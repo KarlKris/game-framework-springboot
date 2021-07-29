@@ -68,7 +68,7 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
 
     @Override
     public String getName() {
-        return "IpFilter";
+        return FirewallAndIpFilter.class.getSimpleName();
     }
 
 

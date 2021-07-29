@@ -25,11 +25,6 @@
             <artifactId>netty-all</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.li</groupId>
-            <artifactId>game-utils</artifactId>
-            <version>1.0</version>
-        </dependency>
     </dependencies>
 
     <build>
