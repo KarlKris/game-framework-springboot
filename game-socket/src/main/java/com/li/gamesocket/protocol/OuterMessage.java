@@ -1,5 +1,6 @@
-package com.li.gamesocket.codec;
+package com.li.gamesocket.protocol;
 
+import cn.hutool.core.util.ArrayUtil;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -22,6 +23,11 @@ public class OuterMessage implements IMessage {
     public void writeTo(ByteBuf out) {
         header.writeTo(out);
 
+        // 消息体有数据才写入
+        if (ArrayUtil.isEmpty(body)) {
+            return;
+        }
+
         out.writeByte(body.length);
         out.writeBytes(body);
     }
@@ -30,8 +36,19 @@ public class OuterMessage implements IMessage {
     public static OuterMessage readIn(ByteBuf in) {
         OuterMessage message = new OuterMessage();
         message.header = OuterMessageHeader.readIn(in);
-        message.body = new byte[in.readByte()];
-        in.readBytes(message.body);
+
+        if (in.readableBytes() > 0) {
+            message.body = new byte[in.readByte()];
+            in.readBytes(message.body);
+        }
+
+        return message;
+    }
+
+    static OuterMessage of(OuterMessageHeader header, byte[] body) {
+        OuterMessage message = new OuterMessage();
+        message.header = header;
+        message.body = body;
         return message;
     }
 }

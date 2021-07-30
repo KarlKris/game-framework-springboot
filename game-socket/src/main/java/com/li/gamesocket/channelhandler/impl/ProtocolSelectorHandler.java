@@ -1,6 +1,7 @@
 package com.li.gamesocket.channelhandler.impl;
 
 import com.li.gamesocket.codec.*;
+import com.li.gamesocket.protocol.ProtocolConstant;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -50,6 +51,8 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
     private MessageEncoder messageEncoder;
     @Autowired
     private MessageDecoder messageDecoder;
+    @Autowired(required = false)
+    private HeartBeatHandler heartBeatHandler;
 
 
     /** WEBSOCKET 握手数据包头 **/
@@ -130,6 +133,12 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
                     , MessageEncoder.class.getSimpleName(), this.messageEncoder);
             channelHandlerContext.pipeline().addBefore(idleStateHandlerName
                     , MessageDecoder.class.getSimpleName(), this.messageDecoder);
+
+            // 心跳
+            if (this.heartBeatHandler != null) {
+                channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+                        , HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
+            }
 
             return;
         }

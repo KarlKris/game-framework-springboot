@@ -1,4 +1,4 @@
-package com.li.gamesocket.codec;
+package com.li.gamesocket.protocol;
 
 /**
  * @author li-yuanwen

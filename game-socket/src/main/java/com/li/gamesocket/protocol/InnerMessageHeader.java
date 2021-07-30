@@ -1,5 +1,6 @@
-package com.li.gamesocket.codec;
+package com.li.gamesocket.protocol;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.li.gamesocket.service.Command;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
@@ -31,33 +32,68 @@ public class InnerMessageHeader {
 
 
     /** 写入至ByteBuf **/
-    public void writeTo(ByteBuf out) {
+    void writeTo(ByteBuf out) {
         out.writeShort(protocolId);
         // 长度占位
         out.writeInt(0);
+
+        // 加入压缩标识
+        if (zip) {
+            type = ProtocolConstant.addBodyZipState(type);
+        }
+
         out.writeByte(type);
-        command.writeTo(out);
-        out.writeBoolean(zip);
+
+        // 命令标识
+        if (ProtocolConstant.hasState(type, ProtocolConstant.COMMAND_MARK)) {
+            command.writeTo(out);
+        }
 
         out.writeLong(sn);
         out.writeLong(sourceId);
+
+        // 判断是否有ip地址
+        if (ArrayUtil.isEmpty(ip)) {
+            return;
+        }
+
         out.writeByte(ip.length);
         out.writeBytes(ip);
     }
 
     /** 从ByteBuf中读取 **/
-    public static InnerMessageHeader readIn(ByteBuf in) {
+    static InnerMessageHeader readIn(ByteBuf in) {
         InnerMessageHeader header = new InnerMessageHeader();
         header.protocolId = in.readShort();
         header.length = in.readInt();
         header.type = in.readByte();
-        header.command = Command.readIn(in);
-        header.zip = in.readBoolean();
+
+        if (ProtocolConstant.hasState(header.type, ProtocolConstant.COMMAND_MARK)) {
+            header.command = Command.readIn(in);
+        }
+
+        header.zip = ProtocolConstant.hasState(header.type, ProtocolConstant.BODY_ZIP_MARK);
 
         header.sn = in.readLong();
         header.sourceId = in.readLong();
-        header.ip = new byte[in.readByte()];
-        in.readBytes(header.ip);
+
+        if (in.readableBytes() > 0) {
+            header.ip = new byte[in.readByte()];
+            in.readBytes(header.ip);
+        }
+
+        return header;
+    }
+
+    static InnerMessageHeader of(byte msgType, Command command
+            , boolean zip, long sn, long sourceId, byte[] ip) {
+        InnerMessageHeader header = new InnerMessageHeader();
+        header.type = msgType;
+        header.command = command;
+        header.zip = zip;
+        header.sn = sn;
+        header.sourceId = sourceId;
+        header.ip = ip;
         return header;
     }
 

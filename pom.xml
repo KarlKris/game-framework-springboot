@@ -23,6 +23,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <hutool.version>5.7.6</hutool.version>
     </properties>
 
     <dependencies>
@@ -43,6 +44,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!--- 引入Hutool工具包 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
 
     </dependencies>
 

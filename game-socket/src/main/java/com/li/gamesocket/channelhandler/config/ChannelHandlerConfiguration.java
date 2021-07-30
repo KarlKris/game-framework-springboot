@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,21 +23,24 @@ import java.util.concurrent.TimeUnit;
 public class ChannelHandlerConfiguration {
 
 
-    /** IdleStateHandler 心跳检测多长时间没读到数据时发送一帧心跳(秒) **/
+    /** IdleStateHandler 心跳检测多长时间(秒)没读到数据时抛出IdleStateEvent.READER_IDLE事件 **/
     @Value("${netty.server.idle.read.seconds:5}")
     private int readTime;
 
-    /** IdleStateHandler 心跳检测多长时间没向对方发送数据时发送一帧心跳(秒) **/
+    /** IdleStateHandler 心跳检测多长时间(秒)没向对方发送数据时抛出IdleStateEvent.WRITER_IDLE事件 **/
     @Value("${netty.server.idle.write.seconds:0}")
     private int writeTime;
 
-    /** IdleStateHandler 心跳检测多长时间没任何操作时发送一帧心跳(秒) **/
+    /** IdleStateHandler 心跳检测多长时间(秒)没任何操作时抛出IdleStateEvent.ALL_IDLE事件 **/
     @Value("${netty.server.idle.all.seconds:5}")
     private int allTime;
 
 
     /** 心跳检测ChannelHandler **/
     @Bean
+    @ConditionalOnExpression("${netty.server.idle.read.seconds:5}>0 " +
+            "|| ${netty.server.idle.write.seconds:0}>0 " +
+            "|| ${netty.server.idle.all.seconds:0}>0")
     public IdleStateHandler idleStateHandler() {
         return new IdleStateHandler(this.readTime, this.writeTime, this.allTime, TimeUnit.SECONDS);
     }

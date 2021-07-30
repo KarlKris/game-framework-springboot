@@ -1,5 +1,8 @@
 package com.li.gamesocket.codec;
 
+import com.li.gamesocket.protocol.InnerMessage;
+import com.li.gamesocket.protocol.OuterMessage;
+import com.li.gamesocket.protocol.ProtocolConstant;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

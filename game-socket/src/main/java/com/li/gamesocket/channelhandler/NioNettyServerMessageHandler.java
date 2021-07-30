@@ -27,7 +27,7 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
     private List<NioNettyFilter> filters;
     @Autowired
     private ProtocolSelectorHandler protocolSelectorHandler;
-    @Autowired
+    @Autowired(required = false)
     private IdleStateHandler idleStateHandler;
 
     @Override
@@ -50,10 +50,11 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
         pipeline.addLast(ProtocolSelectorHandler.class.getSimpleName(), this.protocolSelectorHandler);
 
         // 心跳检测
-        pipeline.addLast(IdleStateHandler.class.getSimpleName(), this.idleStateHandler);
+        if (this.idleStateHandler != null) {
+            pipeline.addLast(IdleStateHandler.class.getSimpleName(), this.idleStateHandler);
+        }
 
         // 业务
-
 
     }
 }
