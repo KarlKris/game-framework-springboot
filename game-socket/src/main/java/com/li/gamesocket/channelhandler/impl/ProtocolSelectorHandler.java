@@ -140,6 +140,9 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
                         , HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
             }
 
+            // 移除自身,完成协议选择
+            channelHandlerContext.pipeline().remove(this.getClass().getSimpleName());
+
             return;
         }
 

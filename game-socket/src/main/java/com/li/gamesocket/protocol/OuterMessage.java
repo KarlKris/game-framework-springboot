@@ -1,6 +1,7 @@
 package com.li.gamesocket.protocol;
 
 import cn.hutool.core.util.ArrayUtil;
+import com.li.gamesocket.service.Command;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -17,6 +18,34 @@ public class OuterMessage implements IMessage {
     @Override
     public short getProtocolHeaderIdentity() {
         return header.getProtocolId();
+    }
+
+    @Override
+    public byte getMessageType() {
+        return header.getType();
+    }
+
+    @Override
+    public Command getCommand() {
+        return header.getCommand();
+    }
+
+    @Override
+    public byte getSerializeType() {
+        byte type = header.getType();
+        type &= ProtocolConstant.SERIALIZE_TYPE_MARK;
+
+        return type;
+    }
+
+    @Override
+    public byte[] getBody() {
+        return body;
+    }
+
+    @Override
+    public long getSn() {
+        return header.getSn();
     }
 
     /** 写入至ByteBuf **/

@@ -15,6 +15,8 @@ public class OuterMessageHeader {
     private short protocolId = ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY;
     /** 消息字节长度 **/
     private int length;
+    /** 消息序号 **/
+    private long sn;
     /** 消息类型 **/
     private byte type;
     /** 请求业务标识 **/
@@ -27,6 +29,7 @@ public class OuterMessageHeader {
         out.writeShort(protocolId);
         // 长度占位
         out.writeInt(0);
+        out.writeLong(sn);
 
         // 加入压缩标识
         if (zip) {
@@ -46,6 +49,7 @@ public class OuterMessageHeader {
         OuterMessageHeader header = new OuterMessageHeader();
         header.protocolId = in.readShort();
         header.length = in.readInt();
+        header.sn = in.readLong();
         header.type = in.readByte();
 
         if (ProtocolConstant.hasState(header.type, ProtocolConstant.COMMAND_MARK)) {
@@ -58,8 +62,9 @@ public class OuterMessageHeader {
     }
 
 
-    static OuterMessageHeader of(byte type, Command command, boolean zip) {
+    static OuterMessageHeader of(long sn, byte type, Command command, boolean zip) {
         OuterMessageHeader header = new OuterMessageHeader();
+        header.sn = sn;
         header.type = type;
         header.command = command;
         header.zip = zip;

@@ -20,6 +20,34 @@ public class InnerMessage implements IMessage {
         return header.getProtocolId();
     }
 
+    @Override
+    public byte getMessageType() {
+        return header.getType();
+    }
+
+    @Override
+    public Command getCommand() {
+        return header.getCommand();
+    }
+
+    @Override
+    public byte getSerializeType() {
+        byte type = header.getType();
+        type &= ProtocolConstant.SERIALIZE_TYPE_MARK;
+
+        return type;
+    }
+
+    @Override
+    public byte[] getBody() {
+        return body;
+    }
+
+    @Override
+    public long getSn() {
+        return header.getSn();
+    }
+
     /** 写入至ByteBuf **/
     public void writeTo(ByteBuf out) {
         header.writeTo(out);

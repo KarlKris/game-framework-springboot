@@ -1,6 +1,7 @@
 package com.li.gamesocket.channelhandler;
 
 import com.li.gamesocket.channelhandler.impl.ProtocolSelectorHandler;
+import com.li.gamesocket.channelhandler.impl.VocationalWorkHandler;
 import com.li.gamesocket.ssl.SslConfig;
 import com.li.gamesocket.ssl.SslContextFactory;
 import io.netty.channel.ChannelInitializer;
@@ -29,6 +30,8 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
     private ProtocolSelectorHandler protocolSelectorHandler;
     @Autowired(required = false)
     private IdleStateHandler idleStateHandler;
+    @Autowired
+    private VocationalWorkHandler vocationalWorkHandler;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -55,6 +58,7 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
         }
 
         // 业务
+        pipeline.addLast(VocationalWorkHandler.class.getSimpleName(), this.vocationalWorkHandler);
 
     }
 }
