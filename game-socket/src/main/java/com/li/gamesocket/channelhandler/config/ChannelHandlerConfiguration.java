@@ -36,13 +36,23 @@ public class ChannelHandlerConfiguration {
     private int allTime;
 
 
-    /** 心跳检测ChannelHandler **/
-    @Bean
+    /** 服务端心跳检测ChannelHandler **/
+    @Bean("serverIdleStateHandler")
     @ConditionalOnExpression("${netty.server.idle.read.seconds:5}>0 " +
             "|| ${netty.server.idle.write.seconds:0}>0 " +
             "|| ${netty.server.idle.all.seconds:0}>0")
-    public IdleStateHandler idleStateHandler() {
+    public IdleStateHandler serverIdleStateHandler() {
         return new IdleStateHandler(this.readTime, this.writeTime, this.allTime, TimeUnit.SECONDS);
+    }
+
+    /** 客户端心跳检测ChannelHandler **/
+    @Bean("clientIdleStateHandler")
+    @ConditionalOnExpression("${netty.server.idle.read.seconds:5}>0 " +
+            "|| ${netty.server.idle.write.seconds:0}>0 " +
+            "|| ${netty.server.idle.all.seconds:0}>0")
+    public IdleStateHandler clientIdleStateHandler() {
+        int writeTime = Math.min(this.readTime, this.allTime) - 1;
+        return new IdleStateHandler(0, writeTime, 0, TimeUnit.SECONDS);
     }
 
     // ------- WebSocket 协议相关ChannelHandler ----------------------------------

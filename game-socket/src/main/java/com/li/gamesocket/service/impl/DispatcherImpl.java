@@ -5,6 +5,7 @@ import cn.hutool.core.convert.ConvertException;
 import cn.hutool.core.thread.NamedThreadFactory;
 import cn.hutool.core.util.ZipUtil;
 import com.li.gamesocket.exception.BadRequestException;
+import com.li.gamesocket.exception.MethodParamAnalysisException;
 import com.li.gamesocket.exception.SerializeFailException;
 import com.li.gamesocket.protocol.IMessage;
 import com.li.gamesocket.protocol.MessageFactory;
@@ -159,6 +160,9 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         }catch (ConvertException e) {
             log.error("发生类型转换异常", e);
             responseBody = serializer.serialize(Response.CONVERT_FAIL);
+        }catch (MethodParamAnalysisException e){
+            log.error("发生参数解析异常", e);
+            responseBody = serializer.serialize(Response.PARAM_ANALYSIS_ERROR);
         }catch (BadRequestException e){
             if (log.isDebugEnabled()) {
                 log.debug("发生异常请求异常,异常码[{}]", e.getErrorCode(), e);
@@ -194,7 +198,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                 continue;
             }
 
-            // todo 报错
+            throw new MethodParamAnalysisException("未提供参数[" + parameterName + "]");
         }
 
         return objs;
@@ -225,9 +229,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             log.warn("关闭消息分发线程池数组");
         }
 
-        int length = this.executorServices.length;
-        for (int i = 0; i < length; i++) {
-            this.executorServices[i].shutdown();
+        for (ExecutorService executorService : this.executorServices) {
+            executorService.shutdown();
         }
     }
 }

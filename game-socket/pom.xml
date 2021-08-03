@@ -27,6 +27,13 @@
             <artifactId>netty-all</artifactId>
         </dependency>
 
+        <!-- 框架核心包 -->
+        <dependency>
+            <groupId>com.li</groupId>
+            <artifactId>game-core</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <!-- 序列化框架 -->
         <dependency>
             <groupId>io.protostuff</groupId>

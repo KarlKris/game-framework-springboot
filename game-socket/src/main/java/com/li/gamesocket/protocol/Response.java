@@ -12,8 +12,10 @@ public class Response {
     public static final Response SERIALIZE_FAIL = ERROR(ResultCode.SERIALIZE_FAIL);
     /** 身份未认定 **/
     public static final Response NO_IDENTITY = ERROR(ResultCode.NO_IDENTITY);
-    /** 默认失败 **/
+    /** 类型转换 **/
     public static final Response CONVERT_FAIL = ERROR(ResultCode.CONVERT_FAIL);
+    /** 参数解析异常 **/
+    public static final Response PARAM_ANALYSIS_ERROR = ERROR(ResultCode.PARAM_ANALYSIS_ERROR);
 
 
     /** 状态码 **/

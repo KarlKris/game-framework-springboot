@@ -19,6 +19,7 @@
 
     <modules>
         <module>game-socket</module>
+        <module>game-core</module>
     </modules>
 
     <properties>

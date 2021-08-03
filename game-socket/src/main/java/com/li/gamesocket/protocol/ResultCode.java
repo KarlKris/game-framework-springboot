@@ -22,5 +22,8 @@ public interface ResultCode {
     /** 方法参数类型转换失败 **/
     int CONVERT_FAIL = -4;
 
+    /** 方法参数解析异常 **/
+    int PARAM_ANALYSIS_ERROR = -5;
+
 
 }
