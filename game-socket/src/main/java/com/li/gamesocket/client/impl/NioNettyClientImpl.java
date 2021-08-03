@@ -1,5 +1,7 @@
 package com.li.gamesocket.client.impl;
 
+import com.li.gamecore.rpc.model.Address;
+import com.li.gamesocket.client.NioNettyClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -11,19 +13,22 @@ import lombok.extern.slf4j.Slf4j;
  * Netty Client
  */
 @Slf4j
-@AllArgsConstructor
-public class NioNettyClientImpl {
+public class NioNettyClientImpl implements NioNettyClient {
 
+    /** 连接目标IP地址 **/
+    private Address address;
     /** 连接超时(毫秒) **/
     private int connectTimeoutMillis;
-    /** Channel **/
-    private Channel channel;
     /** 共享线程组 **/
     private EventLoopGroup eventLoopGroup;
     /** ChannelInitializer **/
     private ChannelInitializer channelInitializer;
 
-    private void connect(String ip, int port) throws InterruptedException {
+    /** Channel **/
+    private Channel channel;
+
+
+    private void connect() throws InterruptedException {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(this.eventLoopGroup)
                 .channel(NioSocketChannel.class)
@@ -31,13 +36,26 @@ public class NioNettyClientImpl {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectTimeoutMillis)
                 .handler(this.channelInitializer);
 
-        ChannelFuture future = bootstrap.connect(ip, port).sync();
+        ChannelFuture future = bootstrap.connect(this.address.getIp(), this.address.getPort()).sync();
         this.channel = future.channel();
 
-        log.warn("客户端连接[{}:{}]成功", ip, port);
+        log.warn("客户端连接[{}:{}]成功", this.address.getIp(), this.address.getPort());
 
+    }
+
+    private boolean isConnected() {
+        return this.channel != null && this.channel.isActive();
     }
 
 
 
+    public static NioNettyClientImpl newInstance(Address address, int connectTimeoutMillis
+            , EventLoopGroup eventLoopGroup, ChannelInitializer channelInitializer) {
+        NioNettyClientImpl nioNettyClient = new NioNettyClientImpl();
+        nioNettyClient.address = address;
+        nioNettyClient.connectTimeoutMillis = connectTimeoutMillis;
+        nioNettyClient.eventLoopGroup = eventLoopGroup;
+        nioNettyClient.channelInitializer = channelInitializer;
+        return nioNettyClient;
+    }
 }

@@ -1,27 +1,29 @@
 package com.li.gamesocket.service;
 
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
 
 /**
  * @author li-yuanwen
  * 封装请求业务标识
  */
+@Getter
 public class Command {
 
     /** 消息所属模块号 **/
     private short module;
     /** 消息所属命令号 **/
-    private byte command;
+    private byte instruction;
 
-    public Command(short module, byte command) {
+    public Command(short module, byte instruction) {
         this.module = module;
-        this.command = command;
+        this.instruction = instruction;
     }
 
     /** 写入至ByteBuf **/
     public void writeTo(ByteBuf out) {
         out.writeShort(module);
-        out.writeByte(command);
+        out.writeByte(instruction);
     }
 
     /** 从ByteBuf中读取 **/
@@ -38,18 +40,18 @@ public class Command {
             return false;
         }
 
-        Command command1 = (Command) o;
+        Command c = (Command) o;
 
-        if (module != command1.module) {
+        if (module != c.module) {
             return false;
         }
-        return command == command1.command;
+        return instruction == c.instruction;
     }
 
     @Override
     public int hashCode() {
         int result = module;
-        result = 31 * result + (int) command;
+        result = 31 * result + (int) instruction;
         return result;
     }
 }

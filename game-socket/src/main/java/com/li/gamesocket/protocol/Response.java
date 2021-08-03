@@ -16,6 +16,8 @@ public class Response {
     public static final Response CONVERT_FAIL = ERROR(ResultCode.CONVERT_FAIL);
     /** 参数解析异常 **/
     public static final Response PARAM_ANALYSIS_ERROR = ERROR(ResultCode.PARAM_ANALYSIS_ERROR);
+    /** 无效操作 **/
+    public static final Response INVALID_OP = ERROR(ResultCode.INVALID_OP);
 
 
     /** 状态码 **/

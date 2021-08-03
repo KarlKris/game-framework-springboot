@@ -4,6 +4,11 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.convert.ConvertException;
 import cn.hutool.core.thread.NamedThreadFactory;
 import cn.hutool.core.util.ZipUtil;
+import com.li.gamecore.rpc.RemoteServerSeekService;
+import com.li.gamecore.rpc.model.Address;
+import com.li.gamecore.thread.MonitoredThreadPoolExecutor;
+import com.li.gamesocket.client.NioNettyClient;
+import com.li.gamesocket.client.NioNettyClientFactory;
 import com.li.gamesocket.exception.BadRequestException;
 import com.li.gamesocket.exception.MethodParamAnalysisException;
 import com.li.gamesocket.exception.SerializeFailException;
@@ -41,15 +46,19 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextClosedEvent> {
 
+
+    @Autowired
+    private ApplicationContext applicationContext;
     @Autowired
     private VocationalWorkConfig config;
-
     @Autowired
     private CommandManager commandManager;
     @Autowired
     private SessionManager sessionManager;
+    @Autowired(required = false)
+    private RemoteServerSeekService remoteServerSeekService;
     @Autowired
-    private ApplicationContext applicationContext;
+    private NioNettyClientFactory clientFactory;
 
     /** 业务线程池 **/
     private ExecutorService[] executorServices;
@@ -70,8 +79,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         int i = (Runtime.getRuntime().availableProcessors() >> 1) << 1;
         this.executorServices = new ExecutorService[i];
         for (int j = 0; j < i; j++) {
-            // todo 后续改成可监控的线程池(继承ThreadPoolExecutor)
-            this.executorServices[j] = new ThreadPoolExecutor(1,1,
+            // 单线程池,减少加锁频率
+            this.executorServices[j] = new MonitoredThreadPoolExecutor(1,1,
                     0, TimeUnit.SECONDS
                     , new ArrayBlockingQueue<>(config.getMaxQueueLength())
                     , new NamedThreadFactory("业务线程池", false));
@@ -94,9 +103,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         }
 
         int index = canAndGetExecutorServiceArrayIndex(hash(id));
-        this.executorServices[index].submit(()-> {
-            doDispatch(session, message);
-        });
+        this.executorServices[index].submit(()-> { doDispatch(session, message); });
 
 
     }
@@ -117,7 +124,23 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         // 方法调用上下文
         MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(message.getCommand());
         if (methodInvokeCtx == null) {
-            // todo RPC
+            // RPC
+            if (this.remoteServerSeekService == null) {
+                response(session, message, serializer.serialize(Response.INVALID_OP), false);
+                return;
+            }
+
+            Address address = this.remoteServerSeekService.seekApplicationAddressByCommand(message.getCommand().getModule()
+                    , message.getCommand().getInstruction());
+
+            if (address == null) {
+                response(session, message, serializer.serialize(Response.INVALID_OP), false);
+                return;
+            }
+
+            NioNettyClient client = clientFactory.newInstance(address);
+            // todo 连接对方
+
             return;
         }
 

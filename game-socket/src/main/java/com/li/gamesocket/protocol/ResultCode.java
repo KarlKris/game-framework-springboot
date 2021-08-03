@@ -25,5 +25,8 @@ public interface ResultCode {
     /** 方法参数解析异常 **/
     int PARAM_ANALYSIS_ERROR = -5;
 
+    /** 无效操作 **/
+    int INVALID_OP = -6;
+
 
 }
