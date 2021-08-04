@@ -1,6 +1,6 @@
 package com.li.gamesocket.session;
 
-import cn.hutool.core.net.Ipv4Util;
+import com.li.gamecore.utils.IpUtils;
 import com.li.gamesocket.protocol.IMessage;
 import io.netty.channel.Channel;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class Session {
     }
 
     public String ip() {
-        return null;
+        return IpUtils.getIp(this.channel.remoteAddress());
     }
 
 

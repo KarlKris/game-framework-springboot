@@ -1,5 +1,8 @@
 package com.li.gamesocket.protocol;
 
+import com.li.gamesocket.session.Session;
+import org.springframework.util.StringUtils;
+
 /**
  * @author li-yuanwen
  * 消息工厂
@@ -31,8 +34,8 @@ public class MessageFactory {
      * @param zip 是否压缩了响应体
      * @return 消息
      */
-    public static IMessage transformResponseMsg(IMessage message, byte[] body, boolean zip) {
-        if (message.getProtocolHeaderIdentity() == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
+    public static IMessage transformResponseMsg(Session session, IMessage message, byte[] body, boolean zip) {
+        if (message.isOuterMessage()) {
             return OuterMessage.of(
                     OuterMessageHeader.of(message.getSn()
                             , ProtocolConstant.transformResponse(message.getMessageType())
@@ -41,17 +44,48 @@ public class MessageFactory {
                     , body);
         }
 
-        if (message.getProtocolHeaderIdentity() == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
+        if (message.isInnerMessage()) {
+            String ip = session.ip();
+            byte[] ipBytes = StringUtils.isEmpty(ip) ? null : ip.getBytes();
             return InnerMessage.of(
                     InnerMessageHeader.of(ProtocolConstant.transformResponse(message.getMessageType())
                             , message.getCommand()
                             , zip
                             , message.getSn()
-                            , -1L
-                            , null)
+                            , session.getIdentity()
+                            , ipBytes)
                     , body);
         }
 
+        return null;
+    }
+
+    /**
+     * 将请求消息转换成内部请求消息InnerMessage
+     * @param message 请求消息
+     * @param sn 内部序号
+     * @param session 请求源
+     * @return /
+     */
+    public static InnerMessage transformInnerRequest(IMessage message, long sn, Session session) {
+        if (!message.isRequest()) {
+            throw new IllegalArgumentException("message belong to response");
+        }
+
+        String ip = session.ip();
+        byte[] ipBytes = StringUtils.isEmpty(ip) ? null : ip.getBytes();
+        InnerMessageHeader header = InnerMessageHeader.of(message.getMessageType()
+                , message.getCommand()
+                , message.zip(), sn, session.getIdentity(), ipBytes);
+
+        return InnerMessage.of(header, message.getBody());
+    }
+
+    /**
+     * 将响应消息转换成外部响应消息
+     * @return 外部响应消息
+     */
+    public static IMessage transformResponse(IMessage message, Session session) {
         return null;
     }
 

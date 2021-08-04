@@ -32,13 +32,13 @@ public class HeartBeatHandler extends SimpleChannelInboundHandler<IMessage> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
         if (msg.isHeartBeatRequest()) {
-            if (msg.getProtocolHeaderIdentity() == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
+            if (msg.isInnerMessage()) {
                 // 发生心跳响应包
                 ctx.channel().writeAndFlush(MessageFactory.HEART_BEAT_RES_INNER_MSG);
                 return;
             }
 
-            if (msg.getProtocolHeaderIdentity() == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
+            if (msg.isOuterMessage()) {
                 // 发生心跳响应包
                 ctx.channel().writeAndFlush(MessageFactory.HEART_BEAT_RES_OUTER_MSG);
                 return;

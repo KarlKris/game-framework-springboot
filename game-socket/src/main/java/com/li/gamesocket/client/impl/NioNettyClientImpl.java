@@ -1,12 +1,17 @@
 package com.li.gamesocket.client.impl;
 
 import com.li.gamecore.rpc.model.Address;
+import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.client.NioNettyClient;
+import com.li.gamesocket.protocol.IMessage;
+import com.li.gamesocket.protocol.Response;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 /**
  * @author li-yuanwen
@@ -27,6 +32,34 @@ public class NioNettyClientImpl implements NioNettyClient {
     /** Channel **/
     private Channel channel;
 
+    @Override
+    public <T> CompletableFuture<T> send(IMessage message, BiConsumer<IMessage, CompletableFuture<T>> sendSuccessConsumer)
+            throws InterruptedException {
+
+        if (!isConnected()) {
+            connect();
+        }
+
+        CompletableFuture<T> completableFuture = new CompletableFuture<>();
+
+        ChannelFuture channelFuture = channel.writeAndFlush(message);
+        channelFuture.addListener(future -> {
+            if (future.cause() != null) {
+                sendSuccessConsumer.accept(message, completableFuture);
+            }else {
+                log.error("向服务器[{}]发送信息发生异常", address, future.cause());
+                completableFuture.completeExceptionally(future.cause());
+            }
+        });
+
+
+        return completableFuture;
+    }
+
+    @Override
+    public void receive(IMessage message, CompletableFuture<Response> future) {
+
+    }
 
     private void connect() throws InterruptedException {
         Bootstrap bootstrap = new Bootstrap();
@@ -38,6 +71,9 @@ public class NioNettyClientImpl implements NioNettyClient {
 
         ChannelFuture future = bootstrap.connect(this.address.getIp(), this.address.getPort()).sync();
         this.channel = future.channel();
+
+        // 绑定属性
+        this.channel.attr(ChannelAttributeKeys.CLIENT).set(this);
 
         log.warn("客户端连接[{}:{}]成功", this.address.getIp(), this.address.getPort());
 

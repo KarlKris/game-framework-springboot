@@ -77,4 +77,19 @@ public interface IMessage {
     }
 
 
+    /**
+     * 是否是外部消息
+     * @return true OuterMessage
+     */
+    default boolean isOuterMessage() {
+        return getProtocolHeaderIdentity() == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY;
+    }
+
+    /**
+     * 是否是内部消息
+     * @return true InnerMessage
+     */
+    default boolean isInnerMessage() {
+        return getProtocolHeaderIdentity() == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY;
+    }
 }

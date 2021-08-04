@@ -18,14 +18,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SessionManager {
 
     /** session id generator **/
-    private AtomicInteger sessionIdGenerator = new AtomicInteger(0);
+    private final AtomicInteger sessionIdGenerator = new AtomicInteger(0);
 
     /** 未识别身份Session 字典 **/
-    private ConcurrentHashMap<Integer, Session> annoymous = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Session> annoymous = new ConcurrentHashMap<>();
 
     /** 已识别身份Session 字典 **/
-    private ConcurrentHashMap<Long, Session> identities = new ConcurrentHashMap<>();
-
+    private final ConcurrentHashMap<Long, Session> identities = new ConcurrentHashMap<>();
 
     /** 为Channel注册Session **/
     public Session registerSession(Channel channel) {

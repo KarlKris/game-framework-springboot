@@ -1,6 +1,5 @@
 package com.li.gamesocket.protocol;
 
-import com.li.gamesocket.protocol.serialize.Serializer;
 import io.netty.buffer.ByteBuf;
 
 /**

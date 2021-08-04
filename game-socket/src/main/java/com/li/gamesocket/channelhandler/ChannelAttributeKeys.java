@@ -1,5 +1,6 @@
 package com.li.gamesocket.channelhandler;
 
+import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.session.Session;
 import io.netty.util.AttributeKey;
 
@@ -15,4 +16,7 @@ public interface ChannelAttributeKeys {
 
     /** Channel绑定属性Session **/
     AttributeKey<Session> SESSION = AttributeKey.newInstance("Session");
+
+    /** Channel绑定属性 客户端Client **/
+    AttributeKey<NioNettyClient> CLIENT = AttributeKey.newInstance("CLIENT");
 }

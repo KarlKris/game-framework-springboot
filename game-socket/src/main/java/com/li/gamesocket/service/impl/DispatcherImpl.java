@@ -12,14 +12,12 @@ import com.li.gamesocket.client.NioNettyClientFactory;
 import com.li.gamesocket.exception.BadRequestException;
 import com.li.gamesocket.exception.MethodParamAnalysisException;
 import com.li.gamesocket.exception.SerializeFailException;
-import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.protocol.MessageFactory;
-import com.li.gamesocket.protocol.Request;
-import com.li.gamesocket.protocol.Response;
+import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.service.*;
 import com.li.gamesocket.session.Session;
 import com.li.gamesocket.session.SessionManager;
+import com.li.gamesocket.session.SnCtxManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -55,10 +52,13 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
     private CommandManager commandManager;
     @Autowired
     private SessionManager sessionManager;
-    @Autowired(required = false)
-    private RemoteServerSeekService remoteServerSeekService;
     @Autowired
     private NioNettyClientFactory clientFactory;
+
+    @Autowired(required = false)
+    private RemoteServerSeekService remoteServerSeekService;
+    @Autowired(required = false)
+    private SnCtxManager snCtxManager;
 
     /** 业务线程池 **/
     private ExecutorService[] executorServices;
@@ -133,20 +133,11 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             Address address = this.remoteServerSeekService.seekApplicationAddressByCommand(message.getCommand().getModule()
                     , message.getCommand().getInstruction());
 
-            if (address == null) {
+            if (address == null || !forwardMessage(message, session, address)) {
                 response(session, message, serializer.serialize(Response.INVALID_OP), false);
                 return;
             }
 
-            NioNettyClient client = clientFactory.newInstance(address);
-            // todo 连接对方
-
-            return;
-        }
-
-        if (methodInvokeCtx.isIdentity() && !session.identity()) {
-            // 没有标识
-            response(session, message, serializer.serialize(Response.NO_IDENTITY), false);
             return;
         }
 
@@ -162,8 +153,31 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         boolean zip = false;
         try {
             Request request = serializer.deserialize(body, Request.class);
-            Object result = ReflectionUtils.invokeMethod(methodInvokeCtx.getMethod(), methodInvokeCtx.getTarget()
-                    , decodeRequest(session, methodInvokeCtx.getParams(), request));
+
+            Object result = null;
+            if (message.isInnerMessage()) {
+                InnerMessage innerMessage = (InnerMessage) message;
+
+                long identity = innerMessage.getIdentity();
+                if (identity <= 0) {
+                    // 没有标识
+                    response(session, message, serializer.serialize(Response.NO_IDENTITY), false);
+                    return;
+                }
+
+                result = ReflectionUtils.invokeMethod(methodInvokeCtx.getMethod(), methodInvokeCtx.getTarget()
+                        , decodeRequest(innerMessage.getIdentity(), methodInvokeCtx.getParams(), request));
+            }else {
+
+                if (methodInvokeCtx.isIdentity() && !session.identity()) {
+                    // 没有标识
+                    response(session, message, serializer.serialize(Response.NO_IDENTITY), false);
+                    return;
+                }
+
+                result = ReflectionUtils.invokeMethod(methodInvokeCtx.getMethod(), methodInvokeCtx.getTarget()
+                        , decodeRequest(session.getIdentity(), methodInvokeCtx.getParams(), request));
+            }
 
             Response response;
             if (!noResponse) {
@@ -197,7 +211,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
     }
 
     /** 解析出方法参数 **/
-    private Object[] decodeRequest(Session session, MethodParameter[] params, Request request) {
+    private Object[] decodeRequest(long identity, MethodParameter[] params, Request request) {
         Map<String, Object> map = request.getParams();
 
         int length = params.length;
@@ -205,7 +219,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         for (int i = 0; i < length; i++) {
             MethodParameter parameter = params[i];
             if (parameter.identity()) {
-                objs[i] = session.getIdentity();
+                objs[i] = identity;
                 continue;
             }
 
@@ -227,10 +241,28 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         return objs;
     }
 
+    /** 转发消息 **/
+    private boolean forwardMessage(IMessage message, Session session, Address address) {
+        NioNettyClient client = clientFactory.newInstance(address);
+        long nextSn = snCtxManager.nextSn();
+        InnerMessage innerMessage = MessageFactory.transformInnerRequest(message, nextSn, session);
+
+        try {
+            client.send(innerMessage
+                    , (msg, completableFuture)
+                            -> snCtxManager.forward(msg.getSn(), nextSn, session.getChannel()));
+            return true;
+        } catch (InterruptedException e) {
+            log.error("消息转发至[{}]发生未知异常", address, e);
+            return false;
+        }
+    }
+
     /** 响应 **/
     private void response(Session session, IMessage message, byte[] responseBody, boolean zip) {
-        sessionManager.writeAndFlush(session, MessageFactory.transformResponseMsg(message, responseBody, zip));
+        sessionManager.writeAndFlush(session, MessageFactory.transformResponseMsg(session, message, responseBody, zip));
     }
+
 
     /**
      * 根据hash找到对应的线程池下标,仿HashMap
