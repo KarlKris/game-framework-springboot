@@ -10,6 +10,8 @@ public interface ResultCode {
     /** 请求响应成功码  **/
     int SUCCESS = 0;
 
+    /** 小于0 服务器错误 大于0 业务逻辑错误 **/
+
     /** 默认失败,不对客户端展示具体原因 **/
     int FAIL = -1;
 

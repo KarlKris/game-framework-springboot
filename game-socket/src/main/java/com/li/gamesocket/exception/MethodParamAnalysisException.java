@@ -1,5 +1,6 @@
 package com.li.gamesocket.exception;
 
+import com.li.gamesocket.protocol.ResultCode;
 import lombok.Getter;
 
 /**
@@ -7,25 +8,10 @@ import lombok.Getter;
  * 业务方法参数解析异常
  */
 @Getter
-public class MethodParamAnalysisException extends RuntimeException {
-
-    public MethodParamAnalysisException() {
-        super();
-    }
+public class MethodParamAnalysisException extends UnknowException {
 
     public MethodParamAnalysisException(String message) {
-        super(message);
+        super(ResultCode.PARAM_ANALYSIS_ERROR, message);
     }
 
-    public MethodParamAnalysisException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public MethodParamAnalysisException(Throwable cause) {
-        super(cause);
-    }
-
-    protected MethodParamAnalysisException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

@@ -1,9 +1,12 @@
 package com.li.gamesocket.protocol;
 
+import lombok.Getter;
+
 /**
  * @author li-yuanwen
  * 消息响应中消息体封装
  */
+@Getter
 public class Response {
 
     /** 默认成功响应 **/
@@ -24,6 +27,16 @@ public class Response {
     private int code;
     /** 响应内容 **/
     private Object content;
+
+    /** 请求是否成功 **/
+    public boolean success() {
+        return code == ResultCode.SUCCESS;
+    }
+
+    /** 是否是业务逻辑失败 **/
+    public boolean isVocationalException() {
+        return code > 0;
+    }
 
     public static Response SUCCESS(Object content) {
         Response response = new Response();

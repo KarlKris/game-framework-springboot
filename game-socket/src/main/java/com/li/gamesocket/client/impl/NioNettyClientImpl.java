@@ -56,11 +56,6 @@ public class NioNettyClientImpl implements NioNettyClient {
         return completableFuture;
     }
 
-    @Override
-    public void receive(IMessage message, CompletableFuture<Response> future) {
-
-    }
-
     private void connect() throws InterruptedException {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(this.eventLoopGroup)
@@ -71,9 +66,6 @@ public class NioNettyClientImpl implements NioNettyClient {
 
         ChannelFuture future = bootstrap.connect(this.address.getIp(), this.address.getPort()).sync();
         this.channel = future.channel();
-
-        // 绑定属性
-        this.channel.attr(ChannelAttributeKeys.CLIENT).set(this);
 
         log.warn("客户端连接[{}:{}]成功", this.address.getIp(), this.address.getPort());
 

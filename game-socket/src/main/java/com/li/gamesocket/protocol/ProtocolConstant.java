@@ -66,7 +66,8 @@ public interface ProtocolConstant {
     byte VOCATIONAL_WORK_REQ = 0x8;
 
     /** 业务响应(携带命令) 0 0 00 1 1 00 **/
-    byte VOCATIONAL_WORK_RES = 0x9;
+    byte VOCATIONAL_WORK_RES = 0xc;
+
 
 
     /**

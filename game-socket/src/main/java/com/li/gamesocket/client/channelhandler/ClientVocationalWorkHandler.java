@@ -2,8 +2,13 @@ package com.li.gamesocket.client.channelhandler;
 
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.client.NioNettyClient;
+import com.li.gamesocket.exception.BadRequestException;
+import com.li.gamesocket.exception.UnknowException;
 import com.li.gamesocket.protocol.IMessage;
 import com.li.gamesocket.protocol.MessageFactory;
+import com.li.gamesocket.protocol.Response;
+import com.li.gamesocket.protocol.serialize.Serializer;
+import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.session.Session;
 import com.li.gamesocket.session.SessionManager;
 import com.li.gamesocket.session.SnCtx;
@@ -19,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author li-yuanwen
@@ -32,6 +38,8 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
     private SnCtxManager snCtxManager;
     @Autowired
     private SessionManager sessionManager;
+    @Autowired
+    private SerializerManager serializerManager;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
@@ -53,26 +61,36 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             return;
         }
 
-        Channel channel = null;
+        // 直接转发给源目标
         if (snCtx.isForward()) {
-            channel = snCtx.getChannel();
+            Channel channel = snCtx.getChannel();
             Session session = channel.attr(ChannelAttributeKeys.SESSION).get();
 
             if (log.isDebugEnabled()) {
                 log.debug("转发响应消息[{}]至[{}]", msg, session.ip());
             }
 
-            IMessage message = MessageFactory.transformResponse(msg, session);
+            IMessage message = MessageFactory.transformResponse(snCtx.getSn(), msg, session);
 
             sessionManager.writeAndFlush(session, message);
 
             return;
-        }else {
-            channel = ctx.channel();
         }
 
-        NioNettyClient client = channel.attr(ChannelAttributeKeys.CLIENT).get();
-        client.receive(msg);
+        CompletableFuture<Response> future = snCtx.getFuture();
+
+        Serializer serializer = serializerManager.getSerializer(msg.getSerializeType());
+        Response response = serializer.deserialize(msg.getBody(), Response.class);
+        if (response.success()) {
+            future.complete(response);
+        }else {
+            if (response.isVocationalException()) {
+                future.completeExceptionally(new BadRequestException(response.getCode()));
+            }else {
+                future.completeExceptionally(new UnknowException(response.getCode()));
+            }
+
+        }
 
     }
 

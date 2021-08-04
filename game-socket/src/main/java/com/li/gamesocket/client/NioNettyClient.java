@@ -26,10 +26,4 @@ public interface NioNettyClient {
             , BiConsumer<IMessage, CompletableFuture<T>> sendSuccessConsumer) throws InterruptedException;
 
 
-    /**
-     * 接收消息
-     * @param message 消息
-     */
-    void receive(IMessage message, CompletableFuture<Response> future);
-
 }

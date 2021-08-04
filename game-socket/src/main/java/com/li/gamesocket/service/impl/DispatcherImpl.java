@@ -14,6 +14,7 @@ import com.li.gamesocket.exception.MethodParamAnalysisException;
 import com.li.gamesocket.exception.SerializeFailException;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
+import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.service.*;
 import com.li.gamesocket.session.Session;
 import com.li.gamesocket.session.SessionManager;
@@ -45,16 +46,17 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
 
 
     @Autowired
-    private ApplicationContext applicationContext;
-    @Autowired
     private VocationalWorkConfig config;
     @Autowired
     private CommandManager commandManager;
     @Autowired
     private SessionManager sessionManager;
     @Autowired
-    private NioNettyClientFactory clientFactory;
+    private SerializerManager serializerManager;
 
+
+    @Autowired
+    private NioNettyClientFactory clientFactory;
     @Autowired(required = false)
     private RemoteServerSeekService remoteServerSeekService;
     @Autowired(required = false)
@@ -63,17 +65,10 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
     /** 业务线程池 **/
     private ExecutorService[] executorServices;
 
-    /** 消息体序列化器 **/
-    private Map<Byte, Serializer> serializerHolder;
+
 
     @PostConstruct
     private void init() {
-        this.serializerHolder = new HashMap<>(2);
-        for (Serializer serializer : applicationContext.getBeansOfType(Serializer.class).values()) {
-            if (this.serializerHolder.putIfAbsent(serializer.getSerializerType(), serializer) != null) {
-                throw new BeanInitializationException("出现相同类型[" + serializer.getSerializerType() + "]序列化器");
-            }
-        }
 
         // 保证线程池数量是2的N次幂
         int i = (Runtime.getRuntime().availableProcessors() >> 1) << 1;
@@ -112,7 +107,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
     private void doDispatch(Session session, IMessage message) {
         // 查询序列化/反序列化方式
         byte serializeType = message.getSerializeType();
-        Serializer serializer = serializerHolder.get(serializeType);
+        Serializer serializer = serializerManager.getSerializer(serializeType);
         if (serializer == null) {
             if (log.isWarnEnabled()) {
                 log.warn("请求消息序列化类型[{}],找不到对应的序列化工具,忽略", serializeType);

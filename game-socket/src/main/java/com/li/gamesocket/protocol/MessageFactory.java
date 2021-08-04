@@ -85,7 +85,7 @@ public class MessageFactory {
      * 将响应消息转换成外部响应消息
      * @return 外部响应消息
      */
-    public static IMessage transformResponse(IMessage message, Session session) {
+    public static IMessage transformResponse(long sn, IMessage message, Session session) {
         return null;
     }
 
