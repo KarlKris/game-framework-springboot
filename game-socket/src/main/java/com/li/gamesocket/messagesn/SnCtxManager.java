@@ -1,23 +1,23 @@
-package com.li.gamesocket.session;
+package com.li.gamesocket.messagesn;
 
 import com.li.gamecore.rpc.RemoteServerSeekService;
-import com.li.gamesocket.protocol.IMessage;
+import com.li.gamesocket.protocol.Response;
 import io.netty.channel.Channel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author li-yuanwen
- * 消息序号管理(用于异步RPC)
+ * 消息序号管理 rpc
  */
 @Component
 @ConditionalOnBean(RemoteServerSeekService.class)
 public class SnCtxManager {
 
-    // 用于异步RPC
 
     /** 消息序号生成器 **/
     private final AtomicLong snGenerator = new AtomicLong(0);
@@ -32,7 +32,12 @@ public class SnCtxManager {
     }
 
     public void forward(long msgSn, long innerSn, Channel channel) {
-        SnCtx snCtx = new SnCtx(innerSn, msgSn, channel);
+        SnCtx snCtx = new ForwardSnCtx(innerSn, msgSn, channel);
+        this.snCtxHolder.put(snCtx.getInnerSn(), snCtx);
+    }
+
+    public void send(long innerSn, CompletableFuture<Response> completableFuture) {
+        RpcSnCtx snCtx = new RpcSnCtx(innerSn, completableFuture);
         this.snCtxHolder.put(snCtx.getInnerSn(), snCtx);
     }
 

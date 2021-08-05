@@ -1,6 +1,5 @@
 package com.li.gamesocket.service.impl;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.convert.ConvertException;
 import cn.hutool.core.thread.NamedThreadFactory;
 import cn.hutool.core.util.ZipUtil;
@@ -10,19 +9,17 @@ import com.li.gamecore.thread.MonitoredThreadPoolExecutor;
 import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.client.NioNettyClientFactory;
 import com.li.gamesocket.exception.BadRequestException;
-import com.li.gamesocket.exception.MethodParamAnalysisException;
 import com.li.gamesocket.exception.SerializeFailException;
+import com.li.gamesocket.messagesn.SnCtxManager;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.service.*;
 import com.li.gamesocket.session.Session;
 import com.li.gamesocket.session.SessionManager;
-import com.li.gamesocket.session.SnCtxManager;
+import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
@@ -30,8 +27,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -136,7 +131,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             return;
         }
 
-        Class<?> returnType = methodInvokeCtx.getMethod().getReturnType();
+        MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
+        Class<?> returnType = methodCtx.getMethod().getReturnType();
         boolean noResponse = ClassUtils.isAssignable(Void.TYPE, returnType);
 
         byte[] body = message.getBody();
@@ -160,8 +156,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                     return;
                 }
 
-                result = ReflectionUtils.invokeMethod(methodInvokeCtx.getMethod(), methodInvokeCtx.getTarget()
-                        , decodeRequest(innerMessage.getIdentity(), methodInvokeCtx.getParams(), request));
+                result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget()
+                        , CommandUtils.decodeRequest(session, innerMessage.getIdentity(), methodCtx.getParams(), request));
             }else {
 
                 if (methodInvokeCtx.isIdentity() && !session.identity()) {
@@ -170,8 +166,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                     return;
                 }
 
-                result = ReflectionUtils.invokeMethod(methodInvokeCtx.getMethod(), methodInvokeCtx.getTarget()
-                        , decodeRequest(session.getIdentity(), methodInvokeCtx.getParams(), request));
+                result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget()
+                        , CommandUtils.decodeRequest(session, session.getIdentity(), methodCtx.getParams(), request));
             }
 
             Response response;
@@ -192,7 +188,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         }catch (ConvertException e) {
             log.error("发生类型转换异常", e);
             responseBody = serializer.serialize(Response.CONVERT_FAIL);
-        }catch (MethodParamAnalysisException e){
+        }catch (IllegalArgumentException e){
             log.error("发生参数解析异常", e);
             responseBody = serializer.serialize(Response.PARAM_ANALYSIS_ERROR);
         }catch (BadRequestException e){
@@ -205,42 +201,12 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         }
     }
 
-    /** 解析出方法参数 **/
-    private Object[] decodeRequest(long identity, MethodParameter[] params, Request request) {
-        Map<String, Object> map = request.getParams();
-
-        int length = params.length;
-        Object[] objs = new Object[length];
-        for (int i = 0; i < length; i++) {
-            MethodParameter parameter = params[i];
-            if (parameter.identity()) {
-                objs[i] = identity;
-                continue;
-            }
-
-            String parameterName = parameter.getParameterName();
-            Object o = map.get(parameterName);
-            if (o != null) {
-                objs[i] = Convert.convert(parameter.getParameterType(), o);
-                continue;
-            }
-
-            if (!parameter.isRequired()) {
-                objs[i] = null;
-                continue;
-            }
-
-            throw new MethodParamAnalysisException("未提供参数[" + parameterName + "]");
-        }
-
-        return objs;
-    }
-
     /** 转发消息 **/
     private boolean forwardMessage(IMessage message, Session session, Address address) {
         NioNettyClient client = clientFactory.newInstance(address);
         long nextSn = snCtxManager.nextSn();
-        InnerMessage innerMessage = MessageFactory.transformInnerRequest(message, nextSn, session);
+        // 构建内部消息进行转发
+        InnerMessage innerMessage = MessageFactory.toForwardMessage(message, nextSn, session);
 
         try {
             client.send(innerMessage

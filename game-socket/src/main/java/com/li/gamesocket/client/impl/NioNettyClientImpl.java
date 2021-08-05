@@ -1,15 +1,24 @@
 package com.li.gamesocket.client.impl;
 
+import com.li.gamecore.ApplicationContextHolder;
 import com.li.gamecore.rpc.model.Address;
-import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.client.NioNettyClient;
+import com.li.gamesocket.client.SendProxyInvoker;
+import com.li.gamesocket.client.channelhandler.ClientVocationalWorkHandler;
+import com.li.gamesocket.client.channelhandler.NioNettyClientMessageHandler;
 import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.protocol.Response;
+import com.li.gamesocket.protocol.serialize.Serializer;
+import com.li.gamesocket.service.MethodCtx;
+import com.li.gamesocket.utils.CommandUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -21,16 +30,27 @@ import java.util.function.BiConsumer;
 public class NioNettyClientImpl implements NioNettyClient {
 
     /** 连接目标IP地址 **/
-    private Address address;
+    private final Address address;
     /** 连接超时(毫秒) **/
-    private int connectTimeoutMillis;
+    private final int connectTimeoutMillis;
     /** 共享线程组 **/
-    private EventLoopGroup eventLoopGroup;
+    private final EventLoopGroup eventLoopGroup;
     /** ChannelInitializer **/
-    private ChannelInitializer channelInitializer;
+    private final ChannelInitializer channelInitializer = ApplicationContextHolder.getBean(NioNettyClientMessageHandler.class);
+
+    /** 代理对象 **/
+    private final Map<String, Object> proxy = new HashMap<>();
 
     /** Channel **/
     private Channel channel;
+
+    NioNettyClientImpl(Address address, int connectTimeoutMillis
+            , EventLoopGroup eventLoopGroup) {
+        this.address = address;
+        this.connectTimeoutMillis = connectTimeoutMillis;
+        this.eventLoopGroup = eventLoopGroup;
+    }
+
 
     @Override
     public <T> CompletableFuture<T> send(IMessage message, BiConsumer<IMessage, CompletableFuture<T>> sendSuccessConsumer)
@@ -52,8 +72,34 @@ public class NioNettyClientImpl implements NioNettyClient {
             }
         });
 
-
         return completableFuture;
+    }
+
+
+    @Override
+    public <T> T getSendProxy(Class<T> clasz) {
+
+        String name = clasz.getName();
+        Object target = this.proxy.get(name);
+        if (target != null) {
+            return (T) target;
+        }
+
+        synchronized (this.proxy) {
+            target = this.proxy.get(name);
+            if (target != null) {
+                return (T) target;
+            }
+
+            List<MethodCtx> methodCtx = CommandUtils.analysisCommands(clasz, false);
+            target = Proxy.newProxyInstance(clasz.getClassLoader()
+                    , new Class[]{clasz}
+                    , new SendProxyInvoker(this, methodCtx));
+
+            this.proxy.put(name, target);
+        }
+
+        return (T) target;
     }
 
     private void connect() throws InterruptedException {
@@ -78,12 +124,7 @@ public class NioNettyClientImpl implements NioNettyClient {
 
 
     public static NioNettyClientImpl newInstance(Address address, int connectTimeoutMillis
-            , EventLoopGroup eventLoopGroup, ChannelInitializer channelInitializer) {
-        NioNettyClientImpl nioNettyClient = new NioNettyClientImpl();
-        nioNettyClient.address = address;
-        nioNettyClient.connectTimeoutMillis = connectTimeoutMillis;
-        nioNettyClient.eventLoopGroup = eventLoopGroup;
-        nioNettyClient.channelInitializer = channelInitializer;
-        return nioNettyClient;
+            , EventLoopGroup eventLoopGroup) {
+        return new NioNettyClientImpl(address, connectTimeoutMillis, eventLoopGroup);
     }
 }

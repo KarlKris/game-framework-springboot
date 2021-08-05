@@ -1,18 +1,18 @@
 package com.li.gamesocket.client.channelhandler;
 
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
-import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.exception.BadRequestException;
-import com.li.gamesocket.exception.UnknowException;
+import com.li.gamesocket.exception.SocketException;
+import com.li.gamesocket.messagesn.ForwardSnCtx;
+import com.li.gamesocket.messagesn.RpcSnCtx;
+import com.li.gamesocket.messagesn.SnCtx;
+import com.li.gamesocket.messagesn.SnCtxManager;
 import com.li.gamesocket.protocol.IMessage;
 import com.li.gamesocket.protocol.MessageFactory;
 import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
-import com.li.gamesocket.session.Session;
-import com.li.gamesocket.session.SessionManager;
-import com.li.gamesocket.session.SnCtx;
-import com.li.gamesocket.session.SnCtxManager;
+import com.li.gamesocket.session.*;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -55,41 +55,54 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
         SnCtx snCtx = this.snCtxManager.remove(msg.getSn());
         if (snCtx == null) {
             if (log.isDebugEnabled()) {
-                log.debug("客户端ClientVocationalWorkHandler收到无效转发信息,忽略");
+                log.debug("客户端ClientVocationalWorkHandler收到过期信息,序号[{}],忽略", msg.getSn());
             }
 
             return;
         }
 
         // 直接转发给源目标
-        if (snCtx.isForward()) {
-            Channel channel = snCtx.getChannel();
+        if (snCtx instanceof ForwardSnCtx) {
+
+            ForwardSnCtx forwardSnCtx = (ForwardSnCtx) snCtx;
+
+            Channel channel = forwardSnCtx.getChannel();
             Session session = channel.attr(ChannelAttributeKeys.SESSION).get();
 
             if (log.isDebugEnabled()) {
                 log.debug("转发响应消息[{}]至[{}]", msg, session.ip());
             }
 
-            IMessage message = MessageFactory.transformResponse(snCtx.getSn(), msg, session);
+            IMessage message = MessageFactory.transformResponse(forwardSnCtx.getSn(), msg, session);
 
             sessionManager.writeAndFlush(session, message);
 
             return;
         }
 
-        CompletableFuture<Response> future = snCtx.getFuture();
+        if (snCtx instanceof RpcSnCtx) {
 
-        Serializer serializer = serializerManager.getSerializer(msg.getSerializeType());
-        Response response = serializer.deserialize(msg.getBody(), Response.class);
-        if (response.success()) {
-            future.complete(response);
-        }else {
-            if (response.isVocationalException()) {
-                future.completeExceptionally(new BadRequestException(response.getCode()));
+            RpcSnCtx rpcSnCtx = (RpcSnCtx) snCtx;
+
+            CompletableFuture<Response> future = rpcSnCtx.getFuture();
+
+            Serializer serializer = serializerManager.getSerializer(msg.getSerializeType());
+            Response response = serializer.deserialize(msg.getBody(), Response.class);
+            if (response.success()) {
+                future.complete(response);
             }else {
-                future.completeExceptionally(new UnknowException(response.getCode()));
+                if (response.isVocationalException()) {
+                    future.completeExceptionally(new BadRequestException(response.getCode()));
+                }else {
+                    future.completeExceptionally(new SocketException(response.getCode()));
+                }
             }
 
+            return;
+        }
+
+        if (log.isWarnEnabled()) {
+            log.warn("客户端ClientVocationalWorkHandler收到信息[{}],但不处理", snCtx);
         }
 
     }

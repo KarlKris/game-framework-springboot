@@ -17,7 +17,10 @@ public class VocationalWorkConfig {
     @Value("${netty.server.single.threadPool.maxQueueLength:5000}")
     private int maxQueueLength;
     /** 消息体进行压缩的长度值 **/
-    @Value("${netty.server.body.zip.length:5000}")
+    @Value("${netty.body.zip.length:10240}")
     private int bodyZipLength;
+    /** 超时时长(秒) **/
+    @Value("${netty.timeout.second:5}")
+    private int timeoutSecond;
 
 }

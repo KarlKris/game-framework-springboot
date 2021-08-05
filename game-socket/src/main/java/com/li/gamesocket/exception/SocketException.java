@@ -5,22 +5,22 @@ package com.li.gamesocket.exception;
  * @date 2021/8/4 22:24
  * 服务器逻辑异常基础类
  **/
-public class UnknowException extends RuntimeException {
+public class SocketException extends RuntimeException {
 
     /** 错误码 **/
     private int code;
 
-    public UnknowException(int code) {
+    public SocketException(int code) {
         super();
         this.code = code;
     }
 
-    public UnknowException(int code, String message) {
+    public SocketException(int code, String message) {
         super(message);
         this.code = code;
     }
 
-    public UnknowException(int code, String message, Throwable e) {
+    public SocketException(int code, String message, Throwable e) {
         super(message, e);
         this.code = code;
     }

@@ -14,23 +14,15 @@ public class MethodInvokeCtx {
 
     /** 目标对象 **/
     private Object target;
-    /** 具体方法 **/
-    private Method method;
-    /** 方法参数 **/
-    private MethodParameter[] params;
+    /** 方法上下文 **/
+    private MethodCtx methodCtx;
     /** 是否需要身份标识 **/
     private boolean identity;
 
-    MethodInvokeCtx(Object target, Method method, MethodParameter[] params) {
-        for (MethodParameter parameter : params) {
-            if (parameter.identity()) {
-                this.identity = true;
-                break;
-            }
-        }
-
+    MethodInvokeCtx(Object target, MethodCtx methodCtx) {
         this.target = target;
-        this.method = method;
-        this.params = params;
+        this.identity = methodCtx.identity();
+        this.methodCtx = methodCtx;
+
     }
 }

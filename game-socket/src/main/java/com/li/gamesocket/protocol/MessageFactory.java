@@ -1,5 +1,6 @@
 package com.li.gamesocket.protocol;
 
+import com.li.gamesocket.service.Command;
 import com.li.gamesocket.session.Session;
 import org.springframework.util.StringUtils;
 
@@ -67,7 +68,7 @@ public class MessageFactory {
      * @param session 请求源
      * @return /
      */
-    public static InnerMessage transformInnerRequest(IMessage message, long sn, Session session) {
+    public static InnerMessage toForwardMessage(IMessage message, long sn, Session session) {
         if (!message.isRequest()) {
             throw new IllegalArgumentException("message belong to response");
         }
@@ -79,6 +80,13 @@ public class MessageFactory {
                 , message.zip(), sn, session.getIdentity(), ipBytes);
 
         return InnerMessage.of(header, message.getBody());
+    }
+
+    public static InnerMessage toInnerMessage(long innerSn, Command command, byte serializeType, boolean zip, byte[] body) {
+        byte msgType = ProtocolConstant.addSerializeType(ProtocolConstant.VOCATIONAL_WORK_REQ, serializeType);
+
+        InnerMessageHeader header = InnerMessageHeader.of(msgType, command, zip, innerSn, -1, null);
+        return InnerMessage.of(header, body);
     }
 
     /**

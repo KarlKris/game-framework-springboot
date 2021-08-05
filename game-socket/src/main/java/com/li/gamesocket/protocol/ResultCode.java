@@ -13,7 +13,7 @@ public interface ResultCode {
     /** 小于0 服务器错误 大于0 业务逻辑错误 **/
 
     /** 默认失败,不对客户端展示具体原因 **/
-    int FAIL = -1;
+    int UNKNOWN = -1;
 
     /** 无身份标识 **/
     int NO_IDENTITY = -2;
@@ -29,6 +29,9 @@ public interface ResultCode {
 
     /** 无效操作 **/
     int INVALID_OP = -6;
+
+    /** 超时 **/
+    int TIME_OUT = -7;
 
 
 }

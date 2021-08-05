@@ -9,14 +9,6 @@ import com.li.gamesocket.exception.SerializeFailException;
  **/
 public interface Serializer {
 
-    /** 序列化方式, 2位表示 即0-3 **/
-
-    /** Proto Stuff框架 **/
-    byte PROTO_STUFF = 0x0;
-    /** json **/
-    byte JSON = 0x1;
-
-
 
     /**
      * 序列化方式标识

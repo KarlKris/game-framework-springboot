@@ -1,6 +1,7 @@
 package com.li.gamesocket.protocol.serialize.impl;
 
 import com.li.gamesocket.exception.SerializeFailException;
+import com.li.gamesocket.protocol.serialize.SerializeType;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.utils.ProtoStuffUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class ProtoStuffSerializer implements Serializer {
 
     @Override
     public byte getSerializerType() {
-        return Serializer.PROTO_STUFF;
+        return SerializeType.PROTO_STUFF.getType();
     }
 
     @Override

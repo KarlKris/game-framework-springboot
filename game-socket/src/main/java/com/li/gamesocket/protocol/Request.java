@@ -1,5 +1,6 @@
 package com.li.gamesocket.protocol;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Map;
  * 消息请求中消息体的封装
  **/
 @Getter
+@AllArgsConstructor
 public class Request {
 
     /** 请求业务所需数据 **/

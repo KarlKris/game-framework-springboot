@@ -2,6 +2,7 @@ package com.li.gamesocket.protocol.serialize;
 
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,10 @@ import java.util.Map;
  **/
 @Component
 public class SerializerManager {
+
+    /** 客户端默认序列化/反序列化类型 **/
+    @Value(("${netty.default.serialize.type:PROTO_STUFF}"))
+    private SerializeType defaultSerializeType;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -33,8 +38,15 @@ public class SerializerManager {
         }
     }
 
-
+    /** 获取序列化/反序列化工具 **/
     public Serializer getSerializer(byte type) {
         return this.serializerHolder.get(type);
     }
+
+    /** 获取默认序列化/反序列化工具 **/
+    public Serializer getDefaultSerializer() {
+        return getSerializer(defaultSerializeType.getType());
+    }
+
+
 }

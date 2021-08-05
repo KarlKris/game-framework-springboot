@@ -51,6 +51,16 @@ public class SessionManager {
         return session;
     }
 
+    /** 绑定身份 **/
+    public void bindIdentity(Session session, long identity) {
+        Session remove = this.annoymous.remove(session.getSessionId());
+        if (log.isDebugEnabled() && remove == null) {
+            log.debug("session[{}]已绑定某个身份,本次绑定[{}]", session.getSessionId(), identity);
+        }
+        this.identities.put(identity, session);
+    }
+
+
     /** 写入Channel **/
     public void writeAndFlush(Session session, IMessage message) {
         if (message == null) {

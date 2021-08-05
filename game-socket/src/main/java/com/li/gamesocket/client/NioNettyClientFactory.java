@@ -1,12 +1,10 @@
 package com.li.gamesocket.client;
 
 import com.li.gamecore.rpc.model.Address;
-import com.li.gamesocket.client.channelhandler.NioNettyClientMessageHandler;
 import com.li.gamesocket.client.impl.NioNettyClientImpl;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +18,6 @@ import javax.annotation.PreDestroy;
 @Slf4j
 public class NioNettyClientFactory {
 
-    @Autowired
-    private NioNettyClientMessageHandler messageHandler;
-
     /** 客户端连接超时毫秒配置 **/
     @Value("${netty.client.connect.timout.mills:3000}")
     private int connectTimeoutMills;
@@ -30,11 +25,12 @@ public class NioNettyClientFactory {
     @Value("${netty.client.eventLoopGroup.thread.num:4}")
     private int threadNum;
 
+
     /** 客户端共享线程组 **/
     private EventLoopGroup eventLoopGroup;
 
     /** 初始化线程组 **/
-    private void initEventLoopGroup() {
+    private void checkAndInitEventLoopGroup() {
         if (this.eventLoopGroup != null) {
             return;
         }
@@ -72,7 +68,9 @@ public class NioNettyClientFactory {
      * @return 客户端
      */
     public NioNettyClient newInstance(Address address) {
-        initEventLoopGroup();
-        return NioNettyClientImpl.newInstance(address, this.connectTimeoutMills, this.eventLoopGroup, this.messageHandler);
+        checkAndInitEventLoopGroup();
+        return NioNettyClientImpl.newInstance(address
+                , this.connectTimeoutMills
+                , this.eventLoopGroup);
     }
 }
