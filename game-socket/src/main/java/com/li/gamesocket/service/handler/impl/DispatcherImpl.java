@@ -1,4 +1,4 @@
-package com.li.gamesocket.service.impl;
+package com.li.gamesocket.service.handler.impl;
 
 import cn.hutool.core.convert.ConvertException;
 import cn.hutool.core.thread.NamedThreadFactory;
@@ -10,13 +10,17 @@ import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.client.NioNettyClientFactory;
 import com.li.gamesocket.exception.BadRequestException;
 import com.li.gamesocket.exception.SerializeFailException;
-import com.li.gamesocket.messagesn.SnCtxManager;
+import com.li.gamesocket.service.rpc.SnCtxManager;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.service.*;
-import com.li.gamesocket.session.Session;
-import com.li.gamesocket.session.SessionManager;
+import com.li.gamesocket.service.command.CommandManager;
+import com.li.gamesocket.service.command.MethodCtx;
+import com.li.gamesocket.service.command.MethodInvokeCtx;
+import com.li.gamesocket.service.handler.Dispatcher;
+import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.SessionManager;
 import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,10 +154,15 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                 InnerMessage innerMessage = (InnerMessage) message;
 
                 long identity = innerMessage.getIdentity();
-                if (identity <= 0) {
+
+                if (methodInvokeCtx.isIdentity() && identity <= 0) {
                     // 没有标识
                     response(session, message, serializer.serialize(Response.NO_IDENTITY), false);
                     return;
+                }
+                // todo 内网绑定?存疑
+                if (identity > 0) {
+                    sessionManager.bindIdentity(session, identity, true);
                 }
 
                 result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget()

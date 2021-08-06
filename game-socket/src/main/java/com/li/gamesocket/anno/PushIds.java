@@ -7,9 +7,9 @@ import java.lang.annotation.Target;
 
 /**
  * @author li-yuanwen
- * 全服推送推送注解
+ * 注解,用于标识推送目标集
  */
-@Target(ElementType.METHOD)
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AllSocketPush {
+public @interface PushIds {
 }

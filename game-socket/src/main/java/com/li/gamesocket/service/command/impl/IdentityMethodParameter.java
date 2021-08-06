@@ -1,6 +1,6 @@
-package com.li.gamesocket.service.impl;
+package com.li.gamesocket.service.command.impl;
 
-import com.li.gamesocket.service.MethodParameter;
+import com.li.gamesocket.service.command.MethodParameter;
 
 import java.lang.reflect.Type;
 
@@ -13,24 +13,8 @@ public class IdentityMethodParameter implements MethodParameter {
 
     public static final IdentityMethodParameter IDENTITY_PARAMETER = new IdentityMethodParameter();
 
-
-    @Override
-    public String getParameterName() {
-        return null;
-    }
-
-    @Override
     public Type getParameterType() {
         return Long.TYPE;
     }
 
-    @Override
-    public boolean isRequired() {
-        return true;
-    }
-
-    @Override
-    public boolean identity() {
-        return true;
-    }
 }

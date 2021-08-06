@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author li-yuanwen
@@ -17,6 +18,9 @@ import javax.annotation.PreDestroy;
 @Component
 @Slf4j
 public class NioNettyClientFactory {
+
+    /** 客户端连接管理 **/
+    private ConcurrentHashMap<Address, NioNettyClient> clients = new ConcurrentHashMap<>(8);
 
     /** 客户端连接超时毫秒配置 **/
     @Value("${netty.client.connect.timout.mills:3000}")
@@ -68,9 +72,11 @@ public class NioNettyClientFactory {
      * @return 客户端
      */
     public NioNettyClient newInstance(Address address) {
-        checkAndInitEventLoopGroup();
-        return NioNettyClientImpl.newInstance(address
-                , this.connectTimeoutMills
-                , this.eventLoopGroup);
+        return this.clients.computeIfAbsent(address, addr -> {
+            checkAndInitEventLoopGroup();
+            return NioNettyClientImpl.newInstance(addr
+                    , connectTimeoutMills
+                    , eventLoopGroup);
+        });
     }
 }

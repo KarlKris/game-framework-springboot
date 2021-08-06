@@ -1,7 +1,7 @@
 package com.li.gamesocket.protocol;
 
-import com.li.gamesocket.service.Command;
-import com.li.gamesocket.session.Session;
+import com.li.gamesocket.service.command.Command;
+import com.li.gamesocket.service.session.Session;
 import org.springframework.util.StringUtils;
 
 /**
@@ -61,6 +61,15 @@ public class MessageFactory {
         return null;
     }
 
+    public static OuterMessage toResponseOuterMessage(IMessage message, byte[] body, boolean zip) {
+        return OuterMessage.of(
+                OuterMessageHeader.of(message.getSn()
+                        , ProtocolConstant.transformResponse(message.getMessageType())
+                        , message.getCommand()
+                        , zip)
+                , body);
+    }
+
     /**
      * 将请求消息转换成内部请求消息InnerMessage
      * @param message 请求消息
@@ -82,8 +91,15 @@ public class MessageFactory {
         return InnerMessage.of(header, message.getBody());
     }
 
-    public static InnerMessage toInnerMessage(long innerSn, Command command, byte serializeType, boolean zip, byte[] body) {
+    public static InnerMessage toRequestInnerMessage(long innerSn, Command command, byte serializeType, boolean zip, byte[] body) {
         byte msgType = ProtocolConstant.addSerializeType(ProtocolConstant.VOCATIONAL_WORK_REQ, serializeType);
+
+        InnerMessageHeader header = InnerMessageHeader.of(msgType, command, zip, innerSn, -1, null);
+        return InnerMessage.of(header, body);
+    }
+
+    public static InnerMessage toResponseInnerMessage(long innerSn, Command command, byte serializeType, boolean zip, byte[] body) {
+        byte msgType = ProtocolConstant.addSerializeType(ProtocolConstant.VOCATIONAL_WORK_RES, serializeType);
 
         InnerMessageHeader header = InnerMessageHeader.of(msgType, command, zip, innerSn, -1, null);
         return InnerMessage.of(header, body);

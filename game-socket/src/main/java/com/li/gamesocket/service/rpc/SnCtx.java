@@ -1,4 +1,4 @@
-package com.li.gamesocket.messagesn;
+package com.li.gamesocket.service.rpc;
 
 import lombok.Getter;
 

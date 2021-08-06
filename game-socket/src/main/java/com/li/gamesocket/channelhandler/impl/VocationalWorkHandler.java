@@ -2,9 +2,9 @@ package com.li.gamesocket.channelhandler.impl;
 
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.service.Dispatcher;
-import com.li.gamesocket.session.Session;
-import com.li.gamesocket.session.SessionManager;
+import com.li.gamesocket.service.handler.Dispatcher;
+import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.SessionManager;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

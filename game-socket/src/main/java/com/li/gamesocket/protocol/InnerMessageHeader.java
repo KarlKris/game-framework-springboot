@@ -1,7 +1,7 @@
 package com.li.gamesocket.protocol;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.gamesocket.service.Command;
+import com.li.gamesocket.service.command.Command;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 

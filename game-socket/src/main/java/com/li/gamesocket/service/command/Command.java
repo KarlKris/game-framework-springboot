@@ -1,4 +1,4 @@
-package com.li.gamesocket.service;
+package com.li.gamesocket.service.command;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
@@ -18,6 +18,11 @@ public class Command {
     public Command(short module, byte instruction) {
         this.module = module;
         this.instruction = instruction;
+    }
+
+    /** 是否是推送命令 **/
+    public boolean push() {
+        return instruction < 0;
     }
 
     /** 写入至ByteBuf **/

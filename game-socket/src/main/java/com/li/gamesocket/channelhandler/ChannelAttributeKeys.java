@@ -1,7 +1,6 @@
 package com.li.gamesocket.channelhandler;
 
-import com.li.gamesocket.client.NioNettyClient;
-import com.li.gamesocket.session.Session;
+import com.li.gamesocket.service.session.Session;
 import io.netty.util.AttributeKey;
 
 /**

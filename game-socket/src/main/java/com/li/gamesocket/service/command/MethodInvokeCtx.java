@@ -1,8 +1,6 @@
-package com.li.gamesocket.service;
+package com.li.gamesocket.service.command;
 
 import lombok.Getter;
-
-import java.lang.reflect.Method;
 
 /**
  * @author li-yuanwen

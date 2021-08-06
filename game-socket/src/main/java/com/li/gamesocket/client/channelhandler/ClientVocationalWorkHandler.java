@@ -1,18 +1,19 @@
 package com.li.gamesocket.client.channelhandler;
 
+import cn.hutool.core.util.ZipUtil;
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.exception.BadRequestException;
 import com.li.gamesocket.exception.SocketException;
-import com.li.gamesocket.messagesn.ForwardSnCtx;
-import com.li.gamesocket.messagesn.RpcSnCtx;
-import com.li.gamesocket.messagesn.SnCtx;
-import com.li.gamesocket.messagesn.SnCtxManager;
-import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.protocol.MessageFactory;
-import com.li.gamesocket.protocol.Response;
+import com.li.gamesocket.protocol.*;
+import com.li.gamesocket.service.VocationalWorkConfig;
+import com.li.gamesocket.service.rpc.ForwardSnCtx;
+import com.li.gamesocket.service.rpc.RpcSnCtx;
+import com.li.gamesocket.service.rpc.SnCtx;
+import com.li.gamesocket.service.rpc.SnCtxManager;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
-import com.li.gamesocket.session.*;
+import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.SessionManager;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -40,6 +41,8 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
     private SessionManager sessionManager;
     @Autowired
     private SerializerManager serializerManager;
+    @Autowired
+    private VocationalWorkConfig vocationalWorkConfig;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
@@ -47,6 +50,33 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
         if (msg.isRequest()) {
             if (log.isDebugEnabled()) {
                 log.debug("客户端ClientVocationalWorkHandler收到请求信息,忽略");
+            }
+
+            return;
+        }
+
+        // 处理从服务端收到的推送消息
+        if (msg.getCommand().push()) {
+
+            Serializer serializer = serializerManager.getSerializer(msg.getSerializeType());
+            PushResponse pushResponse = serializer.deserialize(msg.getBody(), PushResponse.class);
+
+            Response response = Response.SUCCESS(pushResponse.getContent());
+            byte[] body = serializer.serialize(response);
+            boolean zip = false;
+            if (body.length > vocationalWorkConfig.getBodyZipLength()) {
+                body = ZipUtil.gzip(body);
+                zip = true;
+            }
+
+            for (long identity : pushResponse.getTargets()) {
+                Session session = sessionManager.getIdentitySession(identity);
+                if (session == null) {
+                    continue;
+                }
+
+                OuterMessage message = MessageFactory.toResponseOuterMessage(msg, body, zip);
+                sessionManager.writeAndFlush(session, message);
             }
 
             return;

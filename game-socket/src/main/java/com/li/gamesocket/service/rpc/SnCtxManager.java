@@ -1,4 +1,4 @@
-package com.li.gamesocket.messagesn;
+package com.li.gamesocket.service.rpc;
 
 import com.li.gamecore.rpc.RemoteServerSeekService;
 import com.li.gamesocket.protocol.Response;

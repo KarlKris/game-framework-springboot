@@ -1,11 +1,14 @@
-package com.li.gamesocket.session;
+package com.li.gamesocket.service.session;
 
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.IMessage;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,12 +55,26 @@ public class SessionManager {
     }
 
     /** 绑定身份 **/
-    public void bindIdentity(Session session, long identity) {
+    public void bindIdentity(Session session, long identity, boolean inner) {
         Session remove = this.annoymous.remove(session.getSessionId());
         if (log.isDebugEnabled() && remove == null) {
             log.debug("session[{}]已绑定某个身份,本次绑定[{}]", session.getSessionId(), identity);
         }
+        // 非内部连接才将身份标识绑定进Session
+        if (!inner) {
+            session.bind(identity);
+        }
         this.identities.put(identity, session);
+    }
+
+    /** 获取指定Session **/
+    public Session getIdentitySession(long identity) {
+        return this.identities.get(identity);
+    }
+
+    /** 获取已绑定身份的标识集 **/
+    public Collection<Long> getOnlineIdentities() {
+        return Collections.unmodifiableCollection(this.identities.keySet());
     }
 
 

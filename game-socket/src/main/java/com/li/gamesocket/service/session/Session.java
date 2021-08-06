@@ -1,4 +1,4 @@
-package com.li.gamesocket.session;
+package com.li.gamesocket.service.session;
 
 import com.li.gamecore.utils.IpUtils;
 import com.li.gamesocket.protocol.IMessage;
@@ -27,7 +27,6 @@ public class Session {
         return IpUtils.getIp(this.channel.remoteAddress());
     }
 
-
     /** 绑定标识 **/
     void bind(long identity) {
         this.identity = identity;
@@ -36,6 +35,25 @@ public class Session {
     /** 写入消息 **/
     void writeAndFlush(IMessage message) {
         channel.writeAndFlush(message);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Session)) {
+            return false;
+        }
+
+        Session session = (Session) o;
+
+        return sessionId == session.sessionId;
+    }
+
+    @Override
+    public int hashCode() {
+        return sessionId * 31;
     }
 
     static Session newInstance(int sessionId, Channel channel) {

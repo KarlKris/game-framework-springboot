@@ -4,11 +4,11 @@ import cn.hutool.core.util.ZipUtil;
 import com.li.gamecore.ApplicationContextHolder;
 import com.li.gamesocket.exception.BadRequestException;
 import com.li.gamesocket.exception.SocketException;
-import com.li.gamesocket.messagesn.SnCtxManager;
+import com.li.gamesocket.service.rpc.SnCtxManager;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
-import com.li.gamesocket.service.MethodCtx;
+import com.li.gamesocket.service.command.MethodCtx;
 import com.li.gamesocket.service.VocationalWorkConfig;
 import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +55,10 @@ public class SendProxyInvoker implements InvocationHandler {
 
         MethodCtx methodCtx = this.methodCtxHolder.get(method);
         if (methodCtx == null) {
-            throw new IllegalArgumentException("调用的方法[" + method.getName() + "]没有添加 @SocketCommand 注解");
+            throw new IllegalArgumentException("远程方法[" + method.getName() + "]没有添加 @SocketCommand 注解");
         }
 
-        Request request = CommandUtils.encodeRequest(methodCtx.getParams(), args);
+        Request request = CommandUtils.encodeRpcRequest(methodCtx.getParams(), args);
 
         byte[] body = serializer.serialize(request);
 
@@ -68,7 +68,7 @@ public class SendProxyInvoker implements InvocationHandler {
             zip = true;
         }
 
-        InnerMessage message = MessageFactory.toInnerMessage(this.snCtxManager.nextSn()
+        InnerMessage message = MessageFactory.toRequestInnerMessage(this.snCtxManager.nextSn()
                 , methodCtx.getCommand(), serializer.getSerializerType(), zip, body);
 
         try {

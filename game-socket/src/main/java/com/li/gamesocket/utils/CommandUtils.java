@@ -1,20 +1,18 @@
 package com.li.gamesocket.utils;
 
 import cn.hutool.core.convert.Convert;
-import com.li.gamesocket.anno.Identity;
-import com.li.gamesocket.anno.InBody;
-import com.li.gamesocket.anno.SocketCommand;
-import com.li.gamesocket.anno.SocketModule;
+import com.li.gamesocket.anno.*;
+import com.li.gamesocket.protocol.PushResponse;
 import com.li.gamesocket.protocol.Request;
-import com.li.gamesocket.service.Command;
-import com.li.gamesocket.service.MethodCtx;
-import com.li.gamesocket.service.MethodParameter;
-import com.li.gamesocket.service.impl.IdentityMethodParameter;
-import com.li.gamesocket.service.impl.InBodyMethodParameter;
-import com.li.gamesocket.service.impl.SessionMethodParameter;
-import com.li.gamesocket.session.Session;
+import com.li.gamesocket.service.command.Command;
+import com.li.gamesocket.service.command.MethodCtx;
+import com.li.gamesocket.service.command.MethodParameter;
+import com.li.gamesocket.service.command.impl.IdentityMethodParameter;
+import com.li.gamesocket.service.command.impl.InBodyMethodParameter;
+import com.li.gamesocket.service.command.impl.PushIdsMethodParameter;
+import com.li.gamesocket.service.command.impl.SessionMethodParameter;
+import com.li.gamesocket.service.session.Session;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
@@ -40,9 +38,10 @@ public class CommandUtils {
             return Collections.emptyList();
         }
 
-        // 忽略常规bean
         SocketModule socketModule = AnnotationUtils.findAnnotation(targetClass, SocketModule.class);
-        if (socketModule == null) {
+        boolean push = AnnotationUtils.findAnnotation(targetClass, SocketPush.class) != null;
+        // 既不是业务，也不是推送
+        if (socketModule == null && !push) {
             return Collections.emptyList();
         }
 
@@ -69,30 +68,43 @@ public class CommandUtils {
             for (int i = 0; i < length; i++) {
                 Parameter parameter = parameters[i];
 
-                // session
-                if (parameter.getParameterizedType()
+                // session不得用于推送
+                if (!push && parameter.getParameterizedType()
                         == SessionMethodParameter.SESSION_PARAMETER.getParameterType()) {
                     params[i] = SessionMethodParameter.SESSION_PARAMETER;
                     continue;
                 }
 
-                Identity identity = parameter.getAnnotation(Identity.class);
-                if (identity != null) {
+                // identity不得用于推送
+                if (!push && parameter.getAnnotation(Identity.class) != null) {
                     if (parameter.getType() != IdentityMethodParameter.IDENTITY_PARAMETER.getParameterType()) {
-                        throw new BeanInitializationException("模块号[" + module + "]命令号[" + command + "]的@Identity注解使用类型必须为long");
+                        throw new IllegalArgumentException("模块号[" + module + "]命令号[" + command + "]的@Identity注解使用类型必须为long");
                     }
                     params[i] = IdentityMethodParameter.IDENTITY_PARAMETER;
                     continue;
                 }
 
+                // 参数内容
                 InBody inBody = parameter.getAnnotation(InBody.class);
                 if (inBody != null) {
                     params[i] = new InBodyMethodParameter(inBody.name(), parameter.getType(), inBody.required());
                     continue;
                 }
 
+                // 推送目标
+                PushIds pushIds = parameter.getAnnotation(PushIds.class);
+                if (pushIds != null) {
+                    if (push && parameter.getParameterizedType()
+                            == PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER.getParameterType()) {
+                        params[i] = PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER;
+                        continue;
+                    }else {
+                        throw new IllegalArgumentException("@PushIds注解使用不符合规范");
+                    }
+                }
+
                 if (log.isWarnEnabled()) {
-                    log.warn("模块号[{}]命令号[{}]方法参数出现既没有@Identity注解也没有@InBody注解,将使用方法参数名为name属性,required为true"
+                    log.warn("模块号[{}]命令号[{}]方法参数出现既没有任何注解,将使用方法参数名为name属性,required为true"
                             , module, command);
                 }
 
@@ -125,24 +137,27 @@ public class CommandUtils {
                 continue;
             }
 
-            if (parameter.identity()) {
+            if (parameter instanceof IdentityMethodParameter) {
                 objs[i] = identity;
                 continue;
             }
 
-            String parameterName = parameter.getParameterName();
-            Object o = map.get(parameterName);
-            if (o != null) {
-                objs[i] = Convert.convert(parameter.getParameterType(), o);
-                continue;
+            if (parameter instanceof InBodyMethodParameter) {
+                InBodyMethodParameter param = (InBodyMethodParameter) parameter;
+                String parameterName = param.getParameterName();
+                Object o = map.get(parameterName);
+                if (o != null) {
+                    objs[i] = Convert.convert(param.getParameterType(), o);
+                    continue;
+                }
+
+                if (!param.isRequired()) {
+                    objs[i] = null;
+                    continue;
+                }
             }
 
-            if (!parameter.isRequired()) {
-                objs[i] = null;
-                continue;
-            }
-
-            throw new IllegalArgumentException("未提供参数[" + parameterName + "]");
+            throw new UnsupportedOperationException("常规业务参数类型不支持[" + parameter + "]解析");
         }
 
         return objs;
@@ -150,12 +165,12 @@ public class CommandUtils {
 
 
     /**
-     * 构建Request
+     * 构建 RPC Request
      * @param params 方法参数信息
      * @param args 实际参数
      * @return Request
      */
-    public static Request encodeRequest(MethodParameter[] params, Object[] args) {
+    public static Request encodeRpcRequest(MethodParameter[] params, Object[] args) {
         int length = params.length;
         if (length != args.length) {
             throw new IllegalArgumentException("请求参数数量与定义数量不一致");
@@ -165,17 +180,50 @@ public class CommandUtils {
 
         for (int i = 0; i < length; i++) {
             MethodParameter parameter = params[i];
-            if (parameter instanceof IdentityMethodParameter) {
-                throw new IllegalArgumentException("请求参数类型不支持 @Identity 注解");
-            }
-            if (parameter instanceof SessionMethodParameter) {
-                throw new IllegalArgumentException("请求参数类型不支持 Session");
+            if (parameter instanceof InBodyMethodParameter) {
+                InBodyMethodParameter param = (InBodyMethodParameter) parameter;
+                map.put(param.getParameterName(), args[i]);
+                continue;
             }
 
-            map.put(parameter.getParameterName(), args[i]);
+            throw new IllegalArgumentException("RPC请求参数不支持 除@InBody以外的其他 注解");
         }
 
         return new Request(map);
+    }
+
+    /**
+     * 构建推送消息中消息体
+     * @param params 方法参数信息
+     * @param args 实际参数
+     * @return PushRequest
+     */
+    public static PushResponse encodePushResponse(MethodParameter[] params, Object[] args) {
+        int length = params.length;
+        if (length != args.length) {
+            throw new IllegalArgumentException("请求参数数量与定义数量不一致");
+        }
+
+        Map<String, Object> map = new HashMap<>(params.length);
+        Collection<Long> identities = null;
+
+        for (int i = 0; i < length; i++) {
+            MethodParameter parameter = params[i];
+            if (parameter instanceof PushIdsMethodParameter) {
+                identities = (Collection<Long>) args[i];
+                continue;
+            }
+
+            if (parameter instanceof InBodyMethodParameter) {
+                InBodyMethodParameter param = (InBodyMethodParameter) parameter;
+                map.put(param.getParameterName(), args[i]);
+                continue;
+            }
+
+            throw new IllegalArgumentException("RPC请求参数不支持 除@InBody以外的其他 注解");
+        }
+
+        return new PushResponse(identities, map);
     }
 
 }

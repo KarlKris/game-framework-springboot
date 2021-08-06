@@ -1,6 +1,6 @@
-package com.li.gamesocket.service.impl;
+package com.li.gamesocket.service.command.impl;
 
-import com.li.gamesocket.service.MethodParameter;
+import com.li.gamesocket.service.command.MethodParameter;
 
 import java.lang.reflect.Type;
 
@@ -24,24 +24,16 @@ public class InBodyMethodParameter implements MethodParameter {
         this.required = required;
     }
 
-
-    @Override
     public String getParameterName() {
         return name;
     }
 
-    @Override
     public Type getParameterType() {
         return type;
     }
 
-    @Override
     public boolean isRequired() {
         return required;
     }
 
-    @Override
-    public boolean identity() {
-        return false;
-    }
 }

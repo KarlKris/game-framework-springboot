@@ -17,4 +17,27 @@ public class Address {
     /** 端口 **/
     private int port;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Address)) {
+            return false;
+        }
+
+        Address address = (Address) o;
+
+        if (port != address.port) {
+            return false;
+        }
+        return ip.equals(address.ip);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = ip.hashCode();
+        result = 31 * result + port;
+        return result;
+    }
 }

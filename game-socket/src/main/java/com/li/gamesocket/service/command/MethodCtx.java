@@ -1,5 +1,6 @@
-package com.li.gamesocket.service;
+package com.li.gamesocket.service.command;
 
+import com.li.gamesocket.service.command.impl.IdentityMethodParameter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,7 +25,7 @@ public class MethodCtx {
     /** 方法是否需要身份标识 **/
     boolean identity() {
         for (MethodParameter parameter : params) {
-            if (parameter.identity()) {
+            if (parameter instanceof IdentityMethodParameter) {
                 return true;
             }
         }

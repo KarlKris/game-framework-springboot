@@ -1,6 +1,6 @@
 package com.li.gamesocket.protocol;
 
-import com.li.gamesocket.service.Command;
+import com.li.gamesocket.service.command.Command;
 
 /**
  * @author li-yuanwen

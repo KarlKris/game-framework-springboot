@@ -1,4 +1,4 @@
-package com.li.gamesocket.service;
+package com.li.gamesocket.service.command;
 
 import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
