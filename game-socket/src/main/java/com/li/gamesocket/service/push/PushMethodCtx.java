@@ -10,7 +10,9 @@ import lombok.Getter;
 @Getter
 public class PushMethodCtx {
 
-    /** 方法上下文 **/
+    /**
+     * 方法上下文
+     **/
     private final MethodCtx methodCtx;
 
     PushMethodCtx(MethodCtx methodCtx) {

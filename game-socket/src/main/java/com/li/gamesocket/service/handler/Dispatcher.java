@@ -12,6 +12,7 @@ public interface Dispatcher {
 
     /**
      * 消息分发
+     *
      * @param message 消息
      * @param session session
      */

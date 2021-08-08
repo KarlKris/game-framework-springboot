@@ -28,8 +28,9 @@ public class CommandUtils {
 
     /**
      * 解析出对象中的命令上下文
+     *
      * @param targetClass 目标Class
-     * @param bean 是否关心是否实例化
+     * @param bean        是否关心是否实例化
      * @return /
      */
     public static List<MethodCtx> analysisCommands(Class<?> targetClass, boolean bean) {
@@ -44,6 +45,7 @@ public class CommandUtils {
         if (socketModule == null && !push) {
             return Collections.emptyList();
         }
+
 
         // 模块号
         short module = socketModule.module();
@@ -98,7 +100,7 @@ public class CommandUtils {
                             == PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER.getParameterType()) {
                         params[i] = PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER;
                         continue;
-                    }else {
+                    } else {
                         throw new IllegalArgumentException("@PushIds注解使用不符合规范");
                     }
                 }
@@ -119,10 +121,11 @@ public class CommandUtils {
 
     /**
      * 解析出方法参数
-     * @param session session
+     *
+     * @param session  session
      * @param identity 身份标识
-     * @param params 方法参数信息
-     * @param request Request
+     * @param params   方法参数信息
+     * @param request  Request
      * @return 方法参数数组
      */
     public static Object[] decodeRequest(Session session, long identity, MethodParameter[] params, Request request) {
@@ -166,8 +169,9 @@ public class CommandUtils {
 
     /**
      * 构建 RPC Request
+     *
      * @param params 方法参数信息
-     * @param args 实际参数
+     * @param args   实际参数
      * @return Request
      */
     public static Request encodeRpcRequest(MethodParameter[] params, Object[] args) {
@@ -194,8 +198,9 @@ public class CommandUtils {
 
     /**
      * 构建推送消息中消息体
+     *
      * @param params 方法参数信息
-     * @param args 实际参数
+     * @param args   实际参数
      * @return PushRequest
      */
     public static PushResponse encodePushResponse(MethodParameter[] params, Object[] args) {

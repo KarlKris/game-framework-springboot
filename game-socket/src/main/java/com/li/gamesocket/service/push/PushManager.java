@@ -18,10 +18,14 @@ import java.util.Map;
 @Slf4j
 public class PushManager {
 
-    /** 代理对象 **/
+    /**
+     * 代理对象
+     **/
     private final Map<String, Object> proxy = new HashMap<>();
 
-    /** 获得推送代理对象 **/
+    /**
+     * 获得推送代理对象
+     **/
     public <T> T getPushProxy(Class<T> clz) {
         String name = clz.getName();
         Object target = this.proxy.get(name);
@@ -39,7 +43,7 @@ public class PushManager {
 
             target = Proxy.newProxyInstance(clz.getClassLoader()
                     , new Class[]{clz}
-                    , new PushProxyInvoker( methodCtx));
+                    , new PushProxyInvoker(methodCtx));
 
             this.proxy.put(name, target);
         }

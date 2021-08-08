@@ -19,6 +19,8 @@
     <modules>
         <module>game-socket</module>
         <module>game-core</module>
+        <module>game-cluster</module>
+        <module>game-gateway</module>
     </modules>
 
     <properties>

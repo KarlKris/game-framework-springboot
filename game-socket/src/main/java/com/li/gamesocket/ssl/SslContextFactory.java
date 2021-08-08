@@ -98,7 +98,7 @@ public class SslContextFactory {
 
             if (tIN != null) {
                 try {
-                    tIN.close();;
+                    tIN.close();
                 }catch (IOException e) {
                     e.printStackTrace();
                 }finally {

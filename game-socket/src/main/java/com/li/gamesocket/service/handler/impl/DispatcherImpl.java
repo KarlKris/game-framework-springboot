@@ -6,19 +6,20 @@ import cn.hutool.core.util.ZipUtil;
 import com.li.gamecore.rpc.RemoteServerSeekService;
 import com.li.gamecore.rpc.model.Address;
 import com.li.gamecore.thread.MonitoredThreadPoolExecutor;
+import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.client.NioNettyClientFactory;
-import com.li.gamesocket.exception.BadRequestException;
-import com.li.gamesocket.exception.SerializeFailException;
-import com.li.gamesocket.service.rpc.SnCtxManager;
+import com.li.gamecore.exception.BadRequestException;
+import com.li.gamecore.exception.SerializeFailException;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
-import com.li.gamesocket.service.*;
+import com.li.gamesocket.service.VocationalWorkConfig;
 import com.li.gamesocket.service.command.CommandManager;
 import com.li.gamesocket.service.command.MethodCtx;
 import com.li.gamesocket.service.command.MethodInvokeCtx;
 import com.li.gamesocket.service.handler.Dispatcher;
+import com.li.gamesocket.service.rpc.SnCtxManager;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
 import com.li.gamesocket.utils.CommandUtils;
@@ -65,7 +66,6 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
     private ExecutorService[] executorServices;
 
 
-
     @PostConstruct
     private void init() {
 
@@ -74,7 +74,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         this.executorServices = new ExecutorService[i];
         for (int j = 0; j < i; j++) {
             // 单线程池,减少加锁频率
-            this.executorServices[j] = new MonitoredThreadPoolExecutor(1,1,
+            this.executorServices[j] = new MonitoredThreadPoolExecutor(1, 1,
                     0, TimeUnit.SECONDS
                     , new ArrayBlockingQueue<>(config.getMaxQueueLength())
                     , new NamedThreadFactory("业务线程池", false));
@@ -97,7 +97,9 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         }
 
         int index = canAndGetExecutorServiceArrayIndex(hash(id));
-        this.executorServices[index].submit(()-> { doDispatch(session, message); });
+        this.executorServices[index].submit(() -> {
+            doDispatch(session, message);
+        });
 
 
     }
@@ -111,9 +113,11 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             if (log.isWarnEnabled()) {
                 log.warn("请求消息序列化类型[{}],找不到对应的序列化工具,忽略", serializeType);
             }
-
             return;
         }
+
+        // 记录序列化/反序列化方式
+        session.getChannel().attr(ChannelAttributeKeys.LAST_SERIALIZE_TYPE).set(serializeType);
 
         // 方法调用上下文
         MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(message.getCommand());
@@ -124,8 +128,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                 return;
             }
 
-            Address address = this.remoteServerSeekService.seekApplicationAddressByCommand(message.getCommand().getModule()
-                    , message.getCommand().getInstruction());
+            Address address = this.remoteServerSeekService.seekApplicationAddressByModule(message.getCommand().getModule(), session.getIdentity());
+
 
             if (address == null || !forwardMessage(message, session, address)) {
                 response(session, message, serializer.serialize(Response.INVALID_OP), false);
@@ -167,7 +171,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
 
                 result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget()
                         , CommandUtils.decodeRequest(session, innerMessage.getIdentity(), methodCtx.getParams(), request));
-            }else {
+            } else {
 
                 if (methodInvokeCtx.isIdentity() && !session.identity()) {
                     // 没有标识
@@ -183,7 +187,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             if (!noResponse) {
                 // 响应
                 response = Response.SUCCESS(result);
-            }else {
+            } else {
                 response = Response.DEFAULT_SUCCESS;
             }
             responseBody = serializer.serialize(response);
@@ -191,21 +195,21 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             if (zip) {
                 responseBody = ZipUtil.gzip(responseBody);
             }
-        }catch (SerializeFailException e) {
+        } catch (SerializeFailException e) {
             log.error("发生序列化/反序列化异常", e);
             responseBody = serializer.serialize(Response.SERIALIZE_FAIL);
-        }catch (ConvertException e) {
+        } catch (ConvertException e) {
             log.error("发生类型转换异常", e);
             responseBody = serializer.serialize(Response.CONVERT_FAIL);
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             log.error("发生参数解析异常", e);
             responseBody = serializer.serialize(Response.PARAM_ANALYSIS_ERROR);
-        }catch (BadRequestException e){
+        } catch (BadRequestException e) {
             if (log.isDebugEnabled()) {
                 log.debug("发生异常请求异常,异常码[{}]", e.getErrorCode(), e);
             }
             responseBody = serializer.serialize(Response.ERROR(e.getErrorCode()));
-        }finally {
+        } finally {
             response(session, message, responseBody, zip);
         }
     }
@@ -234,9 +238,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
     }
 
 
-    /**
-     * 根据hash找到对应的线程池下标,仿HashMap
-     **/
+    /** 根据hash找到对应的线程池下标,仿HashMap **/
     private int canAndGetExecutorServiceArrayIndex(int hash) {
         int length = this.executorServices.length;
         return (length - 1) & hash;

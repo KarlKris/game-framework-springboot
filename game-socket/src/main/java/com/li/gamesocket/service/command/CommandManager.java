@@ -12,6 +12,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author li-yuanwen
@@ -27,6 +29,13 @@ public class CommandManager extends InstantiationAwareBeanPostProcessorAdapter {
 
     public MethodInvokeCtx getMethodInvokeCtx(Command command) {
         return commandInvokeCtxHolder.get(command);
+    }
+
+    public Set<Short> getModules() {
+        return commandInvokeCtxHolder
+                .keySet().stream()
+                .map(Command::getModule)
+                .collect(Collectors.toSet());
     }
 
     @Override

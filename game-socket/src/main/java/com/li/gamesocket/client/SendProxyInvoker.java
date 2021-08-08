@@ -2,8 +2,9 @@ package com.li.gamesocket.client;
 
 import cn.hutool.core.util.ZipUtil;
 import com.li.gamecore.ApplicationContextHolder;
-import com.li.gamesocket.exception.BadRequestException;
-import com.li.gamesocket.exception.SocketException;
+import com.li.gamecore.exception.BadRequestException;
+import com.li.gamecore.exception.SocketException;
+import com.li.gamecore.exception.code.ResultCode;
 import com.li.gamesocket.service.rpc.SnCtxManager;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
@@ -78,15 +79,15 @@ public class SendProxyInvoker implements InvocationHandler {
             Response response = future.get(timeoutSecond, TimeUnit.SECONDS);
             if (response.success()) {
                 return response.getContent();
-            }else if (!response.isVocationalException()) {
+            } else if (!response.isVocationalException()) {
                 throw new SocketException(response.getCode());
-            }else {
+            } else {
                 throw new BadRequestException(response.getCode());
             }
-        }catch (InterruptedException | TimeoutException e) {
+        } catch (InterruptedException | TimeoutException e) {
             log.error("SendProxyInvoker超时中断", e);
             throw new SocketException(ResultCode.TIME_OUT);
-        }catch (ExecutionException e) {
+        } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof SocketException) {
                 throw (SocketException) cause;
@@ -96,10 +97,10 @@ public class SendProxyInvoker implements InvocationHandler {
             }
             log.error("SendProxyInvoker发生未知ExecutionException异常", e);
             throw new SocketException(ResultCode.UNKNOWN);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("SendProxyInvoker发生未知异常", e);
             throw new SocketException(ResultCode.UNKNOWN);
-        }finally {
+        } finally {
             // 移除序号
             snCtxManager.remove(message.getSn());
         }

@@ -32,15 +32,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements NioNettyFilter, FirewallService {
 
     /** 黑名单(,逗号分隔) **/
-    @Value("${netty.server.black.ips:}")
+    @Value("${netty.server.blackIps:}")
     private String blackIpStr;
 
     /** 白名单(,逗号分隔) **/
-    @Value("${netty.server.white.ips:}")
+    @Value("${netty.server.whiteIps:}")
     private String whiteIpStr;
 
     /** 同时最大连接数 **/
-    @Value("${netty.server.max.connect.num}")
+    @Value("${netty.server.maxConnectNum}")
     private int maxConnectNum;
 
 

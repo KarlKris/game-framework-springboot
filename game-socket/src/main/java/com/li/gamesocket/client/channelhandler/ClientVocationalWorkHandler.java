@@ -1,17 +1,17 @@
 package com.li.gamesocket.client.channelhandler;
 
 import cn.hutool.core.util.ZipUtil;
+import com.li.gamecore.exception.BadRequestException;
+import com.li.gamecore.exception.SocketException;
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
-import com.li.gamesocket.exception.BadRequestException;
-import com.li.gamesocket.exception.SocketException;
 import com.li.gamesocket.protocol.*;
+import com.li.gamesocket.protocol.serialize.Serializer;
+import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.service.VocationalWorkConfig;
 import com.li.gamesocket.service.rpc.ForwardSnCtx;
 import com.li.gamesocket.service.rpc.RpcSnCtx;
 import com.li.gamesocket.service.rpc.SnCtx;
 import com.li.gamesocket.service.rpc.SnCtxManager;
-import com.li.gamesocket.protocol.serialize.Serializer;
-import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
 import io.netty.channel.Channel;
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -62,17 +63,27 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             PushResponse pushResponse = serializer.deserialize(msg.getBody(), PushResponse.class);
 
             Response response = Response.SUCCESS(pushResponse.getContent());
-            byte[] body = serializer.serialize(response);
+
+            Byte serializeType = null;
+            byte[] body = null;
             boolean zip = false;
-            if (body.length > vocationalWorkConfig.getBodyZipLength()) {
-                body = ZipUtil.gzip(body);
-                zip = true;
-            }
 
             for (long identity : pushResponse.getTargets()) {
                 Session session = sessionManager.getIdentitySession(identity);
                 if (session == null) {
                     continue;
+                }
+
+                Byte type = session.getChannel().attr(ChannelAttributeKeys.LAST_SERIALIZE_TYPE).get();
+                if (!Objects.equals(type, serializeType)) {
+                    serializeType = type;
+                    serializer = serializerManager.getSerializer(type);
+                    body = serializer.serialize(response);
+                    if (body.length > vocationalWorkConfig.getBodyZipLength()) {
+                        body = ZipUtil.gzip(body);
+                        zip = true;
+                    }
+
                 }
 
                 OuterMessage message = MessageFactory.toResponseOuterMessage(msg, body, zip);
@@ -120,10 +131,10 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             Response response = serializer.deserialize(msg.getBody(), Response.class);
             if (response.success()) {
                 future.complete(response);
-            }else {
+            } else {
                 if (response.isVocationalException()) {
                     future.completeExceptionally(new BadRequestException(response.getCode()));
-                }else {
+                } else {
                     future.completeExceptionally(new SocketException(response.getCode()));
                 }
             }
@@ -142,7 +153,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
         if (cause instanceof IOException) {
             log.error("客户端发生IOException,与服务端断开连接", cause);
             ctx.close();
-        }else {
+        } else {
             log.error("客户端发生未知异常", cause);
         }
     }

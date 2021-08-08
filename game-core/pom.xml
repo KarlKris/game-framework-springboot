@@ -12,6 +12,12 @@
 
     <artifactId>game-core</artifactId>
     <version>1.0</version>
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+    </dependencies>
     <name>game-core</name>
     <description>游戏框架核心包</description>
 

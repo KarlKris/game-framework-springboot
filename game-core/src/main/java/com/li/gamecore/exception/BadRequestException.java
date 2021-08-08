@@ -1,4 +1,4 @@
-package com.li.gamesocket.exception;
+package com.li.gamecore.exception;
 
 import lombok.Getter;
 

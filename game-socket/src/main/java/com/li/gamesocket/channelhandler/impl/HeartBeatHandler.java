@@ -4,10 +4,8 @@ import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.IMessage;
 import com.li.gamesocket.protocol.MessageFactory;
 import com.li.gamesocket.protocol.ProtocolConstant;
-import com.sun.org.apache.regexp.internal.RE;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class HeartBeatHandler extends SimpleChannelInboundHandler<IMessage> {
 
     /** 是否开启心跳 **/
-    @Value("${netty.server.heartBeat.enable:false}")
+    @Value("${netty.server.heartBeat.enable:true}")
     private boolean heartBeatEnable;
 
     @Override

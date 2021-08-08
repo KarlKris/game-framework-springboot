@@ -1,4 +1,4 @@
-package com.li.gamesocket.exception;
+package com.li.gamecore.exception;
 
 /**
  * @author li-yuanwen
@@ -7,7 +7,9 @@ package com.li.gamesocket.exception;
  **/
 public class SocketException extends RuntimeException {
 
-    /** 错误码 **/
+    /**
+     * 错误码
+     **/
     private int code;
 
     public SocketException(int code) {

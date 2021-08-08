@@ -27,16 +27,26 @@ import java.util.*;
 public class PushProxyInvoker implements InvocationHandler {
 
 
-    /** Session管理 **/
+    /**
+     * Session管理
+     **/
     private final SessionManager sessionManager = ApplicationContextHolder.getBean(SessionManager.class);
-    /** 方法参数上下文 **/
+    /**
+     * 方法参数上下文
+     **/
     private final Map<Method, PushMethodCtx> methodCtxHolder;
 
-    /** 默认序列化/反序列化工具 **/
+    /**
+     * 默认序列化/反序列化工具
+     **/
     private final Serializer serializer = ApplicationContextHolder.getBean(SerializerManager.class).getDefaultSerializer();
-    /** 默认压缩body阙值 **/
+    /**
+     * 默认压缩body阙值
+     **/
     private final int bodyZipLength = ApplicationContextHolder.getBean(VocationalWorkConfig.class).getBodyZipLength();
-    /** 消息管理器 **/
+    /**
+     * 消息管理器
+     **/
     private final SnCtxManager snCtxManager = ApplicationContextHolder.getBean(SnCtxManager.class);
 
     PushProxyInvoker(List<MethodCtx> methodCtxes) {

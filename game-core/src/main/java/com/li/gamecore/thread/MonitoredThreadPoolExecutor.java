@@ -38,7 +38,7 @@ public class MonitoredThreadPoolExecutor extends ThreadPoolExecutor {
                     , size
                     , this.getLargestPoolSize());
 
-            this.maxNum = Math.max(this.maxNum , size);
+            this.maxNum = Math.max(this.maxNum, size);
 
             this.startTimes.put(toRunnableId(r), System.currentTimeMillis());
         }
@@ -52,7 +52,7 @@ public class MonitoredThreadPoolExecutor extends ThreadPoolExecutor {
             long now = System.currentTimeMillis();
             long startTime = this.startTimes.remove(id);
 
-            int time = (int)(now - startTime);
+            int time = (int) (now - startTime);
             this.maxTime = Math.max(this.maxTime, time);
 
             log.debug("线程池 任务[{}]耗时[{}]", id, time);

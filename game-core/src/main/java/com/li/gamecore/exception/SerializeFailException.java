@@ -1,6 +1,7 @@
-package com.li.gamesocket.exception;
+package com.li.gamecore.exception;
 
-import com.li.gamesocket.protocol.ResultCode;
+
+import com.li.gamecore.exception.code.ResultCode;
 
 /**
  * @author li-yuanwen
