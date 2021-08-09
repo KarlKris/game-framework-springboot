@@ -5,10 +5,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.codec.http.websocketx.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -44,5 +41,27 @@ public class WebSocketDecoder extends SimpleChannelInboundHandler<WebSocketFrame
 
         ByteBuf byteBuf = msg.content();
         ApplicationContextHolder.getBean(MessageDecoder.class).channelRead(ctx, byteBuf);
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof WebSocketServerProtocolHandler.HandshakeComplete) {
+            if (log.isDebugEnabled()) {
+                log.info("websocket 握手成功。");
+            }
+            WebSocketServerProtocolHandler.HandshakeComplete handshakeComplete = (WebSocketServerProtocolHandler.HandshakeComplete) evt;
+            String requestUri = handshakeComplete.requestUri();
+            if (log.isDebugEnabled()) {
+                log.info("requestUri:[{}]", requestUri);
+            }
+            String subproTocol = handshakeComplete.selectedSubprotocol();
+            if (log.isDebugEnabled()) {
+                log.info("subproTocol:[{}]", subproTocol);
+                handshakeComplete.requestHeaders().forEach(entry -> log.info("header key:[{}] value:[{}]", entry.getKey(), entry.getValue()));
+            }
+
+        } else {
+            super.userEventTriggered(ctx, evt);
+        }
     }
 }

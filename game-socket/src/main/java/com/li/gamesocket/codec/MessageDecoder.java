@@ -29,11 +29,11 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
 
         short protocolHeaderIdentity = ProtocolConstant.getProtocolHeaderIdentity(buf);
         if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
-            return InnerMessage.readIn(in);
+            return InnerMessage.readIn(buf);
         }
 
         if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
-            return OuterMessage.readIn(in);
+            return OuterMessage.readIn(buf);
         }
 
         if (log.isDebugEnabled()) {

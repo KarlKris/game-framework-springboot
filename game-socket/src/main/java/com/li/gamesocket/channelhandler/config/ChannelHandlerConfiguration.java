@@ -4,6 +4,7 @@ import com.li.gamesocket.codec.MessageDecoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolConfig;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -94,7 +95,11 @@ public class ChannelHandlerConfiguration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WebSocketServerProtocolHandler webSocketServerProtocolHandler() {
-        return new WebSocketServerProtocolHandler(this.contextPath);
+        WebSocketServerProtocolConfig config = WebSocketServerProtocolConfig.newBuilder()
+                .allowExtensions(true)
+                .websocketPath(this.contextPath)
+                .build();
+        return new WebSocketServerProtocolHandler(config);
     }
 
     /** 消息最大长度 **/
