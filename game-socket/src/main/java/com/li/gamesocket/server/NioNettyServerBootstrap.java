@@ -29,7 +29,7 @@ public class NioNettyServerBootstrap implements ApplicationRunner
     @Autowired
     private NioNettyServerMessageHandler nettyServerMessageHandler;
     @Autowired
-    private ServerProperties serverProperties;
+    private ServerConfig serverConfig;
 
 
     /** NIO 线程组 **/
@@ -40,8 +40,8 @@ public class NioNettyServerBootstrap implements ApplicationRunner
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        this.boss = new NioEventLoopGroup(serverProperties.getBossGroupThreadNum());
-        this.workers = new NioEventLoopGroup(serverProperties.getNioGroupThreadNum());
+        this.boss = new NioEventLoopGroup(serverConfig.getBossGroupThreadNum());
+        this.workers = new NioEventLoopGroup(serverConfig.getNioGroupThreadNum());
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(this.boss, this.workers)
@@ -50,7 +50,7 @@ public class NioNettyServerBootstrap implements ApplicationRunner
                 // 函数listen(int socketfd,int backlog)用来初始化服务端可连接队列
                 // 服务端处理客户端连接请求是顺序处理的，所以同一时间只能处理一个客户端连接
                 //多个客户端来的时候，服务端将不能处理的客户端连接请求放在队列中等待处理，backlog参数指定了队列的大小
-                .option(ChannelOption.SO_BACKLOG, serverProperties.getBackLog())
+                .option(ChannelOption.SO_BACKLOG, serverConfig.getBackLog())
                 // 这个参数表示允许重复使用本地地址和端口
                 // 某个服务器进程占用了TCP的80端口进行监听，此时再次监听该端口就会返回错误
                 // 使用该参数就可以解决问题，该参数允许共用该端口，这个在服务器程序中比较常使用
@@ -58,11 +58,11 @@ public class NioNettyServerBootstrap implements ApplicationRunner
                 .childHandler(this.nettyServerMessageHandler);
 
         // 同步绑定端口
-        ChannelFuture channelFuture = serverBootstrap.bind(serverProperties.getPort()).sync();
+        ChannelFuture channelFuture = serverBootstrap.bind(serverConfig.getPort()).sync();
         // 绑定服务器Channel
         this.channel = channelFuture.channel();
 
-        log.warn("NIO Socket 服务器[{}]正常启动成功", serverProperties.getPort());
+        log.warn("NIO Socket 服务器[{}]正常启动成功", serverConfig.getPort());
 
     }
 
@@ -73,6 +73,6 @@ public class NioNettyServerBootstrap implements ApplicationRunner
         this.workers.shutdownGracefully();
         this.channel.close();
 
-        log.warn("NIO Socket 服务器[{}]正常关闭", serverProperties.getPort());
+        log.warn("NIO Socket 服务器[{}]正常关闭", serverConfig.getPort());
     }
 }

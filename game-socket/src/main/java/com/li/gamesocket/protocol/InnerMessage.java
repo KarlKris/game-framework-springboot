@@ -61,7 +61,7 @@ public class InnerMessage implements IMessage {
             return;
         }
 
-        out.writeByte(body.length);
+        out.writeShort(body.length);
         out.writeBytes(body);
     }
 
@@ -70,7 +70,7 @@ public class InnerMessage implements IMessage {
         InnerMessage message = new InnerMessage();
         message.header = InnerMessageHeader.readIn(in);
         if (in.readableBytes() > 0) {
-            message.body = new byte[in.readByte()];
+            message.body = new byte[in.readShort()];
             in.readBytes(message.body);
         }
         return message;

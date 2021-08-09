@@ -1,5 +1,6 @@
 package com.li.gamesocket.codec;
 
+import com.li.gamecore.ApplicationContextHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,7 +10,6 @@ import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 @ChannelHandler.Sharable
 public class WebSocketDecoder extends SimpleChannelInboundHandler<WebSocketFrame> {
 
-    @Autowired
-    private MessageDecoder messageDecoder;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg) throws Exception {
@@ -45,6 +43,6 @@ public class WebSocketDecoder extends SimpleChannelInboundHandler<WebSocketFrame
         }
 
         ByteBuf byteBuf = msg.content();
-        messageDecoder.channelRead(ctx, byteBuf);
+        ApplicationContextHolder.getBean(MessageDecoder.class).channelRead(ctx, byteBuf);
     }
 }

@@ -10,7 +10,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @ChannelHandler.Sharable
-@ConditionalOnBean(name = "idleStateHandler")
 public class HeartBeatHandler extends SimpleChannelInboundHandler<IMessage> {
 
     /** 是否开启心跳 **/

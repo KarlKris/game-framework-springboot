@@ -2,14 +2,14 @@ package com.li.gamesocket.service;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * @author li-yuanwen
  * @date 2021/8/1 10:28
  * 业务相关参数
  **/
-@Configuration
+@Component
 @Getter
 public class VocationalWorkConfig {
 

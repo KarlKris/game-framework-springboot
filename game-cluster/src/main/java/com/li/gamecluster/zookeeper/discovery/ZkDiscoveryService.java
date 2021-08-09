@@ -8,7 +8,10 @@ import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Service
 @Slf4j
-public class ZkDiscoveryService {
+public class ZkDiscoveryService implements ApplicationListener<ContextClosedEvent> {
 
     @Autowired
     private CuratorFramework curatorFramework;
@@ -88,5 +91,17 @@ public class ZkDiscoveryService {
     }
 
 
-
+    @Override
+    public void onApplicationEvent(ContextClosedEvent contextClosedEvent) {
+        if (CollectionUtils.isEmpty(discoveryNodeCache)) {
+            return;
+        }
+        for (ServiceDiscoveryNode serviceDiscoveryNode : discoveryNodeCache.values()) {
+            try {
+                serviceDiscoveryNode.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.li.gamesocket.channelhandler;
 
+import com.li.gamecore.ApplicationContextHolder;
 import com.li.gamesocket.channelhandler.impl.ProtocolSelectorHandler;
 import com.li.gamesocket.channelhandler.impl.VocationalWorkHandler;
 import com.li.gamesocket.ssl.SslConfig;
@@ -10,7 +11,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -27,11 +27,6 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
     private SslConfig sslConfig;
     @Autowired
     private List<NioNettyFilter> filters;
-    @Autowired
-    private ProtocolSelectorHandler protocolSelectorHandler;
-    @Autowired(required = false)
-    @Qualifier("serverIdleStateHandler")
-    private IdleStateHandler idleStateHandler;
     @Autowired
     private VocationalWorkHandler vocationalWorkHandler;
 
@@ -52,12 +47,11 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
         }
 
         // 协议选择
-        pipeline.addLast(ProtocolSelectorHandler.class.getSimpleName(), this.protocolSelectorHandler);
+        pipeline.addLast(ProtocolSelectorHandler.class.getSimpleName(), ApplicationContextHolder.getBean(ProtocolSelectorHandler.class));
 
         // 心跳检测
-        if (this.idleStateHandler != null) {
-            pipeline.addLast(IdleStateHandler.class.getSimpleName(), this.idleStateHandler);
-        }
+        pipeline.addLast(IdleStateHandler.class.getSimpleName()
+                , ApplicationContextHolder.getBean("serverIdleStateHandler", IdleStateHandler.class));
 
         // 业务
         pipeline.addLast(VocationalWorkHandler.class.getSimpleName(), this.vocationalWorkHandler);

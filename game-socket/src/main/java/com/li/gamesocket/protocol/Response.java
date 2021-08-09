@@ -1,5 +1,6 @@
 package com.li.gamesocket.protocol;
 
+import com.li.gamecore.exception.code.ResultCode;
 import lombok.Getter;
 
 /**

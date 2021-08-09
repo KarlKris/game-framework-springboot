@@ -9,7 +9,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -25,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author li-yuanwen
  * 黑白名单过滤器,防火墙
  */
-@Order(1)
 @Component
 @ChannelHandler.Sharable
 @Slf4j
@@ -56,12 +54,12 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
 
     @PostConstruct
     private void init() {
+        this.blackIps = new CopyOnWriteArraySet<>();
         if (!StringUtils.isEmpty(this.blackIpStr)) {
-            this.blackIps = new CopyOnWriteArraySet<>();
             this.blackIps.addAll(Arrays.asList(this.blackIpStr.split(",")));
         }
+        this.whiteIps = new CopyOnWriteArraySet<>();
         if (!StringUtils.isEmpty(this.whiteIpStr)) {
-            this.whiteIps = new CopyOnWriteArraySet<>();
             this.whiteIps.addAll(Arrays.asList(this.whiteIpStr.split(",")));
         }
     }

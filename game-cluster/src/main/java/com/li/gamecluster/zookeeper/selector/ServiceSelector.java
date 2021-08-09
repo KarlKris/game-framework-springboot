@@ -1,10 +1,9 @@
 package com.li.gamecluster.zookeeper.selector;
 
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
-import com.li.gamecluster.zookeeper.model.ServiceInstancePayLoad;
 import com.li.gamecluster.zookeeper.selector.impl.BalanceServiceSelector;
 import com.li.gamecluster.zookeeper.selector.impl.IdentityServiceSelector;
-import org.apache.curator.x.discovery.ServiceInstance;
+import com.li.gamecore.rpc.model.Address;
 
 /**
  * @author li-yuanwen
@@ -25,7 +24,7 @@ public interface ServiceSelector {
      * @param identity 身份标识
      * @return 服务
      */
-    ServiceInstance<ServiceInstancePayLoad> select(ServiceDiscoveryNode node, long identity);
+    Address select(ServiceDiscoveryNode node, long identity);
 
 
 }

@@ -2,19 +2,19 @@ package com.li.gamesocket.server;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * @author li-yuanwen
  * @date 2021/8/7 23:10
  **/
-@Configuration
 @Getter
-public class ServerProperties {
+@Component
+public class ServerConfig {
 
-    /** 唯一服务器标识(数据服必须使用 渠道号_服务器号 格式) **/
+    /** 唯一服务器标识(数字) **/
     @Value("${netty.server.id}")
-    private String id;
+    private short serverId;
     /** Socket绑定端口号 **/
     @Value("${netty.server.port}")
     private int port;
@@ -25,7 +25,7 @@ public class ServerProperties {
     @Value("${netty.server.nioGroup.threadNum:16}")
     private int nioGroupThreadNum;
     /** TCP参数SO_BACKLOG **/
-    @Value("${netty.server.tcp.backlog:1024")
+    @Value("${netty.server.tcp.backlog:1024}")
     private int backLog;
 
 }

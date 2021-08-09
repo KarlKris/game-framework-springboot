@@ -1,9 +1,11 @@
 package com.li.gamesocket.channelhandler.impl;
 
-import com.li.gamesocket.codec.*;
+import com.li.gamesocket.codec.MessageDecoder;
+import com.li.gamesocket.codec.MessageEncoder;
+import com.li.gamesocket.codec.WebSocketDecoder;
+import com.li.gamesocket.codec.WebSocketEncoder;
 import com.li.gamesocket.protocol.ProtocolConstant;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -16,6 +18,8 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,7 +30,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@ChannelHandler.Sharable
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProtocolSelectorHandler extends ByteToMessageDecoder {
 
     @Autowired
@@ -51,7 +55,7 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
     private MessageEncoder messageEncoder;
     @Autowired
     private MessageDecoder messageDecoder;
-    @Autowired(required = false)
+    @Autowired
     private HeartBeatHandler heartBeatHandler;
 
 
@@ -65,7 +69,7 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
             , ByteBuf byteBuf, List<Object> list) throws Exception {
 
         // 可读字节数小于协议头字节数,忽略
-        if (byteBuf.readByte() < PROTOCOL_BYTES_SIZE) {
+        if (byteBuf.readableBytes() < PROTOCOL_BYTES_SIZE) {
             if (log.isDebugEnabled()) {
                 log.debug("可读字节数小于协议头字节数[{}],断开连接", PROTOCOL_BYTES_SIZE);
             }

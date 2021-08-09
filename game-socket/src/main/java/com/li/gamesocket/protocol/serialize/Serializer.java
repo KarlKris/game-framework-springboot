@@ -1,6 +1,6 @@
 package com.li.gamesocket.protocol.serialize;
 
-import com.li.gamesocket.exception.SerializeFailException;
+import com.li.gamecore.exception.SerializeFailException;
 
 /**
  * @author li-yuanwen

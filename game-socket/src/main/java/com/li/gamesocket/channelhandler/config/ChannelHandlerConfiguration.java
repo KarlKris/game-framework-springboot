@@ -1,5 +1,6 @@
 package com.li.gamesocket.channelhandler.config;
 
+import com.li.gamesocket.codec.MessageDecoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
@@ -8,9 +9,10 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import java.util.concurrent.TimeUnit;
 
@@ -23,36 +25,18 @@ import java.util.concurrent.TimeUnit;
 public class ChannelHandlerConfiguration {
 
 
-    /** IdleStateHandler 心跳检测多长时间(秒)没读到数据时抛出IdleStateEvent.READER_IDLE事件 **/
-    @Value("${netty.server.idle.read.seconds:5}")
-    private int readTime;
-
-    /** IdleStateHandler 心跳检测多长时间(秒)没向对方发送数据时抛出IdleStateEvent.WRITER_IDLE事件 **/
-    @Value("${netty.server.idle.write.seconds:0}")
-    private int writeTime;
-
-    /** IdleStateHandler 心跳检测多长时间(秒)没任何操作时抛出IdleStateEvent.ALL_IDLE事件 **/
-    @Value("${netty.server.idle.all.seconds:5}")
-    private int allTime;
-
-
     /** 服务端心跳检测ChannelHandler **/
     @Bean("serverIdleStateHandler")
-    @ConditionalOnExpression("${netty.server.idle.read.seconds:5}>0 " +
-            "|| ${netty.server.idle.write.seconds:0}>0 " +
-            "|| ${netty.server.idle.all.seconds:0}>0")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public IdleStateHandler serverIdleStateHandler() {
-        return new IdleStateHandler(this.readTime, this.writeTime, this.allTime, TimeUnit.SECONDS);
+        return new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS);
     }
 
     /** 客户端心跳检测ChannelHandler **/
     @Bean("clientIdleStateHandler")
-    @ConditionalOnExpression("${netty.server.idle.read.seconds:5}>0 " +
-            "|| ${netty.server.idle.write.seconds:0}>0 " +
-            "|| ${netty.server.idle.all.seconds:0}>0")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public IdleStateHandler clientIdleStateHandler() {
-        int writeTime = Math.min(this.readTime, this.allTime) - 1;
-        return new IdleStateHandler(0, writeTime, 0, TimeUnit.SECONDS);
+        return new IdleStateHandler(0, 25, 0, TimeUnit.SECONDS);
     }
 
     // ------- WebSocket 协议相关ChannelHandler ----------------------------------
@@ -73,38 +57,53 @@ public class ChannelHandlerConfiguration {
 
     /** HttpServerCodec：将请求和应答消息解码为HTTP消息 **/
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public HttpServerCodec httpServerCodec() {
         return new HttpServerCodec();
     }
 
     /** HttpObjectAggregator：将HTTP消息的多个部分合成一条完整的HTTP消息 **/
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public HttpObjectAggregator httpObjectAggregator() {
         return new HttpObjectAggregator(this.maxContentLengthInAggregator);
     }
 
     /** 主要用于处理大数据流,防止因为大文件撑爆JVM **/
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ChunkedWriteHandler chunkedWriteHandler() {
         return new ChunkedWriteHandler();
     }
 
     /** WebSocketFrameAggregator 通过对消息进行分类进行聚合,解码为WebSocket帧 **/
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WebSocketFrameAggregator webSocketFrameAggregator() {
         return new WebSocketFrameAggregator(this.maxContentLengthInFrame);
     }
 
     /** WebSocket数据压缩 **/
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WebSocketServerCompressionHandler webSocketServerCompressionHandler() {
         return new WebSocketServerCompressionHandler();
     }
 
     /** 处理websocket连接 **/
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WebSocketServerProtocolHandler webSocketServerProtocolHandler() {
         return new WebSocketServerProtocolHandler(this.contextPath);
     }
 
+    /** 消息最大长度 **/
+    @Value("${netty.server.message.maxContentLength:1048756}")
+    private int maxMessageLength;
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public MessageDecoder messageDecoder() {
+        return new MessageDecoder(maxMessageLength, 2, 4);
+    }
 }

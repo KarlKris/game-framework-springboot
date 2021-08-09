@@ -57,7 +57,8 @@ public class OuterMessage implements IMessage {
             return;
         }
 
-        out.writeByte(body.length);
+        // body字节长度32767
+        out.writeShort(body.length);
         out.writeBytes(body);
     }
 
@@ -67,7 +68,7 @@ public class OuterMessage implements IMessage {
         message.header = OuterMessageHeader.readIn(in);
 
         if (in.readableBytes() > 0) {
-            message.body = new byte[in.readByte()];
+            message.body = new byte[in.readShort()];
             in.readBytes(message.body);
         }
 

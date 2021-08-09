@@ -64,9 +64,9 @@ public class VocationalWorkHandler extends SimpleChannelInboundHandler<IMessage>
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if (cause instanceof IOException) {
             log.error("服务器发生IOException,与客户端[{}]断开连接", ctx.channel().id(), cause);
-            ctx.close();
         }else {
             log.error("服务器发生未知异常", cause);
         }
+        ctx.close();
     }
 }

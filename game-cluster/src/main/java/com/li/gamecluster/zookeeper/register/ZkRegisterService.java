@@ -88,8 +88,7 @@ public class ZkRegisterService {
 
         // 创建记录连接数的临时节点
         // 路径/discovery节点/count节点/id
-        this.countPath = ZkConstant.ZOOKEEPER_SLASH
-                + discoveryPath
+        this.countPath = discoveryPath
                 + ZkConstant.ZOOKEEPER_SLASH
                 + config.getServerType().getServiceName() + ZkConstant.SERVICE_COUNT_SUFFIX
                 + ZkConstant.ZOOKEEPER_SLASH
@@ -109,7 +108,7 @@ public class ZkRegisterService {
 
     /** 服务发现节点的路径(不包含根路径) **/
     private String toServiceDiscoveryPath() {
-        return config.getServerType().getServiceName()
+        return ZkConstant.ZOOKEEPER_SLASH + config.getServerType().getServiceName()
                 + ZkConstant.SERVICE_DISCOVERY_SUFFIX;
     }
 

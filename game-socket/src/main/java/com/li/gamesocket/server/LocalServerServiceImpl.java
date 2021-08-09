@@ -19,13 +19,13 @@ public class LocalServerServiceImpl implements LocalServerService {
     @Autowired
     private CommandManager commandManager;
     @Autowired
-    private ServerProperties serverProperties;
+    private ServerConfig serverConfig;
 
     @Override
     public ServerInfo getLocalServerInfo() throws SocketException {
-        return new ServerInfo(serverProperties.getId()
+        return new ServerInfo(String.valueOf(serverConfig.getServerId())
                 , IpUtils.getLocalIpAddress()
-                , serverProperties.getPort()
+                , serverConfig.getPort()
                 , commandManager.getModules());
     }
 }

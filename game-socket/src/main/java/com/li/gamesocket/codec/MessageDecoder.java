@@ -4,19 +4,15 @@ import com.li.gamesocket.protocol.InnerMessage;
 import com.li.gamesocket.protocol.OuterMessage;
 import com.li.gamesocket.protocol.ProtocolConstant;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * @author li-yuanwen
  * 自定义协议消息解码
  */
-@Component
 @Slf4j
-@ChannelHandler.Sharable
 public class MessageDecoder extends LengthFieldBasedFrameDecoder {
 
     /** 最大包长度,长度字段位移字节数,长度字段所占字节数 **/

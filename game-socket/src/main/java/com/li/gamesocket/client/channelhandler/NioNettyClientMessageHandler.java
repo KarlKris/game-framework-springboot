@@ -1,5 +1,6 @@
 package com.li.gamesocket.client.channelhandler;
 
+import com.li.gamecore.ApplicationContextHolder;
 import com.li.gamesocket.codec.MessageDecoder;
 import com.li.gamesocket.codec.MessageEncoder;
 import com.li.gamesocket.ssl.SslConfig;
@@ -11,7 +12,6 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,11 +25,6 @@ public class NioNettyClientMessageHandler extends ChannelInitializer<SocketChann
     private SslConfig sslConfig;
     @Autowired
     private MessageEncoder messageEncoder;
-    @Autowired
-    private MessageDecoder messageDecoder;
-    @Autowired(required = false)
-    @Qualifier("clientIdleStateHandler")
-    private IdleStateHandler idleStateHandler;
     @Autowired
     private ClientVocationalWorkHandler clientVocationalWorkHandler;
 
@@ -45,12 +40,11 @@ public class NioNettyClientMessageHandler extends ChannelInitializer<SocketChann
 
         // 编解码器
         pipeline.addLast(MessageEncoder.class.getSimpleName(), this.messageEncoder);
-        pipeline.addLast(MessageDecoder.class.getSimpleName(), this.messageDecoder);
+        pipeline.addLast(MessageDecoder.class.getSimpleName(), ApplicationContextHolder.getBean(MessageDecoder.class));
 
         // 心跳
-        if (this.idleStateHandler != null) {
-            pipeline.addLast(IdleStateHandler.class.getSimpleName(), this.idleStateHandler);
-        }
+        pipeline.addLast(IdleStateHandler.class.getSimpleName()
+                , ApplicationContextHolder.getBean("clientIdleStateHandler", IdleStateHandler.class));
 
         // 业务
         pipeline.addLast(ClientVocationalWorkHandler.class.getSimpleName(), this.clientVocationalWorkHandler);

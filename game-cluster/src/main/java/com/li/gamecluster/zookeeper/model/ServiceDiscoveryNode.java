@@ -14,6 +14,7 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.ServiceCacheListener;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -23,14 +24,15 @@ import java.util.function.Consumer;
  * @date 2021/8/8 10:20
  * 服务发现节点数据
  **/
-@Getter
 @Slf4j
 public class ServiceDiscoveryNode {
 
     /** 服务名称 **/
+    @Getter
     private ServerType type;
 
     /** 连接状态 **/
+    @Getter
     private boolean connected;
 
     /** 客户端 **/
@@ -43,6 +45,7 @@ public class ServiceDiscoveryNode {
     private ServiceCache<ServiceInstancePayLoad> cache;
 
     /** 服务地址缓存 **/
+    @Getter
     private Map<String, Address> addressCache;
 
     /** 当前连接第二少的连接数量 **/
@@ -119,22 +122,22 @@ public class ServiceDiscoveryNode {
     }
 
     private void initInstanceAddressCache() {
-        Map<String, Address> tempAddress = new HashMap<>();
+        Map<String, Address> tempAddress = new HashMap<>(8);
         for (ServiceInstance<ServiceInstancePayLoad> instance : this.cache.getInstances()) {
             tempAddress.put(instance.getId(), new Address(instance.getAddress(), instance.getPort()));
         }
-        this.addressCache = tempAddress;
+        this.addressCache = Collections.unmodifiableMap(tempAddress);
     }
 
     /** 获取负载量最小的连接节点id **/
     public String checkAndGetMinServiceCountInstanceId() throws Exception {
         String countPath = toCountPath();
 
-        boolean change = false;
+        boolean change = true;
         if (this.minConnectInstanceId != null) {
             byte[] bytes = this.curatorFramework.getData().forPath(countPath + ZkConstant.ZOOKEEPER_SLASH + minConnectInstanceId);
             int curCount = ByteUtil.bytesToInt(bytes);
-            change = curCount > this.lastSecondConnectNum;
+            change = curCount < this.lastSecondConnectNum;
         }
 
         if (!change) {
@@ -146,9 +149,7 @@ public class ServiceDiscoveryNode {
         return minConnectInstanceId;
     }
 
-    /**
-     * 获取总共连接数
-     */
+    /** 获取总共连接数 **/
     public int getTotalCount() throws Exception {
         String countPath = toCountPath();
         int count = 0;
@@ -159,8 +160,14 @@ public class ServiceDiscoveryNode {
         return count;
     }
 
+    /** 获取某个服务的连接数 **/
+    public int getCount(String id) throws Exception {
+        String countPath = toCountPath()+ ZkConstant.ZOOKEEPER_SLASH + id;
+        return ByteUtil.bytesToInt(this.curatorFramework.getData().forPath(countPath));
+    }
+
     public Address selectAddress(long identity) {
-        return addressCache.get(type.getSelector().select(this, identity).getId());
+        return type.getSelector().select(this, identity);
     }
 
 
