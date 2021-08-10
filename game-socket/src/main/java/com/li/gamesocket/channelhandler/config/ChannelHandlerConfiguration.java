@@ -44,11 +44,11 @@ public class ChannelHandlerConfiguration {
 
 
     /** HttpObjectAggregator 消息最大长度 **/
-    @Value("${netty.server.websocket.http.aggregator.maxContentLength:65535}")
+    @Value("${netty.server.websocket.http.aggregator.maxContentLength:1048756}")
     private int maxContentLengthInAggregator;
 
     /** WebSocketFrameAggregator 消息最大长度 **/
-    @Value("${netty.server.websocket.frame.aggregator.maxContentLength:65535}")
+    @Value("${netty.server.websocket.frame.aggregator.maxContentLength:1048756}")
     private int maxContentLengthInFrame;
 
     /** websocket访问路径前缀 **/

@@ -45,6 +45,9 @@ public class SessionManager {
     /** 删除为Channel注册的Session **/
     public Session removeSession(Channel channel) {
         Session session = channel.attr(ChannelAttributeKeys.SESSION).get();
+        if (session == null) {
+            return null;
+        }
         if (session.identity()) {
             this.identities.remove(session.getIdentity());
         }else {

@@ -1,5 +1,6 @@
 package com.li.gamesocket.channelhandler.impl;
 
+import com.li.gamecore.utils.IpUtils;
 import com.li.gamesocket.channelhandler.FirewallService;
 import com.li.gamesocket.channelhandler.NioNettyFilter;
 import io.netty.buffer.ByteBuf;
@@ -15,7 +16,6 @@ import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,7 +72,7 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        String ip = getIp(ctx.channel().remoteAddress());
+        String ip = IpUtils.getIp(ctx.channel().remoteAddress());
         if (StringUtils.isEmpty(ip)) {
             if (log.isDebugEnabled()) {
                 log.debug("客户端无IP地址,拒绝连接");
@@ -142,7 +142,7 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        String ip = getIp(ctx.channel().remoteAddress());
+        String ip = IpUtils.getIp(ctx.channel().remoteAddress());
         if (checkBlackIpContains(ip)) {
             if (log.isDebugEnabled()) {
                 log.debug("客户端IP地址[{}]处于黑名单内,断开连接", ip);
@@ -187,15 +187,4 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
         return this.blackIps.contains(ip);
     }
 
-    public static String getIp(SocketAddress socketAddress) {
-        String str = socketAddress.toString();
-        int start = str.indexOf("/");
-        if (start != -1) {
-            int end = str.indexOf(":", start);
-            if (end != -1) {
-                return str.substring(start, end);
-            }
-        }
-        return null;
-    }
 }

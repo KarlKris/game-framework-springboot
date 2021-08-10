@@ -119,6 +119,10 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
             channelHandlerContext.pipeline().addBefore(idleStateHandlerName
                     , WebSocketDecoder.class.getSimpleName(), this.webSocketDecoder);
 
+            // 心跳
+            channelHandlerContext.pipeline().addBefore(VocationalWorkHandler.class.getSimpleName()
+                    , HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
+
             // 移除自身,完成协议选择
             channelHandlerContext.pipeline().remove(this.getClass().getSimpleName());
 
@@ -139,10 +143,8 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
                     , MessageDecoder.class.getSimpleName(), this.messageDecoder);
 
             // 心跳
-            if (this.heartBeatHandler != null) {
-                channelHandlerContext.pipeline().addBefore(idleStateHandlerName
-                        , HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
-            }
+            channelHandlerContext.pipeline().addBefore(VocationalWorkHandler.class.getSimpleName()
+                    , HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
 
             // 移除自身,完成协议选择
             channelHandlerContext.pipeline().remove(this.getClass().getSimpleName());

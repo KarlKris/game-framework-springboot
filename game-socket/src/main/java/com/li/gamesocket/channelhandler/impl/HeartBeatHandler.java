@@ -27,6 +27,9 @@ public class HeartBeatHandler extends SimpleChannelInboundHandler<IMessage> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
+        // 修改通信协议
+        ctx.channel().attr(ChannelAttributeKeys.LAST_PROTOCOL_HEADER_IDENTITY).set(msg.getProtocolHeaderIdentity());
+
         if (msg.isHeartBeatRequest()) {
             if (msg.isInnerMessage()) {
                 // 发生心跳响应包

@@ -31,9 +31,6 @@ public class VocationalWorkHandler extends SimpleChannelInboundHandler<IMessage>
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
-        // 修改通信协议
-        ctx.channel().attr(ChannelAttributeKeys.LAST_PROTOCOL_HEADER_IDENTITY).set(msg.getProtocolHeaderIdentity());
-
         Session session = ctx.channel().attr(ChannelAttributeKeys.SESSION).get();
         dispatcher.dispatch(msg, session);
     }
@@ -53,7 +50,7 @@ public class VocationalWorkHandler extends SimpleChannelInboundHandler<IMessage>
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Session session = sessionManager.removeSession(ctx.channel());
 
-        if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled() && session != null) {
             log.debug("与客户端[{}]断开连接,移除失效Session[{}]", session.getChannel().id(), session.getSessionId());
         }
 

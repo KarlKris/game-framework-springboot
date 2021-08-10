@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.net.ssl.SSLEngine;
+
 /**
  * @author li-yuanwen
  */
@@ -34,8 +36,10 @@ public class NioNettyClientMessageHandler extends ChannelInitializer<SocketChann
         ChannelPipeline pipeline = ch.pipeline();
 
         if (this.sslConfig.isSllEnable()) {
+            SSLEngine sslEngine = SslContextFactory.getSslEngine(this.sslConfig);
+            sslEngine.setUseClientMode(true);
             pipeline.addFirst(SslHandler.class.getSimpleName()
-                    , new SslHandler(SslContextFactory.getSslEngine(this.sslConfig)));
+                    , new SslHandler(sslEngine));
         }
 
         // 编解码器

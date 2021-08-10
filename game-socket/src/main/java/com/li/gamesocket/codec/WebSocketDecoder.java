@@ -4,7 +4,7 @@ import com.li.gamecore.ApplicationContextHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -17,30 +17,35 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @ChannelHandler.Sharable
-public class WebSocketDecoder extends SimpleChannelInboundHandler<WebSocketFrame> {
-
+public class WebSocketDecoder extends ChannelInboundHandlerAdapter {
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg) throws Exception {
-        // ping pong 忽略
-        if (msg instanceof PingWebSocketFrame || msg instanceof PongWebSocketFrame) {
-            if (log.isDebugEnabled()) {
-                log.debug("服务器收到了WebSocket Ping/Pong帧,忽略");
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof WebSocketFrame) {
+            // ping pong 忽略
+            if (msg instanceof PingWebSocketFrame || msg instanceof PongWebSocketFrame) {
+                if (log.isDebugEnabled()) {
+                    log.debug("服务器收到了WebSocket Ping/Pong帧,忽略");
+                }
+                return;
             }
-            return;
+
+            // 关闭
+            if (msg instanceof CloseWebSocketFrame) {
+                if (log.isDebugEnabled()) {
+                    log.debug("服务器收到了WebSocket CloseWebSocketFrame 准备关闭连接");
+                }
+                ctx.close();
+                return;
+            }
+
+            ByteBuf byteBuf = ((WebSocketFrame) msg).content();
+            ApplicationContextHolder.getBean(MessageDecoder.class).channelRead(ctx, byteBuf);
+        }else {
+            super.channelRead(ctx, msg);
         }
 
-        // 关闭
-        if (msg instanceof CloseWebSocketFrame) {
-            if (log.isDebugEnabled()) {
-                log.debug("服务器收到了WebSocket CloseWebSocketFrame 准备关闭连接");
-            }
-            ctx.close();
-            return;
-        }
 
-        ByteBuf byteBuf = msg.content();
-        ApplicationContextHolder.getBean(MessageDecoder.class).channelRead(ctx, byteBuf);
     }
 
     @Override
@@ -50,13 +55,7 @@ public class WebSocketDecoder extends SimpleChannelInboundHandler<WebSocketFrame
                 log.info("websocket 握手成功。");
             }
             WebSocketServerProtocolHandler.HandshakeComplete handshakeComplete = (WebSocketServerProtocolHandler.HandshakeComplete) evt;
-            String requestUri = handshakeComplete.requestUri();
             if (log.isDebugEnabled()) {
-                log.info("requestUri:[{}]", requestUri);
-            }
-            String subproTocol = handshakeComplete.selectedSubprotocol();
-            if (log.isDebugEnabled()) {
-                log.info("subproTocol:[{}]", subproTocol);
                 handshakeComplete.requestHeaders().forEach(entry -> log.info("header key:[{}] value:[{}]", entry.getKey(), entry.getValue()));
             }
 

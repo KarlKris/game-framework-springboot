@@ -22,13 +22,10 @@ public class SslContextFactory {
     public static SSLEngine getSslEngine(SslConfig sslConfig) {
         switch (sslConfig.getSslMode()) {
             case CA:
-                SSLEngine engine = buildSslContext(sslConfig).createSSLEngine();
-                engine.setUseClientMode(false);
-                return engine;
+                return buildSslContext(sslConfig).createSSLEngine();
             case CAS:
                 SSLEngine sslEngine = buildSslContext(sslConfig).createSSLEngine();
                 sslEngine.setNeedClientAuth(true);
-                sslEngine.setUseClientMode(false);
                 return sslEngine;
             default:
                 throw new Error("UnsupportedOperation SSL MODE " + sslConfig.getSslMode().name());

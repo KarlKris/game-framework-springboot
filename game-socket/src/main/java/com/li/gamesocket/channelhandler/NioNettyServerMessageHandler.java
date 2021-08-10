@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.net.ssl.SSLEngine;
 import java.util.List;
 
 /**
@@ -36,7 +37,9 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
 
         // SSL 认证
         if (this.sslConfig.isSllEnable()) {
-            pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(SslContextFactory.getSslEngine(this.sslConfig)));
+            SSLEngine sslEngine = SslContextFactory.getSslEngine(this.sslConfig);
+            sslEngine.setUseClientMode(false);
+            pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
         }
 
         // 过滤器
