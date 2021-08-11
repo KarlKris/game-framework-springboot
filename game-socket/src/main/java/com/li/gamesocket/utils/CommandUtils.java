@@ -14,6 +14,7 @@ import com.li.gamesocket.service.command.impl.SessionMethodParameter;
 import com.li.gamesocket.service.session.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.TypeUtils;
 
 import java.lang.annotation.Annotation;
@@ -71,20 +72,22 @@ public class CommandUtils {
 
         // 检查方法
         for (Method method : declaredMethods) {
-            SocketCommand socketCommand = AnnotationUtils.findAnnotation(method, SocketCommand.class);
+            Method annotationMethod = findAnnotationMethod(method, SocketCommand.class);
             // 忽略常规方法
-            if (socketCommand == null) {
+            if (annotationMethod == null) {
                 continue;
             }
+
+            SocketCommand socketCommand = annotationMethod.getAnnotation(SocketCommand.class);
 
             // 命令号
             byte command = socketCommand.command();
 
-            Type[] genericParameterTypes = method.getGenericParameterTypes();
+            Type[] genericParameterTypes = annotationMethod.getGenericParameterTypes();
             int length = genericParameterTypes.length;
             MethodParameter[] params = new MethodParameter[length];
 
-            Annotation[][] annotations = method.getParameterAnnotations();
+            Annotation[][] annotations = annotationMethod.getParameterAnnotations();
             for (int i = 0; i < length; i++) {
                 Type type = genericParameterTypes[i];
                 // session不得用于推送
@@ -246,6 +249,36 @@ public class CommandUtils {
         }
 
         return new PushResponse(identities, map);
+    }
+
+
+    /**
+     * 查找被指定注解指定的原始方法
+     * @param method 方法
+     * @param targetAnnotation 注解
+     * @return 原方法
+     */
+    public static Method findAnnotationMethod(Method method, Class<? extends Annotation> targetAnnotation) {
+        Annotation annotation = method.getAnnotation(targetAnnotation);
+        if (annotation != null) {
+            return method;
+        }
+        Class<?> declaringClass = method.getDeclaringClass();
+        Class<?>[] interfaces = declaringClass.getInterfaces();
+        if (interfaces.length == 0) {
+            return null;
+        }
+        for (Class<?> inter : interfaces) {
+            try {
+                Method interMethod = inter.getMethod(method.getName(), method.getParameterTypes());
+                annotation = interMethod.getAnnotation(targetAnnotation);
+                if (annotation != null) {
+                    return interMethod;
+                }
+            } catch (NoSuchMethodException ignore) {
+            }
+        }
+        return null;
     }
 
 }

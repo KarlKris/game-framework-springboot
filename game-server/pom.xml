@@ -9,7 +9,7 @@
     </parent>
 
     <groupId>com.li</groupId>
-    <artifactId>gameserver</artifactId>
+    <artifactId>game-server</artifactId>
     <version>1.0</version>
     <name>game-server</name>
     <description>游戏框架之游戏服模块</description>

@@ -1,8 +1,8 @@
 package com.li.gamesocket.client.channelhandler;
 
 import cn.hutool.core.util.ZipUtil;
-import com.li.gamecore.exception.BadRequestException;
-import com.li.gamecore.exception.SocketException;
+import com.li.gamecommon.exception.BadRequestException;
+import com.li.gamecommon.exception.SocketException;
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;

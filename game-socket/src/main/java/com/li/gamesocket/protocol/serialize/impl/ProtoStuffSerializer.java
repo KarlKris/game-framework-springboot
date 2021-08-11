@@ -1,6 +1,6 @@
 package com.li.gamesocket.protocol.serialize.impl;
 
-import com.li.gamecore.exception.SerializeFailException;
+import com.li.gamecommon.exception.SerializeFailException;
 import com.li.gamesocket.protocol.serialize.SerializeType;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.utils.ProtoStuffUtils;

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.li.gamecluster.zookeeper.config.CuratorFrameworkConfiguration;
 import com.li.gamecluster.zookeeper.config.ZkConstant;
 import com.li.gamecluster.zookeeper.model.ServiceInstancePayLoad;
-import com.li.gamecore.rpc.LocalServerService;
-import com.li.gamecore.rpc.model.ServerInfo;
+import com.li.gamecommon.rpc.LocalServerService;
+import com.li.gamecommon.rpc.model.ServerInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.x.discovery.ServiceDiscovery;
@@ -77,7 +77,7 @@ public class ZkRegisterService {
 
         // ServiceInstancePayLoad暂时没有数据可填写,后续有的话再加
         ServiceInstance<ServiceInstancePayLoad> instance = ServiceInstance.<ServiceInstancePayLoad>builder()
-                .name(config.getServerType().getServiceName())
+                .name(config.getServerType().name())
                 .id(serverInfo.getId())
                 .address(serverInfo.getId())
                 .port(serverInfo.getPort())
@@ -90,7 +90,7 @@ public class ZkRegisterService {
         // 路径/discovery节点/count节点/id
         this.countPath = discoveryPath
                 + ZkConstant.ZOOKEEPER_SLASH
-                + config.getServerType().getServiceName() + ZkConstant.SERVICE_COUNT_SUFFIX
+                + config.getServerType().name() + ZkConstant.SERVICE_COUNT_SUFFIX
                 + ZkConstant.ZOOKEEPER_SLASH
                 + serverInfo.getId();
 
@@ -108,7 +108,7 @@ public class ZkRegisterService {
 
     /** 服务发现节点的路径(不包含根路径) **/
     private String toServiceDiscoveryPath() {
-        return ZkConstant.ZOOKEEPER_SLASH + config.getServerType().getServiceName()
+        return ZkConstant.ZOOKEEPER_SLASH + config.getServerType().name()
                 + ZkConstant.SERVICE_DISCOVERY_SUFFIX;
     }
 

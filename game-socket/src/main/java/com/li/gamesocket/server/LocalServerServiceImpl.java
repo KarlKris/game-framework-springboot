@@ -1,8 +1,8 @@
 package com.li.gamesocket.server;
 
-import com.li.gamecore.rpc.LocalServerService;
-import com.li.gamecore.rpc.model.ServerInfo;
-import com.li.gamecore.utils.IpUtils;
+import com.li.gamecommon.rpc.LocalServerService;
+import com.li.gamecommon.rpc.model.ServerInfo;
+import com.li.gamecommon.utils.IpUtils;
 import com.li.gamesocket.service.command.CommandManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

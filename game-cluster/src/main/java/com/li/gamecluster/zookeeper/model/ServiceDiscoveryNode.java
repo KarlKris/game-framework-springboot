@@ -2,7 +2,7 @@ package com.li.gamecluster.zookeeper.model;
 
 import cn.hutool.core.util.ByteUtil;
 import com.li.gamecluster.zookeeper.config.ZkConstant;
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.rpc.model.Address;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -84,21 +84,21 @@ public class ServiceDiscoveryNode {
 
         this.discovery.start();
 
-        this.cache = this.discovery.serviceCacheBuilder().name(type.getServiceName()).build();
+        this.cache = this.discovery.serviceCacheBuilder().name(type.name()).build();
 
         this.cache.addListener(new ServiceCacheListener() {
             @Override
             public void cacheChanged() {
                 initInstanceAddressCache();
                 if (log.isWarnEnabled()) {
-                    log.warn("服务集群[{}]状态发生变更,集群数量[{}]", type.getServiceName(), addressCache.size());
+                    log.warn("服务集群[{}]状态发生变更,集群数量[{}]", type.name(), addressCache.size());
                 }
             }
 
             @Override
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
                 if (log.isWarnEnabled()) {
-                    log.warn("服务集群[{}]状态发生变更[{}]", type.getServiceName(), newState.name());
+                    log.warn("服务集群[{}]状态发生变更[{}]", type.name(), newState.name());
                 }
                 // todo 后续改进处理断开连接的情况
                 connected = newState.isConnected();
@@ -198,12 +198,12 @@ public class ServiceDiscoveryNode {
 
 
     public String toDiscoveryPath() {
-        return type.getServiceName() + ZkConstant.SERVICE_DISCOVERY_SUFFIX;
+        return type.name() + ZkConstant.SERVICE_DISCOVERY_SUFFIX;
     }
 
     private String toCountPath() {
         return toDiscoveryPath()
                 + ZkConstant.ZOOKEEPER_SLASH
-                + type.getServiceName() + ZkConstant.SERVICE_COUNT_SUFFIX;
+                + type.name() + ZkConstant.SERVICE_COUNT_SUFFIX;
     }
 }

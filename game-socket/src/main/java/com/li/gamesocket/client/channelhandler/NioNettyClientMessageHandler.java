@@ -1,6 +1,6 @@
 package com.li.gamesocket.client.channelhandler;
 
-import com.li.gamecore.ApplicationContextHolder;
+import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.codec.MessageDecoder;
 import com.li.gamesocket.codec.MessageEncoder;
 import io.netty.channel.ChannelInitializer;

@@ -37,7 +37,7 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
 
 
     /** 服务节点缓存 **/
-    private ConcurrentHashMap<String, ServiceDiscoveryNode> discoveryNodeCache;
+    private ConcurrentHashMap<String, ServiceDiscoveryNode> discoveryNodeCache = new ConcurrentHashMap<>(ServerType.values().length);
     /** 模块2服务 **/
     private Map<Short, ServerType> module2Type = new HashMap<>();
 
@@ -45,13 +45,13 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
     /** 获取某服务节点信息 **/
     public ServiceDiscoveryNode checkAndGetServiceDiscoveryNode(ServerType type) throws Exception {
         ServiceDiscoveryNode discoveryNode = null;
-        if ((discoveryNode = this.discoveryNodeCache.get(type.getServiceName())) == null || !discoveryNode.isConnected()) {
+        if ((discoveryNode = this.discoveryNodeCache.get(type.name())) == null || !discoveryNode.isConnected()) {
             discoveryNode = new ServiceDiscoveryNode(type);
 
             // 处理并发
-            ServiceDiscoveryNode old = this.discoveryNodeCache.putIfAbsent(type.getServiceName(), discoveryNode);
+            ServiceDiscoveryNode old = this.discoveryNodeCache.putIfAbsent(type.name(), discoveryNode);
             if (old == null || !old.isConnected()) {
-                this.discoveryNodeCache.put(type.getServiceName(), discoveryNode);
+                this.discoveryNodeCache.put(type.name(), discoveryNode);
                 discoveryNode.start(this.curatorFramework, bytes -> {
                     try {
                         synchronized (module2Type) {
@@ -60,7 +60,7 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
                                 ServerType old1 = module2Type.putIfAbsent(module, type);
                                 if (old1 != null) {
                                     log.warn("出现相同模块号[{}],不同服务[{},{}]"
-                                            , module, old1.getServiceName(), type.getServiceName());
+                                            , module, old1.name(), type.name());
                                 }
                             }
                         }
@@ -86,7 +86,14 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
         return checkAndGetServiceDiscoveryNode(type);
     }
 
-    public ServerType getServerTypeByModule(short module) {
+    public ServerType getServerTypeByModule(short module) throws Exception {
+        ServerType type = this.module2Type.get(module);
+        if (type != null) {
+            return type;
+        }
+        for (ServerType serverType : ServerType.values()) {
+            checkAndGetServiceDiscoveryNode(serverType);
+        }
         return this.module2Type.get(module);
     }
 

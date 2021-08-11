@@ -1,4 +1,4 @@
-package com.li.gamecore.rpc.model;
+package com.li.gamecommon.rpc.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.li.gamesocket.client.impl;
 
-import com.li.gamecore.ApplicationContextHolder;
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.ApplicationContextHolder;
+import com.li.gamecommon.rpc.model.Address;
 import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.client.SendProxyInvoker;
 import com.li.gamesocket.client.channelhandler.NioNettyClientMessageHandler;

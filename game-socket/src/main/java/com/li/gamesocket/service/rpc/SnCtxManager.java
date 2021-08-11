@@ -1,6 +1,6 @@
 package com.li.gamesocket.service.rpc;
 
-import com.li.gamecore.rpc.RemoteServerSeekService;
+import com.li.gamecommon.rpc.RemoteServerSeekService;
 import com.li.gamesocket.protocol.Response;
 import io.netty.channel.Channel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

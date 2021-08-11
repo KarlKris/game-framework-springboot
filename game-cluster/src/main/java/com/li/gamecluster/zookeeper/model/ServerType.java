@@ -10,26 +10,20 @@ import com.li.gamecluster.zookeeper.selector.ServiceSelector;
 public enum ServerType {
 
     /** 网关服 **/
-    GATEWAY("GATEWAY", ServiceSelector.BALANCE_SELECTOR),
+    GATEWAY(ServiceSelector.BALANCE_SELECTOR),
 
     /** 游戏服 **/
-    GAME_SERVER("GAME_SERVER", ServiceSelector.IDENTITY_SELECTOR),
+    GAME_SERVER(ServiceSelector.IDENTITY_SELECTOR),
 
     ;
 
-    /** 服务名 **/
-    private String serviceName;
     /** 选择器 **/
     private ServiceSelector selector;
 
-    ServerType(String serviceName, ServiceSelector selector){
-        this.serviceName = serviceName;
+    ServerType(ServiceSelector selector){
         this.selector = selector;
     }
 
-    public String getServiceName() {
-        return serviceName;
-    }
 
     public ServiceSelector getSelector() {
         return selector;

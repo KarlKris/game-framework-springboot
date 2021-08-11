@@ -1,6 +1,6 @@
 package com.li.gamesocket.channelhandler.impl;
 
-import com.li.gamecore.utils.IpUtils;
+import com.li.gamecommon.utils.IpUtils;
 import com.li.gamesocket.channelhandler.FirewallService;
 import com.li.gamesocket.channelhandler.NioNettyFilter;
 import io.netty.buffer.ByteBuf;

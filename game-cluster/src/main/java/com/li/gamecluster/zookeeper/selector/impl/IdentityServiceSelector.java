@@ -2,8 +2,8 @@ package com.li.gamecluster.zookeeper.selector.impl;
 
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import com.li.gamecluster.zookeeper.selector.ServiceSelector;
-import com.li.gamecore.common.SnowflakeIdGenerator;
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.common.SnowflakeIdGenerator;
+import com.li.gamecommon.rpc.model.Address;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

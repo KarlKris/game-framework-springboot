@@ -1,6 +1,6 @@
 package com.li.gamesocket.client;
 
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.rpc.model.Address;
 import com.li.gamesocket.client.impl.NioNettyClientImpl;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;

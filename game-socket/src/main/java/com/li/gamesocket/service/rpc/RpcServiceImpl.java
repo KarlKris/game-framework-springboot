@@ -1,9 +1,9 @@
 package com.li.gamesocket.service.rpc;
 
-import com.li.gamecore.exception.BadRequestException;
-import com.li.gamecore.exception.code.ResultCode;
-import com.li.gamecore.rpc.RemoteServerSeekService;
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.exception.BadRequestException;
+import com.li.gamecommon.exception.code.ResultCode;
+import com.li.gamecommon.rpc.RemoteServerSeekService;
+import com.li.gamecommon.rpc.model.Address;
 import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.client.NioNettyClientFactory;
 import com.li.gamesocket.protocol.IMessage;

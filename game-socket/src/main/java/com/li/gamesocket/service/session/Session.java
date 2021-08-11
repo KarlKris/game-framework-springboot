@@ -1,6 +1,6 @@
 package com.li.gamesocket.service.session;
 
-import com.li.gamecore.utils.IpUtils;
+import com.li.gamecommon.utils.IpUtils;
 import com.li.gamesocket.protocol.IMessage;
 import io.netty.channel.Channel;
 import lombok.Getter;

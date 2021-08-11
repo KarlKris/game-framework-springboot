@@ -1,4 +1,4 @@
-package com.li.gamecore.utils;
+package com.li.gamecommon.utils;
 
 import java.net.*;
 import java.util.Enumeration;

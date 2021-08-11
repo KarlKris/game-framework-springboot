@@ -1,4 +1,4 @@
-package com.li.gamecore;
+package com.li.gamecommon;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

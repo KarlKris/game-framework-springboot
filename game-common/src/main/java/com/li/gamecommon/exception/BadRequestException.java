@@ -1,4 +1,4 @@
-package com.li.gamecore.exception;
+package com.li.gamecommon.exception;
 
 import lombok.Getter;
 

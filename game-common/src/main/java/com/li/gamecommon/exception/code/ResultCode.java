@@ -1,4 +1,4 @@
-package com.li.gamecore.exception.code;
+package com.li.gamecommon.exception.code;
 
 /**
  * @author li-yuanwen

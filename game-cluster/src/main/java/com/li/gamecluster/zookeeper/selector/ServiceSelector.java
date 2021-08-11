@@ -3,7 +3,7 @@ package com.li.gamecluster.zookeeper.selector;
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import com.li.gamecluster.zookeeper.selector.impl.BalanceServiceSelector;
 import com.li.gamecluster.zookeeper.selector.impl.IdentityServiceSelector;
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.rpc.model.Address;
 
 /**
  * @author li-yuanwen

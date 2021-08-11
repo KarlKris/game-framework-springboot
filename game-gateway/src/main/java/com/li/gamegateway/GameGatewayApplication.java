@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.li.gamesocket","com.li.gamecore","com.li.gamecluster","com.li.gamegateway"})
+@ComponentScan(basePackages = {"com.li.gamesocket", "com.li.gamecommon","com.li.gamecluster","com.li.gamegateway"})
 public class GameGatewayApplication {
 
     public static void main(String[] args) {

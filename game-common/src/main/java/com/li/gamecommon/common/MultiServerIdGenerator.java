@@ -1,4 +1,4 @@
-package com.li.gamecore.common;
+package com.li.gamecommon.common;
 
 /**
  * @author li-yuanwen

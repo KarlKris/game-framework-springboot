@@ -1,6 +1,6 @@
-package com.li.gamecore.rpc;
+package com.li.gamecommon.rpc;
 
-import com.li.gamecore.rpc.model.ServerInfo;
+import com.li.gamecommon.rpc.model.ServerInfo;
 
 import java.net.SocketException;
 

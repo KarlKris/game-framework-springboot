@@ -1,6 +1,6 @@
 package com.li.gamesocket.channelhandler;
 
-import com.li.gamecore.ApplicationContextHolder;
+import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.channelhandler.impl.ProtocolSelectorHandler;
 import com.li.gamesocket.channelhandler.impl.VocationalWorkHandler;
 import io.netty.channel.ChannelInitializer;

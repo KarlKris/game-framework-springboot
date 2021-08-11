@@ -1,7 +1,7 @@
 package com.li.gameserver.modules.login.facade;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.gamecore.common.MultiServerIdGenerator;
+import com.li.gamecommon.common.MultiServerIdGenerator;
 import com.li.gameremote.modules.login.game.GameServerLoginFacade;
 import com.li.gameremote.modules.login.game.GameServerLoginResultCode;
 import com.li.gameserver.common.GameServerSystemConfig;

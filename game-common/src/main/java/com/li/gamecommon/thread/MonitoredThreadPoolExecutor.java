@@ -1,4 +1,4 @@
-package com.li.gamecore.thread;
+package com.li.gamecommon.thread;
 
 import lombok.extern.slf4j.Slf4j;
 

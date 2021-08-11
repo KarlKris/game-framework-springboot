@@ -3,8 +3,8 @@ package com.li.gamecluster.rpc;
 import com.li.gamecluster.zookeeper.discovery.ZkDiscoveryService;
 import com.li.gamecluster.zookeeper.model.ServerType;
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
-import com.li.gamecore.rpc.RemoteServerSeekService;
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.rpc.RemoteServerSeekService;
+import com.li.gamecommon.rpc.model.Address;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class RemoteServerSeekServiceImpl implements RemoteServerSeekService {
             if (type == null) {
                 return null;
             }
-            return type.getServiceName();
+            return type.name();
         } catch (Exception e) {
             log.error("远程服务查询模块号[{}]对应服务出现未知异常", module, e);
             return null;

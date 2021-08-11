@@ -2,7 +2,7 @@ package com.li.gamecluster.zookeeper.selector.impl;
 
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import com.li.gamecluster.zookeeper.selector.ServiceSelector;
-import com.li.gamecore.rpc.model.Address;
+import com.li.gamecommon.rpc.model.Address;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ public class BalanceServiceSelector implements ServiceSelector {
         try {
             return cache.get(node.checkAndGetMinServiceCountInstanceId());
         } catch (Exception e) {
-            log.error("服务类型[{}]负载均衡选择出现未知异常", node.getType().getServiceName(), e);
+            log.error("服务类型[{}]负载均衡选择出现未知异常", node.getType().name(), e);
             return null;
         }
     }

@@ -1,6 +1,6 @@
 package com.li.gamesocket.codec;
 
-import com.li.gamecore.ApplicationContextHolder;
+import com.li.gamecommon.ApplicationContextHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

@@ -1,7 +1,7 @@
 package com.li.gamesocket.service.push;
 
 import cn.hutool.core.util.ZipUtil;
-import com.li.gamecore.ApplicationContextHolder;
+import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.protocol.InnerMessage;
 import com.li.gamesocket.protocol.MessageFactory;
 import com.li.gamesocket.protocol.PushResponse;

@@ -1,7 +1,7 @@
-package com.li.gamecore.exception;
+package com.li.gamecommon.exception;
 
 
-import com.li.gamecore.exception.code.ResultCode;
+import com.li.gamecommon.exception.code.ResultCode;
 
 /**
  * @author li-yuanwen
