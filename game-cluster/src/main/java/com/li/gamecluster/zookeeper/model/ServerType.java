@@ -13,7 +13,7 @@ public enum ServerType {
     GATEWAY("GATEWAY", ServiceSelector.BALANCE_SELECTOR),
 
     /** 游戏服 **/
-    GAME_SERVER("GATEWAY", ServiceSelector.IDENTITY_SELECTOR),
+    GAME_SERVER("GAME_SERVER", ServiceSelector.IDENTITY_SELECTOR),
 
     ;
 

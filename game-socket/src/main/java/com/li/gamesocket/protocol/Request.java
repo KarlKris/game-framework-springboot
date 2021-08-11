@@ -2,6 +2,7 @@ package com.li.gamesocket.protocol;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import java.util.Map;
  **/
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Request {
 
     /** 请求业务所需数据 **/

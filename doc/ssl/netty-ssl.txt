@@ -1,3 +1,5 @@
+JDK版本
+
 第一步：生成Netty服务端私钥和证书仓库命令
 keytool -genkey -alias ssl-game-framework -keysize 2048 -validity 365 -keyalg RSA -dname "CN=localhost" -keypass ssl-game-framework -storepass ssl-game-framework -keystore gameFrameworkServer.jks
 

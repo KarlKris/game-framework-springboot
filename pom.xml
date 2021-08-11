@@ -18,9 +18,11 @@
 
     <modules>
         <module>game-socket</module>
-        <module>game-core</module>
+        <module>game-common</module>
         <module>game-cluster</module>
         <module>game-gateway</module>
+        <module>game-remote</module>
+        <module>game-server</module>
     </modules>
 
     <properties>
@@ -50,6 +52,12 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <!-- Hutool加密解密工具包 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
             <version>${hutool.version}</version>
         </dependency>
 

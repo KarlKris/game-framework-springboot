@@ -166,10 +166,15 @@ public class ServiceDiscoveryNode {
         return ByteUtil.bytesToInt(this.curatorFramework.getData().forPath(countPath));
     }
 
+    /** 根据身份标识选择 **/
     public Address selectAddress(long identity) {
         return type.getSelector().select(this, identity);
     }
 
+    /** 根据服标识选择 **/
+    public Address selectAddressById(String id) {
+        return addressCache.get(id);
+    }
 
     private void doSearchMinCountServiceInstanceId(String countPath) throws Exception {
         int min = Integer.MAX_VALUE;

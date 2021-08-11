@@ -3,14 +3,10 @@ package com.li.gamesocket.service.handler.impl;
 import cn.hutool.core.convert.ConvertException;
 import cn.hutool.core.thread.NamedThreadFactory;
 import cn.hutool.core.util.ZipUtil;
-import com.li.gamecore.rpc.RemoteServerSeekService;
-import com.li.gamecore.rpc.model.Address;
-import com.li.gamecore.thread.MonitoredThreadPoolExecutor;
-import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
-import com.li.gamesocket.client.NioNettyClient;
-import com.li.gamesocket.client.NioNettyClientFactory;
 import com.li.gamecore.exception.BadRequestException;
 import com.li.gamecore.exception.SerializeFailException;
+import com.li.gamecore.thread.MonitoredThreadPoolExecutor;
+import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
@@ -19,7 +15,7 @@ import com.li.gamesocket.service.command.CommandManager;
 import com.li.gamesocket.service.command.MethodCtx;
 import com.li.gamesocket.service.command.MethodInvokeCtx;
 import com.li.gamesocket.service.handler.Dispatcher;
-import com.li.gamesocket.service.rpc.SnCtxManager;
+import com.li.gamesocket.service.rpc.RpcService;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
 import com.li.gamesocket.utils.CommandUtils;
@@ -54,13 +50,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
     @Autowired
     private SerializerManager serializerManager;
 
-
     @Autowired
-    private NioNettyClientFactory clientFactory;
-    @Autowired(required = false)
-    private RemoteServerSeekService remoteServerSeekService;
-    @Autowired(required = false)
-    private SnCtxManager snCtxManager;
+    private RpcService rpcService;
 
     /** 业务线程池 **/
     private ExecutorService[] executorServices;
@@ -123,19 +114,9 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(message.getCommand());
         if (methodInvokeCtx == null) {
             // RPC
-            if (this.remoteServerSeekService == null) {
+            if (!this.rpcService.forward(session, message)) {
                 response(session, message, serializer.serialize(Response.INVALID_OP), false);
-                return;
             }
-
-            Address address = this.remoteServerSeekService.seekApplicationAddressByModule(message.getCommand().getModule(), session.getIdentity());
-
-
-            if (address == null || !forwardMessage(message, session, address)) {
-                response(session, message, serializer.serialize(Response.INVALID_OP), false);
-                return;
-            }
-
             return;
         }
 
@@ -164,10 +145,6 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                     response(session, message, serializer.serialize(Response.NO_IDENTITY), false);
                     return;
                 }
-                // todo 内网绑定?存疑
-                if (identity > 0) {
-                    sessionManager.bindIdentity(session, identity, true);
-                }
 
                 result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget()
                         , CommandUtils.decodeRequest(session, innerMessage.getIdentity(), methodCtx.getParams(), request));
@@ -183,10 +160,14 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                         , CommandUtils.decodeRequest(session, session.getIdentity(), methodCtx.getParams(), request));
             }
 
-            Response response;
+            Response<Object> response;
             if (!noResponse) {
                 // 响应
-                response = Response.SUCCESS(result);
+                if (result instanceof Response) {
+                    response = (Response<Object>) result;
+                }else {
+                    response = Response.SUCCESS(result);
+                }
             } else {
                 response = Response.DEFAULT_SUCCESS;
             }
@@ -211,24 +192,6 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             responseBody = serializer.serialize(Response.ERROR(e.getErrorCode()));
         } finally {
             response(session, message, responseBody, zip);
-        }
-    }
-
-    /** 转发消息 **/
-    private boolean forwardMessage(IMessage message, Session session, Address address) {
-        NioNettyClient client = clientFactory.newInstance(address);
-        long nextSn = snCtxManager.nextSn();
-        // 构建内部消息进行转发
-        InnerMessage innerMessage = MessageFactory.toForwardMessage(message, nextSn, session);
-
-        try {
-            client.send(innerMessage
-                    , (msg, completableFuture)
-                            -> snCtxManager.forward(msg.getSn(), nextSn, session.getChannel()));
-            return true;
-        } catch (InterruptedException e) {
-            log.error("消息转发至[{}]发生未知异常", address, e);
-            return false;
         }
     }
 

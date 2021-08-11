@@ -69,6 +69,8 @@ public class SendProxyInvoker implements InvocationHandler {
             zip = true;
         }
 
+        boolean responseType = method.getReturnType() == Response.class;
+
         InnerMessage message = MessageFactory.toRequestInnerMessage(this.snCtxManager.nextSn()
                 , methodCtx.getCommand(), serializer.getSerializerType(), zip, body);
 
@@ -78,7 +80,7 @@ public class SendProxyInvoker implements InvocationHandler {
 
             Response response = future.get(timeoutSecond, TimeUnit.SECONDS);
             if (response.success()) {
-                return response.getContent();
+                return responseType ? response : response.getContent();
             } else if (!response.isVocationalException()) {
                 throw new SocketException(response.getCode());
             } else {

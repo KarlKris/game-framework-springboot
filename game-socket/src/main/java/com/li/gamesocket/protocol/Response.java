@@ -8,26 +8,26 @@ import lombok.Getter;
  * 消息响应中消息体封装
  */
 @Getter
-public class Response {
+public class Response<T> {
 
     /** 默认成功响应 **/
-    public static final Response DEFAULT_SUCCESS = SUCCESS(null);
+    public static final Response<Object> DEFAULT_SUCCESS = SUCCESS(null);
     /** 序列化/反序列化失败 **/
-    public static final Response SERIALIZE_FAIL = ERROR(ResultCode.SERIALIZE_FAIL);
+    public static final Response<Object> SERIALIZE_FAIL = ERROR(ResultCode.SERIALIZE_FAIL);
     /** 身份未认定 **/
-    public static final Response NO_IDENTITY = ERROR(ResultCode.NO_IDENTITY);
+    public static final Response<Object> NO_IDENTITY = ERROR(ResultCode.NO_IDENTITY);
     /** 类型转换 **/
-    public static final Response CONVERT_FAIL = ERROR(ResultCode.CONVERT_FAIL);
+    public static final Response<Object> CONVERT_FAIL = ERROR(ResultCode.CONVERT_FAIL);
     /** 参数解析异常 **/
-    public static final Response PARAM_ANALYSIS_ERROR = ERROR(ResultCode.PARAM_ANALYSIS_ERROR);
+    public static final Response<Object> PARAM_ANALYSIS_ERROR = ERROR(ResultCode.PARAM_ANALYSIS_ERROR);
     /** 无效操作 **/
-    public static final Response INVALID_OP = ERROR(ResultCode.INVALID_OP);
+    public static final Response<Object> INVALID_OP = ERROR(ResultCode.INVALID_OP);
 
 
     /** 状态码 **/
     private int code;
     /** 响应内容 **/
-    private Object content;
+    private T content;
 
     /** 请求是否成功 **/
     public boolean success() {
@@ -39,15 +39,15 @@ public class Response {
         return code > 0;
     }
 
-    public static Response SUCCESS(Object content) {
-        Response response = new Response();
+    public static <T> Response<T> SUCCESS(T content) {
+        Response<T> response = new Response();
         response.code = ResultCode.SUCCESS;
         response.content = content;
         return response;
     }
 
-    public static Response ERROR(int error) {
-        Response response = new Response();
+    public static <T> Response<T> ERROR(int error) {
+        Response<T> response = new Response();
         response.code = error;
         return response;
     }

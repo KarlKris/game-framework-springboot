@@ -14,9 +14,11 @@ import com.li.gamesocket.service.command.impl.SessionMethodParameter;
 import com.li.gamesocket.service.session.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.TypeUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -25,6 +27,20 @@ import java.util.*;
  */
 @Slf4j
 public class CommandUtils {
+
+    /**
+     * 获取对象的module号
+     * @param targetClass 对象
+     * @return module号
+     */
+    public static short getModule(Class<?> targetClass) {
+        SocketModule socketModule = AnnotationUtils.findAnnotation(targetClass, SocketModule.class);
+        if (socketModule == null) {
+            throw new IllegalArgumentException("类[" + targetClass.getName() +"]没有@SocketModule注解");
+        }
+
+        return socketModule.module();
+    }
 
     /**
      * 解析出对象中的命令上下文
@@ -64,53 +80,54 @@ public class CommandUtils {
             // 命令号
             byte command = socketCommand.command();
 
-            Parameter[] parameters = method.getParameters();
-            int length = parameters.length;
+            Type[] genericParameterTypes = method.getGenericParameterTypes();
+            int length = genericParameterTypes.length;
             MethodParameter[] params = new MethodParameter[length];
-            for (int i = 0; i < length; i++) {
-                Parameter parameter = parameters[i];
 
+            Annotation[][] annotations = method.getParameterAnnotations();
+            for (int i = 0; i < length; i++) {
+                Type type = genericParameterTypes[i];
                 // session不得用于推送
-                if (!push && parameter.getParameterizedType()
-                        == SessionMethodParameter.SESSION_PARAMETER.getParameterType()) {
+                if (!push && TypeUtils.isAssignable(SessionMethodParameter.SESSION_PARAMETER.getParameterType(), type)) {
                     params[i] = SessionMethodParameter.SESSION_PARAMETER;
                     continue;
                 }
 
-                // identity不得用于推送
-                if (!push && parameter.getAnnotation(Identity.class) != null) {
-                    if (parameter.getType() != IdentityMethodParameter.IDENTITY_PARAMETER.getParameterType()) {
-                        throw new IllegalArgumentException("模块号[" + module + "]命令号[" + command + "]的@Identity注解使用类型必须为long");
+                boolean hasAnnotation = false;
+                for (Annotation annotation : annotations[i]) {
+                    // identity不得用于推送
+                    if (!push && annotation instanceof Identity) {
+                        if (!TypeUtils.isAssignable(IdentityMethodParameter.IDENTITY_PARAMETER.getParameterType(), type)) {
+                            throw new IllegalArgumentException("模块号[" + module + "]命令号[" + command + "]的@Identity注解使用类型必须为long");
+                        }
+                        params[i] = IdentityMethodParameter.IDENTITY_PARAMETER;
+                        hasAnnotation = true;
+                        break;
                     }
-                    params[i] = IdentityMethodParameter.IDENTITY_PARAMETER;
-                    continue;
-                }
-
-                // 参数内容
-                InBody inBody = parameter.getAnnotation(InBody.class);
-                if (inBody != null) {
-                    params[i] = new InBodyMethodParameter(inBody.name(), parameter.getType(), inBody.required());
-                    continue;
-                }
-
-                // 推送目标
-                PushIds pushIds = parameter.getAnnotation(PushIds.class);
-                if (pushIds != null) {
-                    if (push && parameter.getParameterizedType()
-                            == PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER.getParameterType()) {
-                        params[i] = PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER;
-                        continue;
-                    } else {
+                    // 参数内容
+                    if (annotation instanceof InBody) {
+                        InBody inBody = (InBody) annotation;
+                        params[i] = new InBodyMethodParameter(inBody.name(), type, inBody.required());
+                        hasAnnotation = true;
+                        break;
+                    }
+                    // 推送目标
+                    if (annotation instanceof PushIds) {
+                        if (push && TypeUtils.isAssignable(PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER.getParameterType(), type)) {
+                            params[i] = PushIdsMethodParameter.PUSH_IDS_METHOD_PARAMETER;
+                            hasAnnotation = true;
+                            break;
+                        }
                         throw new IllegalArgumentException("@PushIds注解使用不符合规范");
                     }
                 }
 
-                if (log.isWarnEnabled()) {
+                if (!hasAnnotation) {
                     log.warn("模块号[{}]命令号[{}]方法参数出现既没有任何注解,将使用方法参数名为name属性,required为true"
                             , module, command);
+                    params[i] = new InBodyMethodParameter(type.getTypeName(), type, true);
                 }
 
-                params[i] = new InBodyMethodParameter(parameter.getName(), parameter.getType(), true);
             }
 
             ctx.add(new MethodCtx(new Command(module, command), method, params));

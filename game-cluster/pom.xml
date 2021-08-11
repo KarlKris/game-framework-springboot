@@ -22,7 +22,7 @@
 
         <dependency>
             <groupId>com.li</groupId>
-            <artifactId>game-core</artifactId>
+            <artifactId>game-common</artifactId>
             <version>1.0</version>
         </dependency>
 

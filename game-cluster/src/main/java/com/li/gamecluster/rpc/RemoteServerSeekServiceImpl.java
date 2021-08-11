@@ -52,4 +52,19 @@ public class RemoteServerSeekServiceImpl implements RemoteServerSeekService {
         }
     }
 
+    @Override
+    public Address seekApplicationAddressById(short module, String id) {
+        try {
+            ServerType type = service.getServerTypeByModule(module);
+            if (type == null) {
+                return null;
+            }
+
+            ServiceDiscoveryNode node = service.checkAndGetServiceDiscoveryNode(type);
+            return node.selectAddressById(id);
+        } catch (Exception e) {
+            log.error("远程服务查询模块号[{}]服务标识[{}]对应服务地址出现未知异常", module, id, e);
+            return null;
+        }
+    }
 }

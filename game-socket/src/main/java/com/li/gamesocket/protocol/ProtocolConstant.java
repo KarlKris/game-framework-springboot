@@ -36,10 +36,10 @@ public interface ProtocolConstant {
      */
 
     /** 携带命令 0 0 00 1 000 **/
-    byte COMMAND_MARK = 0x40;
+    byte COMMAND_MARK = 0x8;
 
     /** 消息压缩 0 1 00 0 000 **/
-    byte BODY_ZIP_MARK = 0x20;
+    byte BODY_ZIP_MARK = 0x40;
 
     /** 具体消息类型掩码 0 0 00 1 111  **/
     byte MESSAGE_TYPE_MARK = 0x15;
@@ -58,7 +58,7 @@ public interface ProtocolConstant {
     byte HEART_BEAT_REQ = 0x0;
 
     /** 心跳检测响应(不携带命令) 0 0 00 0 1 00 **/
-    byte HEART_BEAT_RES = 0x1;
+    byte HEART_BEAT_RES = 0x4;
 
     // 携带命令消息类型
 
