@@ -1,6 +1,7 @@
 package com.li.gamesocket.client.channelhandler;
 
 import com.li.gamecommon.ApplicationContextHolder;
+import com.li.gamesocket.channelhandler.impl.HeartBeatHandler;
 import com.li.gamesocket.codec.MessageDecoder;
 import com.li.gamesocket.codec.MessageEncoder;
 import io.netty.channel.ChannelInitializer;
@@ -30,6 +31,8 @@ public class NioNettyClientMessageHandler extends ChannelInitializer<SocketChann
     private MessageEncoder messageEncoder;
     @Autowired
     private ClientVocationalWorkHandler clientVocationalWorkHandler;
+    @Autowired
+    private HeartBeatHandler heartBeatHandler;
 
 
     @Override
@@ -50,6 +53,7 @@ public class NioNettyClientMessageHandler extends ChannelInitializer<SocketChann
         // 心跳
         pipeline.addLast(IdleStateHandler.class.getSimpleName()
                 , ApplicationContextHolder.getBean("clientIdleStateHandler", IdleStateHandler.class));
+        pipeline.addLast(HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
 
         // 业务
         pipeline.addLast(ClientVocationalWorkHandler.class.getSimpleName(), this.clientVocationalWorkHandler);

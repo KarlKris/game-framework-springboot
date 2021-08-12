@@ -63,11 +63,12 @@ public class NioNettyClientImpl implements NioNettyClient {
         // 这里不是使用的writeAndFlush的原因是防止消息写完时,监听器还未添加
         ChannelFuture channelFuture = channel.write(message);
         channelFuture.addListener(future -> {
-            if (future.cause() != null) {
+            Throwable cause = future.cause();
+            if (cause == null) {
                 sendSuccessConsumer.accept(message, completableFuture);
             }else {
-                log.error("向服务器[{}:{}]发送信息发生异常", address.getIp(), address.getPort(), future.cause());
-                completableFuture.completeExceptionally(future.cause());
+                log.error("向服务器[{}:{}]发送信息发生异常", address.getIp(), address.getPort(), cause);
+                completableFuture.completeExceptionally(cause);
             }
         });
         channel.flush();

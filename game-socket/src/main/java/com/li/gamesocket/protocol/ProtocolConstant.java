@@ -42,7 +42,7 @@ public interface ProtocolConstant {
     byte BODY_ZIP_MARK = 0x40;
 
     /** 具体消息类型掩码 0 0 00 1 111  **/
-    byte MESSAGE_TYPE_MARK = 0x15;
+    byte MESSAGE_TYPE_MARK = 0xf;
 
     /** 序列化方式掩码 0 0 11 0 000**/
     byte SERIALIZE_TYPE_MARK = 0x30;
