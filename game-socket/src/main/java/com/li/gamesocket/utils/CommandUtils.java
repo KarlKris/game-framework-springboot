@@ -207,10 +207,7 @@ public class CommandUtils {
             if (parameter instanceof InBodyMethodParameter) {
                 InBodyMethodParameter param = (InBodyMethodParameter) parameter;
                 map.put(param.getParameterName(), args[i]);
-                continue;
             }
-
-            throw new IllegalArgumentException("RPC请求参数不支持 除@InBody以外的其他 注解");
         }
 
         return new Request(map);

@@ -13,6 +13,9 @@ import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -24,7 +27,7 @@ import javax.annotation.PostConstruct;
  **/
 @Service
 @Slf4j
-public class ZkRegisterService {
+public class ZkRegisterService implements ApplicationRunner {
 
     /** 服务接口 **/
     @Autowired(required = false)
@@ -44,16 +47,19 @@ public class ZkRegisterService {
     /** 连接数节点路径 **/
     private String countPath;
 
-    @PostConstruct
-    private void init() throws Exception {
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+
+        if (log.isInfoEnabled()) {
+            log.info("Spring容器启动成功,开始注册服务");
+        }
+
         if (this.localServerService == null) {
             return;
         }
 
         registerService(localServerService.getLocalServerInfo());
-
     }
-
 
     /**
      * 服务注册
@@ -79,7 +85,7 @@ public class ZkRegisterService {
         ServiceInstance<ServiceInstancePayLoad> instance = ServiceInstance.<ServiceInstancePayLoad>builder()
                 .name(config.getServerType().name())
                 .id(serverInfo.getId())
-                .address(serverInfo.getId())
+                .address(serverInfo.getIp())
                 .port(serverInfo.getPort())
                 .build();
 
@@ -102,6 +108,10 @@ public class ZkRegisterService {
 
         // 更新/discovery数据 模块号数据
         this.curatorFramework.setData().forPath(discoveryPath, objectMapper.writeValueAsBytes(serverInfo.getModules()));
+
+        if (log.isInfoEnabled()) {
+            log.info("注册服务[{}]节点成功,模块数据{}", discoveryPath, serverInfo.getModules());
+        }
 
     }
 

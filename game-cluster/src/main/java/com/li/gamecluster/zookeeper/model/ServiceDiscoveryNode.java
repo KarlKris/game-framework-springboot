@@ -110,7 +110,7 @@ public class ServiceDiscoveryNode {
         initInstanceAddressCache();
 
         // 获取模块数据
-        consumer.accept(this.curatorFramework.getData().forPath(discoveryPath));
+        consumer.accept(this.curatorFramework.getData().forPath(ZkConstant.ZOOKEEPER_SLASH + discoveryPath));
 
         this.connected = true;
 

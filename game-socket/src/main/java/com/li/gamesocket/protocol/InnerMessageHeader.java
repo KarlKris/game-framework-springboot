@@ -54,6 +54,7 @@ public class InnerMessageHeader {
 
         // 判断是否有ip地址
         if (ArrayUtil.isEmpty(ip)) {
+            out.writeByte(0);
             return;
         }
 
@@ -77,8 +78,9 @@ public class InnerMessageHeader {
         header.sn = in.readLong();
         header.sourceId = in.readLong();
 
-        if (in.readableBytes() > 0) {
-            header.ip = new byte[in.readByte()];
+        byte ipBytes = in.readByte();
+        if (ipBytes > 0) {
+            header.ip = new byte[ipBytes];
             in.readBytes(header.ip);
         }
 

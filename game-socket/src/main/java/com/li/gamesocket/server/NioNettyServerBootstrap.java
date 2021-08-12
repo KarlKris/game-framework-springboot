@@ -62,7 +62,9 @@ public class NioNettyServerBootstrap implements ApplicationRunner
         // 绑定服务器Channel
         this.channel = channelFuture.channel();
 
-        log.warn("NIO Socket 服务器[{}]正常启动成功", serverConfig.getPort());
+        if (log.isInfoEnabled()) {
+            log.info("NIO Socket 服务器[{}]正常启动成功", serverConfig.getPort());
+        }
 
     }
 

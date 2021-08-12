@@ -1,5 +1,7 @@
 package com.li.gameremote.modules.login.game;
 
+import com.li.gamesocket.anno.InBody;
+import com.li.gamesocket.anno.SocketCommand;
 import com.li.gamesocket.anno.SocketModule;
 import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.service.session.Session;
@@ -19,7 +21,10 @@ public interface GameServerLoginFacade {
      * @param channel 渠道标识
      * @return /
      */
-    Response<Long> create(Session session, String account, int channel);
+    @SocketCommand(command = GameServerLoginModule.CREATE)
+    Response<Long> create(Session session
+            , @InBody(name = "account") String account
+            , @InBody(name = "channel") int channel);
 
 
     /**
@@ -29,5 +34,8 @@ public interface GameServerLoginFacade {
      * @param channel 渠道标识
      * @return
      */
-    Response<Long> login(Session session, String account, int channel);
+    @SocketCommand(command = GameServerLoginModule.LOGIN)
+    Response<Long> login(Session session
+            , @InBody(name = "account") String account
+            , @InBody(name = "channel") int channel);
 }
