@@ -23,6 +23,7 @@
         <module>game-gateway</module>
         <module>game-remote</module>
         <module>game-server</module>
+        <module>game-core</module>
     </modules>
 
     <properties>

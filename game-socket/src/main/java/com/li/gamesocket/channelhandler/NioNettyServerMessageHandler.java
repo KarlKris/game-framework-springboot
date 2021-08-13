@@ -9,6 +9,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,10 @@ import java.util.List;
  * netty 服务端childhandler
  */
 @Component
+@Slf4j
 public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChannel> {
+    /** ssl协议ClientHello协议头 **/
+    public static final short SSL_CLIENT_HELLO = 0x1603;
 
     @Autowired(required = false)
     @Qualifier("serverSslContext")
@@ -38,8 +42,7 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
 
         // SSL 认证
         if (this.sslContext != null) {
-            SSLEngine sslEngine = this.sslContext.newEngine(socketChannel.alloc());
-            sslEngine.setUseClientMode(false);
+            SSLEngine sslEngine = sslContext.newEngine(socketChannel.alloc());
             pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
         }
 

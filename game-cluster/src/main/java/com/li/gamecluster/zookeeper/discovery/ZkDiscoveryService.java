@@ -37,9 +37,9 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
 
 
     /** 服务节点缓存 **/
-    private ConcurrentHashMap<String, ServiceDiscoveryNode> discoveryNodeCache = new ConcurrentHashMap<>(ServerType.values().length);
+    private final ConcurrentHashMap<String, ServiceDiscoveryNode> discoveryNodeCache = new ConcurrentHashMap<>(ServerType.values().length);
     /** 模块2服务 **/
-    private Map<Short, ServerType> module2Type = new HashMap<>();
+    private final Map<Short, ServerType> module2Type = new HashMap<>();
 
 
     /** 获取某服务节点信息 **/

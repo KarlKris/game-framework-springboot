@@ -75,7 +75,7 @@ public class ZkRegisterService implements ApplicationRunner {
 
         this.serviceDiscovery = ServiceDiscoveryBuilder.builder(ServiceInstancePayLoad.class)
                 .basePath(discoveryPath)
-                .serializer(ZkConstant.SERIALIZER)
+//                .serializer(ZkConstant.SERIALIZER)
                 .client(this.curatorFramework)
                 .build();
 

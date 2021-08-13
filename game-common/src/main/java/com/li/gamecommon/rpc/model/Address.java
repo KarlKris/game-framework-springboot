@@ -13,9 +13,9 @@ import lombok.Getter;
 public class Address {
 
     /** Ip地址 **/
-    private String ip;
+    private final String ip;
     /** 端口 **/
-    private int port;
+    private final int port;
 
     @Override
     public boolean equals(Object o) {
