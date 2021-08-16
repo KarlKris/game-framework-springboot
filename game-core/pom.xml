@@ -14,6 +14,11 @@
     <name>game-core</name>
     <description>游戏框架核心包</description>
 
+    <properties>
+        <aspectj.version>1.9.7</aspectj.version>
+        <caffeine.version>3.0.3</caffeine.version>
+    </properties>
+
     <dependencies>
         <!-- 引入Hibernate数据库 -->
         <dependency>
@@ -23,6 +28,28 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!-- springboot + aspectj -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+
+        <!-- caffeine缓存 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
     </dependencies>
