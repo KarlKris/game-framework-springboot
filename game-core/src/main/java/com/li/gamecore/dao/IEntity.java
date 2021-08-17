@@ -1,12 +1,10 @@
-package com.li.gamecore.persist;
-
-import java.io.Serializable;
+package com.li.gamecore.dao;
 
 /**
  * @author li-yuanwen
  * 数据库表对象基类
  */
-public interface IEntity<PK> extends Serializable {
+public interface IEntity<PK> {
 
     /**
      * 获取主键

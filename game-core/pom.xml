@@ -20,6 +20,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.li</groupId>
+            <artifactId>game-common</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <!-- 引入Hibernate数据库 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -46,10 +52,6 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>${caffeine.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
     </dependencies>

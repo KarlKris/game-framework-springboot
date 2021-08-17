@@ -3,23 +3,23 @@ package com.li.gamecommon.thread;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author li-yuanwen
- * @date 2021/8/3 22:54
- * 包含监控数据的线程池
- **/
+ */
 @Slf4j
-public class MonitoredThreadPoolExecutor extends ThreadPoolExecutor {
+public class MonitoredScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
+
 
     private ConcurrentHashMap<String, Long> startTimes;
     private int maxNum;
     private int maxTime;
-    public MonitoredThreadPoolExecutor(int corePoolSize, int maximumPoolSize
-            , long keepAliveTime, TimeUnit unit
-            , BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
+
+    public MonitoredScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory) {
+        super(corePoolSize, threadFactory);
         this.startTimes = new ConcurrentHashMap<>(0);
     }
 
