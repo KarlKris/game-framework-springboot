@@ -1,4 +1,4 @@
-package com.li.gamecore.dao.service;
+package com.li.gamecore.dao.core;
 
 import com.li.gamecore.dao.IEntity;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author li-yuanwen
  * 数据库访问接口
  */
-public interface Accessor {
+public interface DataBaseAccessor {
 
     /**
      * 读取数据库表数据

@@ -1,4 +1,4 @@
-package com.li.gamecore.dao.service;
+package com.li.gamecore.dao.core;
 
 import com.li.gamecore.dao.IEntity;
 import com.li.gamecore.dao.model.PersistType;
@@ -7,7 +7,7 @@ import com.li.gamecore.dao.model.PersistType;
  * @author li-yuanwen
  * 持久化接口
  */
-public interface Persistor {
+public interface DataBasePersistor {
 
 
     /**

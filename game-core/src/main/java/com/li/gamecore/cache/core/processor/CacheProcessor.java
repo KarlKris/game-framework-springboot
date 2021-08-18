@@ -2,7 +2,7 @@ package com.li.gamecore.cache.core.processor;
 
 
 import com.li.gamecore.cache.config.CachedType;
-import com.li.gamecore.cache.core.Cache;
+import com.li.gamecore.cache.core.cache.Cache;
 
 /**
  * @author li-yuanwen
@@ -26,4 +26,12 @@ public interface CacheProcessor {
      * @return /
      */
     Cache createCache(String cacheName, short maximum, short expire);
+
+
+    /**
+     * 获取缓存
+     * @param cacheName 缓存名称
+     * @return 缓存
+     */
+    Cache getCache(String cacheName);
 }

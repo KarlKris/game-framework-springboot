@@ -16,7 +16,8 @@
 
     <properties>
         <aspectj.version>1.9.7</aspectj.version>
-        <caffeine.version>3.0.3</caffeine.version>
+        <caffeine.version>2.9.0</caffeine.version>
+        <javassist.version>3.27.0-GA</javassist.version>
     </properties>
 
     <dependencies>
@@ -52,6 +53,13 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>${caffeine.version}</version>
+        </dependency>
+
+        <!-- javassist https://mvnrepository.com/artifact/org.javassist/javassist -->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>${javassist.version}</version>
         </dependency>
 
     </dependencies>

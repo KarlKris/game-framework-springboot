@@ -1,15 +1,17 @@
-package com.li.gamecore.dao.service.impl;
+package com.li.gamecore.dao.core.impl;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 import com.li.gamecommon.event.DataBaseCloseEvent;
 import com.li.gamecommon.thread.MonitoredScheduledThreadPoolExecutor;
 import com.li.gamecore.dao.IEntity;
+import com.li.gamecore.dao.core.DataBaseAccessor;
+import com.li.gamecore.dao.core.DataBasePersistor;
 import com.li.gamecore.dao.model.PersistElement;
 import com.li.gamecore.dao.model.PersistType;
-import com.li.gamecore.dao.service.Accessor;
-import com.li.gamecore.dao.service.Persistor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -22,19 +24,20 @@ import java.util.concurrent.TimeUnit;
  * 基于Hibernate的持久化接口
  */
 @Component
+@ConditionalOnBean(SessionFactory.class)
 @Slf4j
-public class HibernatePersistorImpl implements Persistor, ApplicationListener<DataBaseCloseEvent> {
+public class HibernateDataBasePersistorImpl implements DataBasePersistor, ApplicationListener<DataBaseCloseEvent> {
 
     /** 队列 **/
     private final LinkedBlockingQueue<PersistElement> queue = new LinkedBlockingQueue<>();
     /** 回写线程池 **/
     private final ScheduledFuture<?> scheduledFuture;
     /** 数据库访问 **/
-    private final Accessor accessor;
+    private final DataBaseAccessor dataBaseAccessor;
 
     @Autowired
-    public HibernatePersistorImpl(Accessor accessor) {
-        this.accessor = accessor;
+    public HibernateDataBasePersistorImpl(DataBaseAccessor dataBaseAccessor) {
+        this.dataBaseAccessor = dataBaseAccessor;
         this.scheduledFuture = new MonitoredScheduledThreadPoolExecutor(1
                 , new NamedThreadFactory("数据库回写线程", false))
                 .scheduleWithFixedDelay(this::persistAll, 5, 5, TimeUnit.SECONDS);
@@ -69,17 +72,17 @@ public class HibernatePersistorImpl implements Persistor, ApplicationListener<Da
         boolean success = false;
         switch (element.getType()) {
             case CREATE: {
-                accessor.create(element.getEntity());
+                dataBaseAccessor.create(element.getEntity());
                 success = true;
                 break;
             }
             case REMOVE: {
-                accessor.remove(element.getEntity());
+                dataBaseAccessor.remove(element.getEntity());
                 success = true;
                 break;
             }
             case UPDATE: {
-                accessor.update(element.getEntity());
+                dataBaseAccessor.update(element.getEntity());
                 success = true;
                 break;
             }

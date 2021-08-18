@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 public @interface CachedRemove {
 
     /** 缓存类型 **/
-    CachedType type() default CachedType.ENTITY;
+    CachedType type() default CachedType.LOCAL;
 
     /** 缓存名称 支持SpEl表达式 **/
     String name();

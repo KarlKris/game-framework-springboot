@@ -1,14 +1,15 @@
 package com.li.gamecore.cache.aop;
 
 
+import com.li.gamecore.cache.anno.CachedPut;
 import com.li.gamecore.cache.anno.CachedRemove;
-import com.li.gamecore.cache.core.Cache;
-import com.li.gamecore.cache.core.CacheManager;
+import com.li.gamecore.cache.anno.Cachedable;
+import com.li.gamecore.cache.core.cache.Cache;
+import com.li.gamecore.cache.core.manager.CacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -56,7 +57,7 @@ public class CacheAnnotationAspect {
 
     /** 缓存移除 **/
     @After("cachedRemovePointcut()")
-    public void afterInvoke(JoinPoint jp) throws NoSuchMethodException {
+    public void afterRemoveInvoke(JoinPoint jp) throws NoSuchMethodException {
         Method targetMethod = getTargetMethod(jp);
         CachedRemove cachedRemove = AnnotationUtils.findAnnotation(targetMethod, CachedRemove.class);
 
@@ -73,19 +74,94 @@ public class CacheAnnotationAspect {
         // 移除缓存
         Cache cache = cacheManager.getCache(cachedRemove.type(), cacheName);
         if (cache != null) {
-            String key = cachedRemove.key();
-            if (key.startsWith(SPEL_PREFIX)) {
-                Expression expression = parser.parseExpression(key);
+            String keySpEl = cachedRemove.key();
+            Object key = keySpEl;
+            if (keySpEl.startsWith(SPEL_PREFIX)) {
+                Expression expression = parser.parseExpression(keySpEl);
                 if (evaluationContext == null) {
                     Object[] args = jp.getArgs();
                     evaluationContext = bindParam(targetMethod, args);
                 }
-                key = expression.getValue(evaluationContext).toString();
+                key = expression.getValue(evaluationContext);
             }
             cache.remove(key);
         }
+    }
 
+    /** 缓存更新 **/
+    @AfterReturning(value = "cachedPutPointcut()", returning = "result")
+    public void afterPutInvoke(JoinPoint jp, Object result) throws NoSuchMethodException {
+        Method targetMethod = getTargetMethod(jp);
+        CachedPut cachedPut = AnnotationUtils.findAnnotation(targetMethod, CachedPut.class);
 
+        String cacheName = cachedPut.name();
+        EvaluationContext evaluationContext = null;
+        if (cacheName.startsWith(SPEL_PREFIX)) {
+            Expression expression = parser.parseExpression(cacheName);
+            Object[] args = jp.getArgs();
+            evaluationContext = bindParam(targetMethod, args);
+            cacheName = expression.getValue(evaluationContext).toString();
+        }
+
+        Cache cache = cacheManager.getCache(cachedPut.type(), cacheName);
+        if (cache == null) {
+            cache = cacheManager.createCache(cachedPut.type(), cacheName, cachedPut.maximum(), cachedPut.expire());
+        }
+
+        String keySpEl = cachedPut.key();
+        Object key = keySpEl;
+        if (keySpEl.startsWith(SPEL_PREFIX)) {
+            Expression expression = parser.parseExpression(keySpEl);
+            if (evaluationContext == null) {
+                Object[] args = jp.getArgs();
+                evaluationContext = bindParam(targetMethod, args);
+            }
+            key = expression.getValue(evaluationContext);
+        }
+
+        cache.put(key, result);
+    }
+
+    /** 查询缓存 **/
+    @Around("cachedablePointcut()")
+    public Object aroundInvoke(ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
+        Method targetMethod = getTargetMethod(joinPoint);
+        Cachedable cachedable = AnnotationUtils.findAnnotation(targetMethod, Cachedable.class);
+
+        String cacheName = cachedable.name();
+        EvaluationContext evaluationContext = null;
+        if (cacheName.startsWith(SPEL_PREFIX)) {
+            Expression expression = parser.parseExpression(cacheName);
+            Object[] args = joinPoint.getArgs();
+            evaluationContext = bindParam(targetMethod, args);
+            cacheName = expression.getValue(evaluationContext).toString();
+        }
+
+        String keySpEl = cachedable.key();
+        Object key = keySpEl;
+        if (keySpEl.startsWith(SPEL_PREFIX)) {
+            Expression expression = parser.parseExpression(keySpEl);
+            if (evaluationContext == null) {
+                Object[] args = joinPoint.getArgs();
+                evaluationContext = bindParam(targetMethod, args);
+            }
+            key = expression.getValue(evaluationContext);
+        }
+
+        Object result = null;
+        Cache cache = cacheManager.getCache(cachedable.type(), cacheName);
+        if (cache == null || (result = cache.get(key)) == null) {
+            cache = cacheManager.createCache(cachedable.type(), cacheName, cachedable.maximum(), cachedable.expire());
+
+            try {
+                result = joinPoint.proceed();
+                cache.put(key, result);
+                return result;
+            } catch (Throwable throwable) {
+                log.error("执行方法[{}],方法参数[{}]出现未知异常", targetMethod.getName(), joinPoint.getArgs(), throwable);
+            }
+        }
+        return result;
     }
 
 

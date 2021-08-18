@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 public @interface Cachedable {
 
     /** 缓存类型 **/
-    CachedType type() default CachedType.ENTITY;
+    CachedType type() default CachedType.LOCAL;
 
     /**
      * 缓存名称 支持SpEl表达式
@@ -34,6 +34,6 @@ public @interface Cachedable {
     /** 缓存大小 **/
     short maximum() default CacheConstants.DEFAULT_MAXIMUM;
 
-    /** 失效时间 **/
+    /** 失效时间(分钟) **/
     short expire() default CacheConstants.DEFAULT_EXPIRE;
 }
