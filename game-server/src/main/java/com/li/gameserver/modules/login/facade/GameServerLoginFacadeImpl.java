@@ -5,8 +5,10 @@ import com.li.gamecommon.common.MultiServerIdGenerator;
 import com.li.gameremote.modules.login.game.GameServerLoginFacade;
 import com.li.gameremote.modules.login.game.GameServerLoginResultCode;
 import com.li.gameserver.common.GameServerSystemConfig;
+import com.li.gameserver.modules.login.service.AccountService;
 import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.SessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,19 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
 
-    /** 账号2玩家标识 **/
-    private ConcurrentHashMap<String, Long> account2Id = new ConcurrentHashMap<>();
-
-    @Autowired
-    private MultiServerIdGenerator idGenerator;
     @Autowired
     private GameServerSystemConfig gameServerSystemConfig;
-
-    @PostConstruct
-    private void init() {
-        String accountName = "admin.1";
-        this.account2Id.put(accountName, idGenerator.nextId());
-    }
+    @Autowired
+    private SessionManager sessionManager;
+    @Autowired
+    private AccountService accountService;
 
     @Override
     public Response<Long> create(Session session, String account, int channel) {
@@ -39,11 +34,8 @@ public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
             return Response.ERROR(GameServerLoginResultCode.REJECT);
         }
         String accountName = account + "." + channel;
-        long nextId = this.idGenerator.nextId();
-        Long old = this.account2Id.putIfAbsent(accountName, nextId);
-        if (old != null) {
-            return Response.ERROR(GameServerLoginResultCode.CREATE_REPEAT);
-        }
+        long nextId = accountService.createAccount(accountName, channel);
+        sessionManager.bindIdentity(session, nextId, true);
         return Response.SUCCESS(nextId);
     }
 
@@ -53,10 +45,8 @@ public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
             return Response.ERROR(GameServerLoginResultCode.REJECT);
         }
         String accountName = account + "." + channel;
-        Long identity = this.account2Id.get(accountName);
-        if (identity == null) {
-            return Response.ERROR(GameServerLoginResultCode.ACCOUNT_NOT_FOUND);
-        }
+        long identity = accountService.login(accountName, channel);
+        sessionManager.bindIdentity(session, identity, true);
         return Response.SUCCESS(identity);
     }
 

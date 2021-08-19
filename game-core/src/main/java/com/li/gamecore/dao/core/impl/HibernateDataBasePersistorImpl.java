@@ -9,7 +9,6 @@ import com.li.gamecore.dao.core.DataBasePersistor;
 import com.li.gamecore.dao.model.PersistElement;
 import com.li.gamecore.dao.model.PersistType;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationListener;
@@ -23,9 +22,9 @@ import java.util.concurrent.TimeUnit;
  * @author li-yuanwen
  * 基于Hibernate的持久化接口
  */
-@Component
-@ConditionalOnBean(SessionFactory.class)
 @Slf4j
+@Component
+@ConditionalOnBean(DataBaseAccessor.class)
 public class HibernateDataBasePersistorImpl implements DataBasePersistor, ApplicationListener<DataBaseCloseEvent> {
 
     /** 队列 **/

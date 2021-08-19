@@ -3,13 +3,13 @@ package com.li.gameserver.modules.login.manager;
 import com.li.gamecore.dao.IEntity;
 import lombok.Getter;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 /**
  * @author li-yuanwen
  */
-@Table
+@Entity
 @Getter
 public class Account implements IEntity<Long> {
 
@@ -20,14 +20,18 @@ public class Account implements IEntity<Long> {
     /** 账号名 **/
     private String account;
 
+    /** 渠道标识 **/
+    private int channel;
+
     @Override
     public Long getId() {
         return id;
     }
 
-    public static Account of(long id, String accountName) {
+    public static Account of(long id, int channel, String accountName) {
         Account account = new Account();
         account.id = id;
+        account.channel = channel;
         account.account = accountName;
         return account;
     }

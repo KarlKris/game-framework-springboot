@@ -37,6 +37,10 @@ public class Session {
         channel.writeAndFlush(message);
     }
 
+    void kick() {
+        this.channel.close();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

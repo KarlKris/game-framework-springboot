@@ -4,11 +4,9 @@ import com.li.gamecore.cache.anno.Cachedable;
 import com.li.gamecore.dao.EntityBuilder;
 import com.li.gamecore.dao.IEntity;
 import com.li.gamecore.dao.core.DataBaseAccessor;
-import com.li.gamecore.dao.core.DataBasePersistor;
 import com.li.gamecore.dao.javassist.JavassistProxyFactory;
 import com.li.gamecore.dao.service.EntityService;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
@@ -20,13 +18,11 @@ import java.io.Serializable;
  */
 @Service
 @Slf4j
-@ConditionalOnBean(SessionFactory.class)
+@ConditionalOnBean(DataBaseAccessor.class)
 public class EntityServiceImpl implements EntityService {
 
     @Autowired
     private DataBaseAccessor dataBaseAccessor;
-    @Autowired
-    private DataBasePersistor dataBasePersistor;
     @Autowired
     private JavassistProxyFactory javassistProxyFactory;
 

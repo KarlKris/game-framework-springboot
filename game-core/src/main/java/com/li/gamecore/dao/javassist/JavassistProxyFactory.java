@@ -11,13 +11,14 @@ import javassist.bytecode.ConstPool;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.StringMemberValue;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -32,7 +33,7 @@ import static com.li.gamecore.dao.javassist.JavassistConstants.PERSISTOR_FIELD;
  */
 @Slf4j
 @Component
-@ConditionalOnBean(SessionFactory.class)
+@ConditionalOnProperty(value = "spring.datasource.url")
 public class JavassistProxyFactory {
 
     private final ClassPool classPool = ClassPool.getDefault();

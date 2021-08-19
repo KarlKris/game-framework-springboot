@@ -30,7 +30,7 @@ public class MonitoredScheduledThreadPoolExecutor extends ScheduledThreadPoolExe
             // 统计正在执行的任务数量、已完成任务数量、任务总数、队列里缓存的任务数量、池中存在的最大线程数
 
             int size = this.getQueue().size();
-            log.debug("正在执行的任务数量[{}], 已完成任务数量[{}], 任务总数[{}], 队列里缓存的任务数量[{}], 池中存在的最大线程数[{}]"
+            log.debug("可监控定时线程池正在执行的任务数量[{}], 已完成任务数量[{}], 任务总数[{}], 队列里缓存的任务数量[{}], 池中存在的最大线程数[{}]"
                     , this.getActiveCount()
                     , this.getCompletedTaskCount()
                     , this.getTaskCount()
@@ -54,7 +54,7 @@ public class MonitoredScheduledThreadPoolExecutor extends ScheduledThreadPoolExe
             int time = (int) (now - startTime);
             this.maxTime = Math.max(this.maxTime, time);
 
-            log.debug("线程池 任务[{}]耗时[{}]", id, time);
+            log.debug("可监控定时线程池 任务[{}]耗时[{}]", id, time);
         }
     }
 
@@ -76,7 +76,7 @@ public class MonitoredScheduledThreadPoolExecutor extends ScheduledThreadPoolExe
 
     private void log() {
         if (log.isDebugEnabled()) {
-            log.debug("队列最大缓存数量[{}], 总完成任务数[{}]", this.maxNum, this.getCompletedTaskCount());
+            log.debug("可监控定时线程池队列最大缓存数量[{}], 总完成任务数[{}]", this.maxNum, this.getCompletedTaskCount());
         }
     }
 }

@@ -57,6 +57,11 @@ public class SessionManager {
         return session;
     }
 
+    /** 是否在线 **/
+    public boolean online(long identity) {
+        return this.identities.containsKey(identity);
+    }
+
     /** 绑定身份 **/
     public void bindIdentity(Session session, long identity, boolean inner) {
         Session remove = this.annoymous.remove(session.getSessionId());
@@ -67,7 +72,12 @@ public class SessionManager {
         if (!inner) {
             session.bind(identity);
         }
-        this.identities.put(identity, session);
+
+        Session oldSession = this.identities.put(identity, session);
+        if (oldSession != null) {
+            log.warn("玩家[{}]被顶号,强退账号", identity);
+            oldSession.kick();
+        }
     }
 
     /** 获取指定Session **/
