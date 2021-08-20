@@ -155,7 +155,9 @@ public class CacheAnnotationAspect {
 
             try {
                 result = joinPoint.proceed();
-                cache.put(key, result);
+                if (cachedable.nullCache() || result != null) {
+                    cache.put(key, result);
+                }
                 return result;
             } catch (Throwable throwable) {
                 log.error("执行方法[{}],方法参数[{}]出现未知异常", targetMethod.getName(), joinPoint.getArgs(), throwable);

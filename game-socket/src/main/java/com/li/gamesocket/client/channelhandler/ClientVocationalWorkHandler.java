@@ -133,9 +133,9 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
                 future.complete(response);
             } else {
                 if (response.isVocationalException()) {
-                    future.completeExceptionally(new BadRequestException(response.getCode()));
+                    future.completeExceptionally(new BadRequestException(response.getCode(), "请求远程服务业务异常"));
                 } else {
-                    future.completeExceptionally(new SocketException(response.getCode()));
+                    future.completeExceptionally(new SocketException(response.getCode(), "请求远程服务通讯异常"));
                 }
             }
 

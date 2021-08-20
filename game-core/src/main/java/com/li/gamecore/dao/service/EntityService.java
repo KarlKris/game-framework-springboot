@@ -36,4 +36,14 @@ public interface EntityService {
             , EntityBuilder<PK, T> entityBuilder);
 
 
+    /**
+     * 创建数据库表数据
+     * @param entity 创建实体
+     * @param <PK> 标识类型
+     * @param <T> 实体类型
+     * @return 数据库实体
+     */
+    <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> T  create(T entity);
+
+
 }

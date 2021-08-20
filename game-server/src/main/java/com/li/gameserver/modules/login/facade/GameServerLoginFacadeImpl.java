@@ -9,6 +9,7 @@ import com.li.gameserver.modules.login.service.AccountService;
 import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author li-yuanwen
  */
 @Component
+@Slf4j
 public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
 
     @Autowired
@@ -45,7 +47,7 @@ public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
             return Response.ERROR(GameServerLoginResultCode.REJECT);
         }
         String accountName = account + "." + channel;
-        long identity = accountService.login(accountName, channel);
+        long identity = accountService.login(accountName);
         sessionManager.bindIdentity(session, identity, true);
         return Response.SUCCESS(identity);
     }

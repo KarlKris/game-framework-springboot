@@ -44,4 +44,10 @@ public class EntityServiceImpl implements EntityService {
         }
         return javassistProxyFactory.transform(t);
     }
+
+    @Override
+    public <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> T create(T entity) {
+        dataBaseAccessor.create(entity);
+        return entity;
+    }
 }

@@ -1,5 +1,7 @@
 package com.li.gamecore.cache.core.cache;
 
+import com.li.gamecore.cache.core.cache.impl.CacheStat;
+
 /**
  * @author li-yuanwen
  * 缓存抽象
@@ -38,5 +40,12 @@ public interface Cache {
      * 清空缓存
      */
     void clear();
+
+
+    /**
+     * 获取缓存统计数据
+     * @return 缓存统计数据
+     */
+    CacheStat getCacheStat();
 
 }

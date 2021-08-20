@@ -31,5 +31,11 @@ public interface FirewallService {
      */
     void addBlackIp(String ip);
 
+    /**
+     * 查询最大连接数
+     * @return 最大连接数
+     */
+    int getMaxConnectNum();
+
 
 }

@@ -15,6 +15,9 @@ public class CaffeineCache implements Cache {
     protected final String cacheName;
     /** 缓存 **/
     protected final com.github.benmanes.caffeine.cache.Cache<Object, Object> cache;
+    /** 数据统计 **/
+    private final CacheStat stat = new CacheStat();
+
 
     public CaffeineCache(String cacheName, short maximum, short expire) {
         this.cacheName = cacheName;
@@ -42,11 +45,21 @@ public class CaffeineCache implements Cache {
 
     @Override
     public Object get(Object key) {
-        return this.cache.getIfPresent(key);
+        this.stat.incrementQuery();
+        Object result = this.cache.getIfPresent(key);
+        if (result != null) {
+            this.stat.incrementHit();
+        }
+        return result;
     }
 
     @Override
     public void clear() {
         this.cache.invalidateAll();
+    }
+
+    @Override
+    public CacheStat getCacheStat() {
+        return this.stat;
     }
 }

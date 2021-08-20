@@ -31,6 +31,12 @@ public @interface Cachedable {
      */
     String key();
 
+    /**
+     * null值 是否缓存(缓存穿透)
+     * @return true 缓存null值
+     */
+    boolean nullCache() default false;
+
     /** 缓存大小 **/
     short maximum() default CacheConstants.DEFAULT_MAXIMUM;
 

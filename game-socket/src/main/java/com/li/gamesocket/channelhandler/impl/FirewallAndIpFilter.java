@@ -187,4 +187,8 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
         return this.blackIps.contains(ip);
     }
 
+    @Override
+    public int getMaxConnectNum() {
+        return maxConnectNum;
+    }
 }

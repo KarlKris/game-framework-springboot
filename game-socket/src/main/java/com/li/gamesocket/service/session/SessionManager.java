@@ -73,6 +73,10 @@ public class SessionManager {
             session.bind(identity);
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("session[{}]绑定某个身份[{}]", session.getSessionId(), identity);
+        }
+
         Session oldSession = this.identities.put(identity, session);
         if (oldSession != null) {
             log.warn("玩家[{}]被顶号,强退账号", identity);

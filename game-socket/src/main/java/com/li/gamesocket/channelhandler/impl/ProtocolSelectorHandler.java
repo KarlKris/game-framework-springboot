@@ -133,7 +133,6 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
         if (protocolPrefix == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY
                 || protocolPrefix == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
             // 自定义协议
-
             String idleStateHandlerName = IdleStateHandler.class.getSimpleName();
 
             // 编解码器
