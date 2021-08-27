@@ -4,6 +4,7 @@ import com.li.gamecore.dao.IEntity;
 import lombok.Getter;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
+import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,9 +13,10 @@ import javax.persistence.Id;
  * @author li-yuanwen
  */
 @Entity
+@Proxy(lazy = false)
 @NamedQueries({
         @NamedQuery(name = Account.ALL_ACCOUNT_NAME, query = "SELECT a.accountName FROM Account AS a"),
-        @NamedQuery(name = Account.GET_ID_BY_ACCOUNT_NAME, query = "SELECT a.id FROM Account AS a WHERE a.accountName = ?1")
+        @NamedQuery(name = Account.GET_ID_BY_ACCOUNT_NAME, query = "SELECT a.id FROM Account AS a WHERE a.accountName = ?0")
 })
 
 @Getter

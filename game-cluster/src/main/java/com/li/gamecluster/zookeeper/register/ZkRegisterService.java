@@ -5,6 +5,7 @@ import com.li.gamecluster.zookeeper.config.CuratorFrameworkConfiguration;
 import com.li.gamecluster.zookeeper.config.ZkConstant;
 import com.li.gamecluster.zookeeper.model.ServiceInstancePayLoad;
 import com.li.gamecommon.rpc.LocalServerService;
+import com.li.gamecommon.rpc.ServerInfoUpdateService;
 import com.li.gamecommon.rpc.model.ServerInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -27,7 +28,7 @@ import javax.annotation.PostConstruct;
  **/
 @Service
 @Slf4j
-public class ZkRegisterService implements ApplicationRunner {
+public class ZkRegisterService implements ServerInfoUpdateService, ApplicationRunner {
 
     /** 服务接口 **/
     @Autowired(required = false)
@@ -75,7 +76,7 @@ public class ZkRegisterService implements ApplicationRunner {
 
         this.serviceDiscovery = ServiceDiscoveryBuilder.builder(ServiceInstancePayLoad.class)
                 .basePath(discoveryPath)
-//                .serializer(ZkConstant.SERIALIZER)
+                .serializer(ZkConstant.SERIALIZER)
                 .client(this.curatorFramework)
                 .build();
 
@@ -87,6 +88,7 @@ public class ZkRegisterService implements ApplicationRunner {
                 .id(serverInfo.getId())
                 .address(serverInfo.getIp())
                 .port(serverInfo.getPort())
+                .payload(new ServiceInstancePayLoad(serverInfo.getId()))
                 .build();
 
         // 路径/discovery节点/服务名节点/具体服务节点
@@ -104,7 +106,7 @@ public class ZkRegisterService implements ApplicationRunner {
         this.curatorFramework.create()
                 .creatingParentContainersIfNeeded()
                 .withMode(CreateMode.EPHEMERAL)
-                .forPath(this.countPath, new byte[] {0});
+                .forPath(this.countPath, objectMapper.writeValueAsBytes(0));
 
         // 更新/discovery数据 模块号数据
         this.curatorFramework.setData().forPath(discoveryPath, objectMapper.writeValueAsBytes(serverInfo.getModules()));
@@ -122,6 +124,13 @@ public class ZkRegisterService implements ApplicationRunner {
                 + ZkConstant.SERVICE_DISCOVERY_SUFFIX;
     }
 
-
-
+    @Override
+    public void updateConnectNum(int connectNum) {
+        try {
+            this.curatorFramework.setData()
+                    .forPath(this.countPath, objectMapper.writeValueAsBytes(connectNum));
+        } catch (Exception e) {
+            log.error("更新服务器连接数量出现未知异常", e);
+        }
+    }
 }

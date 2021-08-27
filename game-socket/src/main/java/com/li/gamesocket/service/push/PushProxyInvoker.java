@@ -30,7 +30,7 @@ public class PushProxyInvoker implements InvocationHandler {
     /**
      * Session管理
      **/
-    private final SessionManager sessionManager = ApplicationContextHolder.getBean(SessionManager.class);
+    private final SessionManager sessionManager;
     /**
      * 方法参数上下文
      **/
@@ -39,19 +39,24 @@ public class PushProxyInvoker implements InvocationHandler {
     /**
      * 默认序列化/反序列化工具
      **/
-    private final Serializer serializer = ApplicationContextHolder.getBean(SerializerManager.class).getDefaultSerializer();
+    private final Serializer serializer;
     /**
      * 默认压缩body阙值
      **/
-    private final int bodyZipLength = ApplicationContextHolder.getBean(VocationalWorkConfig.class).getBodyZipLength();
+    private final int bodyZipLength;
     /**
      * 消息管理器
      **/
-    private final SnCtxManager snCtxManager = ApplicationContextHolder.getBean(SnCtxManager.class);
+    private final SnCtxManager snCtxManager;
 
     PushProxyInvoker(List<MethodCtx> methodCtxes) {
         this.methodCtxHolder = new HashMap<>(methodCtxes.size());
         methodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
+        this.sessionManager =  ApplicationContextHolder.getBean(SessionManager.class);
+        this.serializer = ApplicationContextHolder.getBean(SerializerManager.class).getDefaultSerializer();
+        this.bodyZipLength = ApplicationContextHolder.getBean(VocationalWorkConfig.class).getBodyZipLength();
+        this.snCtxManager  = ApplicationContextHolder.getBean(SnCtxManager.class);
+
     }
 
     @Override

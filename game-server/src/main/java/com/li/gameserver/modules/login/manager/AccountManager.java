@@ -32,16 +32,13 @@ public class AccountManager {
         return entityService.create(Account.of(idGenerator.nextId(), channel, accountName));
     }
 
-    public Account load(String accountName) {
-        Long id = getIdByAccountName(accountName);
-        if (id != null) {
-            return entityService.load(id, Account.class);
-        }
-        return null;
+    public Account load(long id) {
+        return entityService.load(id, Account.class);
     }
 
-    @Cachedable(name = "#{Account.class.getName()}", key = "#{accountName}")
-    private Long getIdByAccountName(String accountName) {
+
+    @Cachedable(name = "AccountName2Id", key = "#accountName")
+    public Long getIdByAccountName(String accountName) {
         return dataBaseQuerier.uniqueQuery(Account.class, Long.TYPE, Account.GET_ID_BY_ACCOUNT_NAME, accountName);
     }
 

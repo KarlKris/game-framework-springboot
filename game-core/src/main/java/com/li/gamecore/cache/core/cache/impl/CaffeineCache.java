@@ -9,28 +9,18 @@ import java.util.concurrent.TimeUnit;
  * @author li-yuanwen
  * 基于Caffeine的缓存
  */
-public class CaffeineCache implements Cache {
+public class CaffeineCache extends AbstractCache {
 
-    /** 缓存名称 **/
-    protected final String cacheName;
     /** 缓存 **/
-    protected final com.github.benmanes.caffeine.cache.Cache<Object, Object> cache;
-    /** 数据统计 **/
-    private final CacheStat stat = new CacheStat();
+    private final com.github.benmanes.caffeine.cache.Cache<Object, Object> cache;
 
 
     public CaffeineCache(String cacheName, short maximum, short expire) {
-        this.cacheName = cacheName;
+        super(cacheName);
         this.cache = Caffeine.newBuilder()
                 .maximumSize(maximum)
                 .expireAfterAccess(expire, TimeUnit.MINUTES)
                 .build();
-    }
-
-
-    @Override
-    public String getCacheName() {
-        return this.cacheName;
     }
 
     @Override
@@ -44,13 +34,8 @@ public class CaffeineCache implements Cache {
     }
 
     @Override
-    public Object get(Object key) {
-        this.stat.incrementQuery();
-        Object result = this.cache.getIfPresent(key);
-        if (result != null) {
-            this.stat.incrementHit();
-        }
-        return result;
+    protected Object get0(Object key) {
+        return this.cache.getIfPresent(key);
     }
 
     @Override
@@ -58,8 +43,4 @@ public class CaffeineCache implements Cache {
         this.cache.invalidateAll();
     }
 
-    @Override
-    public CacheStat getCacheStat() {
-        return this.stat;
-    }
 }

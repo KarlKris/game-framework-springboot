@@ -56,10 +56,10 @@ public class AccountServiceImpl implements AccountService {
         if (!accountNames.mightContain(accountName)) {
             throw new BadRequestException(GameServerLoginResultCode.ACCOUNT_NOT_FOUND);
         }
-        Account account = accountManager.load(accountName);
-        if (account == null) {
+        Long id = accountManager.getIdByAccountName(accountName);
+        if (id == null) {
             throw new BadRequestException(GameServerLoginResultCode.ACCOUNT_NOT_FOUND);
         }
-        return account.getId();
+        return accountManager.load(id).getId();
     }
 }

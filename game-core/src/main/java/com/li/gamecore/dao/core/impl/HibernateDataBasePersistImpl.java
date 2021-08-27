@@ -5,7 +5,7 @@ import com.li.gamecommon.event.DataBaseCloseEvent;
 import com.li.gamecommon.thread.MonitoredScheduledThreadPoolExecutor;
 import com.li.gamecore.dao.IEntity;
 import com.li.gamecore.dao.core.DataBaseAccessor;
-import com.li.gamecore.dao.core.DataBasePersistor;
+import com.li.gamecore.dao.core.DataBasePersister;
 import com.li.gamecore.dao.model.PersistElement;
 import com.li.gamecore.dao.model.PersistType;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @ConditionalOnBean(DataBaseAccessor.class)
-public class HibernateDataBasePersistorImpl implements DataBasePersistor, ApplicationListener<DataBaseCloseEvent> {
+public class HibernateDataBasePersistImpl implements DataBasePersister, ApplicationListener<DataBaseCloseEvent> {
 
     /** 队列 **/
     private final LinkedBlockingQueue<PersistElement> queue = new LinkedBlockingQueue<>();
@@ -35,7 +35,7 @@ public class HibernateDataBasePersistorImpl implements DataBasePersistor, Applic
     private final DataBaseAccessor dataBaseAccessor;
 
     @Autowired
-    public HibernateDataBasePersistorImpl(DataBaseAccessor dataBaseAccessor) {
+    public HibernateDataBasePersistImpl(DataBaseAccessor dataBaseAccessor) {
         this.dataBaseAccessor = dataBaseAccessor;
         this.scheduledFuture = new MonitoredScheduledThreadPoolExecutor(1
                 , new NamedThreadFactory("数据库回写线程", false))

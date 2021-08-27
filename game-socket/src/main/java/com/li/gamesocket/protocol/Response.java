@@ -22,6 +22,8 @@ public class Response<T> {
     public static final Response<Object> PARAM_ANALYSIS_ERROR = ERROR(ResultCode.PARAM_ANALYSIS_ERROR);
     /** 无效操作 **/
     public static final Response<Object> INVALID_OP = ERROR(ResultCode.INVALID_OP);
+    /** 未知错误 **/
+    public static final Response<Object> UNKNOWN = ERROR(ResultCode.UNKNOWN);
 
 
     /** 状态码 **/

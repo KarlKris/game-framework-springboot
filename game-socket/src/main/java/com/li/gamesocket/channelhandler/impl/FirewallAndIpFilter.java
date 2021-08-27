@@ -1,5 +1,6 @@
 package com.li.gamesocket.channelhandler.impl;
 
+import com.li.gamecommon.rpc.ServerInfoUpdateService;
 import com.li.gamecommon.utils.IpUtils;
 import com.li.gamesocket.channelhandler.FirewallService;
 import com.li.gamesocket.channelhandler.NioNettyFilter;
@@ -9,6 +10,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -40,6 +42,9 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
     /** 同时最大连接数 **/
     @Value("${netty.server.maxConnectNum}")
     private int maxConnectNum;
+
+    @Autowired(required = false)
+    private ServerInfoUpdateService serverInfoUpdateService;
 
 
     /** 当前连接数 **/
@@ -137,7 +142,14 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         this.connectNum.decrementAndGet();
+        updateConnectNum();
         super.channelUnregistered(ctx);
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        updateConnectNum();
+        super.channelActive(ctx);
     }
 
     @Override
@@ -190,5 +202,11 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
     @Override
     public int getMaxConnectNum() {
         return maxConnectNum;
+    }
+
+    private void updateConnectNum() {
+        if (this.serverInfoUpdateService != null) {
+            this.serverInfoUpdateService.updateConnectNum(this.connectNum.get());
+        }
     }
 }

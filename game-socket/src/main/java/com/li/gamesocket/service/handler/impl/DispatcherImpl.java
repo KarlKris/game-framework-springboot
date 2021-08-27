@@ -190,7 +190,10 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                 log.debug("发生异常请求异常,异常码[{}]", e.getErrorCode(), e);
             }
             responseBody = serializer.serialize(Response.ERROR(e.getErrorCode()));
-        } finally {
+        } catch (Exception e){
+            log.error("发生未知异常", e);
+            responseBody = serializer.serialize(Response.UNKNOWN);
+        }finally {
             response(session, message, responseBody, zip);
         }
     }

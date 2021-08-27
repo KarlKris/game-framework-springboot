@@ -27,14 +27,14 @@ public class EntityServiceImpl implements EntityService {
     private JavassistProxyFactory javassistProxyFactory;
 
     @Override
-    @Cachedable(name = "#{tClass.getName()}", key = "#{id}")
+    @Cachedable(name = "#tClass.getName()", key = "#id")
     public <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> T load(PK id, Class<T> tClass) {
         T t = dataBaseAccessor.load(id, tClass);
         return javassistProxyFactory.transform(t);
     }
 
     @Override
-    @Cachedable(name = "#{tClass.getName()}", key = "#{id}")
+    @Cachedable(name = "#tClass.getName()", key = "#id")
     public <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> T loadOrCreate(PK id, Class<T> tClass
             , EntityBuilder<PK, T> entityBuilder) {
         T t = dataBaseAccessor.load(id, tClass);

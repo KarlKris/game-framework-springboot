@@ -17,6 +17,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,7 @@ public class CacheAnnotationAspect {
     public static final String SPEL_PREFIX = "#";
 
     private final ExpressionParser parser = new SpelExpressionParser();
+    private final TemplateParserContext parserContext = new TemplateParserContext();
     private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
     @Autowired
@@ -67,7 +69,7 @@ public class CacheAnnotationAspect {
             Expression expression = parser.parseExpression(cacheName);
             Object[] args = jp.getArgs();
             evaluationContext = bindParam(targetMethod, args);
-            cacheName = expression.getValue(evaluationContext).toString();
+            cacheName = expression.getValue(evaluationContext, String.class);
         }
 
 
@@ -100,7 +102,7 @@ public class CacheAnnotationAspect {
             Expression expression = parser.parseExpression(cacheName);
             Object[] args = jp.getArgs();
             evaluationContext = bindParam(targetMethod, args);
-            cacheName = expression.getValue(evaluationContext).toString();
+            cacheName = expression.getValue(evaluationContext, String.class);
         }
 
         Cache cache = cacheManager.getCache(cachedPut.type(), cacheName);
@@ -134,7 +136,7 @@ public class CacheAnnotationAspect {
             Expression expression = parser.parseExpression(cacheName);
             Object[] args = joinPoint.getArgs();
             evaluationContext = bindParam(targetMethod, args);
-            cacheName = expression.getValue(evaluationContext).toString();
+            cacheName = expression.getValue(evaluationContext, String.class);
         }
 
         String keySpEl = cachedable.key();

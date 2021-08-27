@@ -3,29 +3,26 @@ package com.li.gamecore.dao.javassist;
 import com.li.gamecommon.exception.EnhanceException;
 import com.li.gamecore.dao.IEntity;
 import com.li.gamecore.dao.anno.Enhance;
-import com.li.gamecore.dao.core.DataBasePersistor;
+import com.li.gamecore.dao.core.DataBasePersister;
 import javassist.*;
-import javassist.bytecode.AnnotationsAttribute;
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.ConstPool;
-import javassist.bytecode.annotation.Annotation;
-import javassist.bytecode.annotation.StringMemberValue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import javax.sql.DataSource;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.li.gamecore.dao.javassist.JavassistConstants.ENHANCE_SUFFIX;
-import static com.li.gamecore.dao.javassist.JavassistConstants.PERSISTOR_FIELD;
+import static com.li.gamecore.dao.javassist.JavassistConstants.*;
 
 /**
  * @author li-yuanwen
@@ -39,17 +36,21 @@ public class JavassistProxyFactory {
     private final ClassPool classPool = ClassPool.getDefault();
     /** 构造器缓存 **/
     private static final ConcurrentHashMap<String, Constructor<? extends IEntity>> constructorHolder = new ConcurrentHashMap<>();
+    /** Object方法 **/
+    private static final Set<Method> objectMethods = new HashSet<>(Arrays.asList(Object.class.getDeclaredMethods()));
 
     @Autowired
-    private DataBasePersistor persistor;
+    private DataBasePersister persistor;
 
-    /** 创建实体增强对象 **/
-    public <T extends IEntity> T transform(T entity) {
+    /**
+     * 创建实体增强对象
+     **/
+    public <PK extends Serializable, T extends IEntity<PK>> T transform(T entity) {
         Class<? extends IEntity> entityClass = entity.getClass();
         Constructor<? extends IEntity> constructor = constructorHolder.computeIfAbsent(entityClass.getName(), k -> {
             try {
-                return buildEnhanceClass(entityClass).getConstructor(entityClass, DataBasePersistor.class);
-            } catch (NotFoundException | CannotCompileException | NoSuchMethodException e) {
+                return buildEnhanceClass(entityClass).getConstructor(entityClass, DataBasePersister.class);
+            } catch (NotFoundException | CannotCompileException | NoSuchMethodException | ClassNotFoundException e) {
                 log.error("增强类[{}]出现未知异常", entityClass.getSimpleName(), e);
                 throw new EnhanceException(entity, e);
             }
@@ -60,6 +61,124 @@ public class JavassistProxyFactory {
             log.error("增强类[{}]出现未知异常", entityClass.getSimpleName(), e);
             throw new EnhanceException(entity, e);
         }
+    }
+
+
+
+    private Class buildEnhanceClass(Class<? extends IEntity> tClass) throws NotFoundException, CannotCompileException, ClassNotFoundException {
+        String className = tClass.getName();
+        CtClass ctClass = classPool.makeClass(tClass.getCanonicalName() + ENHANCE_SUFFIX);
+        CtClass superClass = classPool.get(className);
+        ctClass.setSuperclass(superClass);
+
+        // 增加持久化Field
+        CtField persistField = new CtField(classPool.get(DataBasePersister.class.getName()), PERSISTER_FIELD, ctClass);
+        persistField.setModifiers(Modifier.PRIVATE + Modifier.FINAL);
+        ctClass.addField(persistField);
+        // 增加实际实体
+        CtField entityField = new CtField(superClass, ENTITY_FIELD, ctClass);
+        entityField.setModifiers(Modifier.PRIVATE + Modifier.FINAL);
+        ctClass.addField(entityField);
+
+        // 增加构造器
+        CtConstructor ctConstructor = new CtConstructor(toCtClassArray(tClass, DataBasePersister.class), ctClass);
+
+        String constructorBody = "{ this." + ENTITY_FIELD + "=$1;" +
+                "this." + PERSISTER_FIELD + "=$2;}";
+        ctConstructor.setBody(constructorBody);
+        ctConstructor.setModifiers(Modifier.PUBLIC);
+        ctClass.addConstructor(ctConstructor);
+
+        // 增强方法
+        ReflectionUtils.doWithMethods(tClass, method -> {
+            int modifiers = method.getModifiers();
+            if (Modifier.isStatic(modifiers)) {
+                return;
+            }
+            Enhance enhance = AnnotationUtils.findAnnotation(method, Enhance.class);
+            CtMethod ctMethod = null;
+            try {
+                if (enhance == null) {
+                    ctMethod = buildMethod(ctClass, method);
+                }else {
+                    ctMethod = buildEnhanceMethod(ctClass, method, enhance);
+                }
+                ctClass.addMethod(ctMethod);
+            } catch (NotFoundException | CannotCompileException e) {
+                throw new IllegalArgumentException("增强实体[" + className + "]方法出现未知异常", e);
+            }
+
+        }, method -> {
+            if (objectMethods.contains(method)) {
+                return false;
+            }
+            if (Modifier.isFinal(method.getModifiers()) || Modifier.isStatic(method.getModifiers())
+                    || Modifier.isPrivate(method.getModifiers())) {
+                return false;
+            }
+            return !method.isSynthetic();
+        });
+
+        return ctClass.toClass();
+    }
+
+
+    private CtMethod buildMethod(CtClass ctClass, Method method) throws NotFoundException, CannotCompileException {
+        Class<?> returnType = method.getReturnType();
+        String methodName = method.getName();
+        CtMethod ctMethod = new CtMethod(classPool.get(returnType.getName())
+                , methodName
+                , toCtClassArray(method.getParameterTypes())
+                , ctClass);
+        ctMethod.setModifiers(method.getModifiers());
+
+        Class<?>[] exceptionTypes = method.getExceptionTypes();
+        if (exceptionTypes.length != 0) {
+            ctMethod.setExceptionTypes(toCtClassArray(method.getParameterTypes()));
+        }
+
+        if (returnType == void.class) {
+            ctMethod.setBody("{" + ENTITY_FIELD + "." + methodName + "($$);}");
+        } else {
+            ctMethod.setBody("{ return " + ENTITY_FIELD + "." + methodName + "($$);}");
+        }
+
+        return ctMethod;
+    }
+
+    private CtMethod buildEnhanceMethod(CtClass ctClass, Method method, Enhance enhance) throws NotFoundException, CannotCompileException {
+        Class<?> returnType = method.getReturnType();
+        String methodName = method.getName();
+        CtMethod ctMethod = new CtMethod(classPool.get(returnType.getName())
+                , methodName
+                , toCtClassArray(method.getParameterTypes())
+                , ctClass);
+        ctMethod.setModifiers(method.getModifiers());
+
+        Class<?>[] exceptionTypes = method.getExceptionTypes();
+        if (exceptionTypes.length != 0) {
+            ctMethod.setExceptionTypes(toCtClassArray(method.getParameterTypes()));
+        }
+
+        if (returnType == void.class) {
+            ctMethod.setBody("{" + ENTITY_FIELD + "." + methodName + "($$); " +
+                    "" + PERSISTER_FIELD +".asynPersist(PersistType.UPDATE, " + ENTITY_FIELD + ");}");
+        } else {
+            String returnClass = returnType.isArray() ? toArrayTypeDeclared(returnType) : returnType.getName();
+            ctMethod.setBody("{" + returnClass + " ret = " + ENTITY_FIELD + "." + methodName + "($$); "
+                    + PERSISTER_FIELD +".asynPersist(PersistType.UPDATE, " + ENTITY_FIELD + ");"
+                    + "return ret;}");
+        }
+
+
+        return ctMethod;
+    }
+
+
+    /** 获取数组类型的声明定义  **/
+    private String toArrayTypeDeclared(Class<?> arrayClz) {
+        Class<?> type = arrayClz.getComponentType();
+        return type.getName() + "[]";
     }
 
     /**
@@ -74,69 +193,5 @@ public class JavassistProxyFactory {
             result[i] = classPool.get(classes[i].getName());
         }
         return result;
-    }
-
-    /**
-     * 获取数组类型的声明定义
-     */
-    private String toArrayTypeDeclared(Class<?> arrayClz) {
-        Class<?> type = arrayClz.getComponentType();
-        return type.getName() + "[]";
-    }
-
-    private Class buildEnhanceClass(Class tClass)throws NotFoundException, CannotCompileException {
-        CtClass superClass = classPool.get(tClass.getName());
-        CtClass ctClass = classPool.makeClass(tClass.getCanonicalName() + ENHANCE_SUFFIX);
-        ctClass.setSuperclass(superClass);
-        ClassFile classFile = ctClass.getClassFile();
-        ConstPool constPool = classFile.getConstPool();
-
-        // 增加@Table注解 在增强类上
-        AnnotationsAttribute tableAnnotationsAttribute = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
-        Annotation tableAnnotation = new Annotation("javax.persistence.Table", constPool);
-        tableAnnotation.addMemberValue("name", new StringMemberValue(tClass.getSimpleName(), constPool));
-        tableAnnotationsAttribute.addAnnotation(tableAnnotation);
-        classFile.addAttribute(tableAnnotationsAttribute);
-
-        // 增加持久化接口
-        CtField ctField = new CtField(classPool.get(DataBasePersistor.class.getName()), PERSISTOR_FIELD, ctClass);
-        ctField.setModifiers(Modifier.PRIVATE + Modifier.FINAL);
-        // 增加@Transient注解 在DataBasePersistor属性上
-        AnnotationsAttribute annotationsAttribute = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
-        Annotation annotation = new Annotation("javax.persistence.Transient", constPool);
-        annotationsAttribute.addAnnotation(annotation);
-        ctField.getFieldInfo().addAttribute(annotationsAttribute);
-        ctClass.addField(ctField);
-
-        // 增加构造器
-        CtConstructor ctConstructor = new CtConstructor(toCtClassArray(tClass, DataBasePersistor.class), ctClass);
-
-        StringBuilder stringBuilder = new StringBuilder("{ this.").append(PERSISTOR_FIELD).append("=$2;");
-        ReflectionUtils.doWithFields(tClass, field -> {
-            String fieldName = field.getName();
-            stringBuilder.append("this.").append(fieldName)
-                    .append("=$1.").append(fieldName).append(";");
-        });
-        stringBuilder.append("}");
-
-        ctConstructor.setBody(stringBuilder.toString());
-        ctConstructor.setModifiers(Modifier.PUBLIC);
-        ctClass.addConstructor(ctConstructor);
-
-        // 增强方法
-        ReflectionUtils.doWithMethods(tClass, method -> {
-            Enhance enhance = AnnotationUtils.findAnnotation(method, Enhance.class);
-            if (enhance != null) {
-                try {
-                    CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName());
-                    ctMethod.insertAfter("this." + PERSISTOR_FIELD + ".asynPersist(PersistType.UPDATE, this);");
-                } catch (NotFoundException | CannotCompileException e) {
-                    log.error("增强类[{}]方法[{}]出现未知异常", tClass.getSimpleName(), method.getName(), e);
-                    throw new EnhanceException(tClass, e);
-                }
-            }
-        });
-
-        return ctClass.toClass();
     }
 }

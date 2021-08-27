@@ -106,11 +106,15 @@ public class MessageFactory {
     }
 
     /**
-     * 将响应消息转换成外部响应消息
+     * 将内部响应消息转换成外部响应消息
      * @return 外部响应消息
      */
     public static IMessage transformResponse(long sn, IMessage message, Session session) {
-        return null;
+        if (message instanceof OuterMessage) {
+            return message;
+        }
+        OuterMessageHeader header = OuterMessageHeader.of(sn, message.getMessageType(), message.getCommand(), message.zip());
+        return OuterMessage.of(header, message.getBody());
     }
 
 

@@ -9,6 +9,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -78,7 +79,7 @@ public class SessionManager {
         }
 
         Session oldSession = this.identities.put(identity, session);
-        if (oldSession != null) {
+        if (oldSession != null && !inner && !Objects.equals(oldSession, session)) {
             log.warn("玩家[{}]被顶号,强退账号", identity);
             oldSession.kick();
         }

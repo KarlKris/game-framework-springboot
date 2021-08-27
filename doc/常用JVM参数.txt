@@ -1,0 +1,35 @@
+// Java堆大小
+-Xms2048m
+-Xmx2048m
+// GC输出
+-XX:+PrintGCDetails
+-XX:+PrintGCDateStamps
+-Xloggc:logs/jvm.log
+// JRF 监控相关
+-XX:+UnlockCommercialFeatures
+-XX:+FlightRecorder
+// VM 安全点相关
+-XX:+PrintGCApplicationStoppedTime
+-XX:+PrintGCApplicationConcurrentTime
+-XX:+PrintSafepointStatistics
+// 监控新生代晋升老年代阈值
+-XX:+PrintTenuringDistribution
+// MetaSpace（使用本地内存，JDK8初始大小是21M）
+-XX:MetaspaceSize=
+-XX:MaxMetaspaceSize=
+// 自适应新生代大小调整输出
+-XX:+PrintAdaptiveSizePolicy
+// 输出每次MinorGC中存活对象的大小
+-XX:+PrintAdaptiveSizePolicy
+// Survivor空间占比(默认50%)
+-XX:TargetSurvivorRatio=<percent>
+
+// 基准测试
+
+// 输出JIT编译器优化的函数
+-XX:+PrintCompilation
+// 输出方法内联
+-XX:+PrintInlining
+// 内联函数的大小设置(bytes)
+// (更大的方法体会导致代码内存占用更多，更少的热点方法会被缓存，最终的效果不一定好。)
+-XX:MaxInliningSize=<value>

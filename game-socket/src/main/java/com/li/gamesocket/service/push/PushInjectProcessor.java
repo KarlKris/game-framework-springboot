@@ -4,6 +4,7 @@ import com.li.gamesocket.anno.PushInject;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
@@ -13,6 +14,7 @@ import org.springframework.util.ReflectionUtils;
  * 注解@PushInject注入
  **/
 @Component
+@Order
 public class PushInjectProcessor extends InstantiationAwareBeanPostProcessorAdapter {
 
     @Autowired
@@ -26,7 +28,7 @@ public class PushInjectProcessor extends InstantiationAwareBeanPostProcessorAdap
                 return;
             }
 
-            Object pushProxy = pushManager.getPushProxy(field.getDeclaringClass());
+            Object pushProxy = pushManager.getPushProxy(field.getType());
             field.setAccessible(true);
             field.set(bean, pushProxy);
         });

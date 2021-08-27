@@ -83,7 +83,10 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
                         body = ZipUtil.gzip(body);
                         zip = true;
                     }
+                }
 
+                if (log.isDebugEnabled()) {
+                    log.debug("向玩家[{}]推送消息", identity);
                 }
 
                 OuterMessage message = MessageFactory.toResponseOuterMessage(msg, body, zip);

@@ -2,6 +2,7 @@ package com.li.gamecore.dao.core;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -16,6 +17,7 @@ import javax.persistence.EntityManagerFactory;
  * @author li-yuanwen
  */
 @Configuration
+@ConditionalOnProperty(value = "spring.datasource.url")
 public class HibernateConfig implements CostomSessionFactory {
 
 
@@ -27,6 +29,12 @@ public class HibernateConfig implements CostomSessionFactory {
     }
 
 
+    /**
+     * 使用默认的JTATransactionManager会导致事务失败
+     * 因为TransactionSynchronizationManager.bindResource()绑定的Session
+     * 和CurrentSessionContext.currentSession()(SpringSessionContext)
+     * 调用的TransactionSynchronizationManager.getResource()来得到Session不一致或者说得不到
+     * **/
     @Bean
     @Primary
     public TransactionManager hibernateTransactionManager(EntityManagerFactory entityManagerFactory) {

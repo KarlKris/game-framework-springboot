@@ -135,7 +135,8 @@ public class ServiceDiscoveryNode {
 
         boolean change = true;
         if (this.minConnectInstanceId != null) {
-            byte[] bytes = this.curatorFramework.getData().forPath(countPath + ZkConstant.ZOOKEEPER_SLASH + minConnectInstanceId);
+            byte[] bytes = this.curatorFramework.getData()
+                    .forPath(countPath + ZkConstant.ZOOKEEPER_SLASH + minConnectInstanceId);
             int curCount = ByteUtil.bytesToInt(bytes);
             change = curCount < this.lastSecondConnectNum;
         }

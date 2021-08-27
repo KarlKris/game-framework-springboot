@@ -1,25 +1,24 @@
 package com.li.gamecommon;
 
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 /**
  * @author li-yuanwen
  * ApplicationContext持有对象工具类
  */
-@Component
 @Order(1)
-public class ApplicationContextHolder implements ApplicationContextAware {
+public class ApplicationContextHolder implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     protected static ApplicationContext applicationContext;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    public void initialize(ConfigurableApplicationContext applicationContext) {
+        ApplicationContextHolder.applicationContext = applicationContext;
     }
+
 
 
     /** 获取Bean **/

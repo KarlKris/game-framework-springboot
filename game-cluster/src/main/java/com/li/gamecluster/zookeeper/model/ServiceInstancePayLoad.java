@@ -1,6 +1,8 @@
 package com.li.gamecluster.zookeeper.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * @author li-yuanwen
@@ -8,8 +10,10 @@ import lombok.Getter;
  * ServiceDiscovery<ServiceInstance>
  **/
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServiceInstancePayLoad {
 
-
+    private String serverId;
 
 }

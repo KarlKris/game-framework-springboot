@@ -7,7 +7,7 @@ import com.li.gamecore.dao.model.PersistType;
  * @author li-yuanwen
  * 持久化接口
  */
-public interface DataBasePersistor {
+public interface DataBasePersister {
 
 
     /**
