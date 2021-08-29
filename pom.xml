@@ -24,6 +24,7 @@
         <module>game-remote</module>
         <module>game-server</module>
         <module>game-core</module>
+        <module>game-manager</module>
     </modules>
 
     <properties>
