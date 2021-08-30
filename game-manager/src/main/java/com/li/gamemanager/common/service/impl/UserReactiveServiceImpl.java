@@ -93,16 +93,18 @@ public class UserReactiveServiceImpl implements UserReactiveService {
         if(fileType != null && !image.contains(fileType)){
             throw new ManagerBadRequestException("文件格式错误！, 仅支持 " + image +" 格式");
         }
-        return findByName(SecurityUtils.getCurrentUsername()).flatMap(user -> {
-            String oldPath = user.getAvatarPath();
-            File file = FileUtils.upload(multipartFile, properties.getPath().getAvatar());
-            user.setAvatarPath(Objects.requireNonNull(file).getPath());
-            user.setAvatarName(file.getName());
-            userRepository.save(user);
-            if (!StringUtils.isEmpty(oldPath)) {
-                FileUtils.del(oldPath);
-            }
-            return Mono.just(Collections.singletonMap("avatar", file.getName()));
+        return SecurityUtils.getCurrentUsername().flatMap(userName -> {
+            return findByName(userName).flatMap(user -> {
+                String oldPath = user.getAvatarPath();
+                File file = FileUtils.upload(multipartFile, properties.getPath().getAvatar());
+                user.setAvatarPath(Objects.requireNonNull(file).getPath());
+                user.setAvatarName(file.getName());
+                userRepository.save(user);
+                if (!StringUtils.isEmpty(oldPath)) {
+                    FileUtils.del(oldPath);
+                }
+                return Mono.just(Collections.singletonMap("avatar", file.getName()));
+            });
         });
     }
 

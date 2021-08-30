@@ -43,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 public class SecurityUtils {
 
     public static final String UN_AUTHORIZED = "Unauthorized";
+    public static ReactiveUserDetailsService reactiveUserDetailsService = null;
 
     /**
      * 获取当前登录的用户
@@ -50,8 +51,10 @@ public class SecurityUtils {
      * @return UserDetails
      */
     public static Mono<UserDetails> getCurrentUser() {
-        ReactiveUserDetailsService reactiveUserDetailsService = ApplicationContextHolder.getBean(ReactiveUserDetailsService.class);
-        return reactiveUserDetailsService.findByUsername(getCurrentUsername());
+        if (reactiveUserDetailsService == null) {
+            reactiveUserDetailsService = ApplicationContextHolder.getBean(ReactiveUserDetailsService.class);
+        }
+        return getCurrentUsername().flatMap(userName-> reactiveUserDetailsService.findByUsername(userName));
     }
 
     /**
@@ -59,7 +62,7 @@ public class SecurityUtils {
      *
      * @return 系统用户名称
      */
-    public static String getCurrentUsername() {
+    public static Mono<String> getCurrentUsername() {
         return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
             Authentication authentication = securityContext.getAuthentication();
             if (authentication == null) {
@@ -70,7 +73,7 @@ public class SecurityUtils {
                 return Mono.just(userDetails.getUsername());
             }
             return Mono.error(new ManagerBadRequestException(HttpStatus.UNAUTHORIZED, "找不到当前登录的信息"));
-        }).block();
+        });
 
     }
 

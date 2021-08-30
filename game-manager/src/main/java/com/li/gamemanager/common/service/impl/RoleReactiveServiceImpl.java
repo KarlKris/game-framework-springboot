@@ -53,10 +53,10 @@ public class RoleReactiveServiceImpl implements RoleReactiveService {
 
     @Override
     public Mono<Void> addFunction(String roleId, String... functions) {
-        return findById(roleId).flatMap(role -> {
-            role.addFunctions(SecurityUtils.getCurrentUsername(), functions);
-            return roleRepository.save(role).flatMap(r -> Mono.empty());
-        });
+        return SecurityUtils.getCurrentUsername().flatMap(userName -> findById(roleId).flatMap(role -> {
+            role.addFunctions(userName, functions);
+            return roleRepository.save(role).flatMap(r->Mono.empty());
+        }));
 
     }
 

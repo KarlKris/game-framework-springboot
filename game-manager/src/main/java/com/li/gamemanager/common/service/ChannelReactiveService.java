@@ -20,7 +20,7 @@ public interface ChannelReactiveService {
      * @param userName 用户账号
      * @return /
      */
-    Flux<List<ChannelVo>> info(String userName);
+    Flux<ChannelVo> info(String userName);
 
 
     /**

@@ -31,7 +31,7 @@ public class ChannelReactiveServiceImpl implements ChannelReactiveService {
     private ChannelRepository channelRepository;
 
     @Override
-    public Flux<List<ChannelVo>> info(String userName) {
+    public Flux<ChannelVo> info(String userName) {
         return doQuery(userName, new Criteria());
     }
 
@@ -52,11 +52,7 @@ public class ChannelReactiveServiceImpl implements ChannelReactiveService {
     }
 
     @QueryLimit(entityClass = Channel.class, userName = "#{userName)")
-    private Flux<List<ChannelVo>> doQuery(String userName, Criteria criteria) {
-        return reactiveMongoTemplate.find(new Query(criteria), Channel.class).buffer().flatMap(channels -> {
-            List<ChannelVo> channelVos = new ArrayList<>(channels.size());
-            channels.forEach(c -> channelVos.add(new ChannelVo(c)));
-            return Mono.just(channelVos);
-        });
+    private Flux<ChannelVo> doQuery(String userName, Criteria criteria) {
+        return reactiveMongoTemplate.find(new Query(criteria), Channel.class).flatMap(channel -> Mono.just(new ChannelVo(channel)));
     }
 }
