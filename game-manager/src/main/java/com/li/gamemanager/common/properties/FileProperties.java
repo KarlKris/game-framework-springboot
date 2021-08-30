@@ -8,15 +8,16 @@ import org.springframework.context.annotation.Configuration;
  * @author li-yuanwen
  * @date 2021/8/28 14:13
  **/
+@Data
 @Configuration
 @ConfigurationProperties(prefix = "file")
 public class FileProperties {
 
     /** 文件大小限制 */
-    private Long maxSize;
+    private long maxSize;
 
     /** 头像大小限制 */
-    private Long avatarMaxSize;
+    private long avatarMaxSize;
 
     private ElPath mac;
 

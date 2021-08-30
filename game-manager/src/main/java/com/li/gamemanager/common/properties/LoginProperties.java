@@ -4,6 +4,7 @@ import com.li.gamemanager.common.security.config.LoginCode;
 import com.li.gamemanager.common.security.config.LoginCodeEnum;
 import com.wf.captcha.*;
 import com.wf.captcha.base.Captcha;
+import lombok.Data;
 import org.springframework.util.StringUtils;
 
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.util.Objects;
  * @author li-yuanwen
  * @date 2021/8/28 14:19
  **/
+@Data
 public class LoginProperties {
     private LoginCode loginCode;
 

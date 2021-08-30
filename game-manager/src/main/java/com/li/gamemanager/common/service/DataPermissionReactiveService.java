@@ -2,13 +2,15 @@ package com.li.gamemanager.common.service;
 
 
 import com.li.gamemanager.common.entity.DataPermission;
+import reactor.core.publisher.Mono;
+
 import java.util.List;
 
 /**
  * @author li-yuanwen
  * 数据权限接口
  */
-public interface DataPermissionService {
+public interface DataPermissionReactiveService {
 
 
     /**
@@ -23,25 +25,25 @@ public interface DataPermissionService {
      * @param userName 用户名称
      * @return /
      */
-    List<DataPermission> findByUser(String userName);
+    Mono<List<DataPermission>> findByUser(String userName);
 
     /**
      * 查询权限
      * @param id 权限id
      * @return
      */
-    DataPermission findById(String id);
+    Mono<DataPermission> findById(String id);
 
     /**
      * 更新权限
      * @param dataPermission 权限
      */
-    void update(DataPermission dataPermission);
+    Mono<Void> update(DataPermission dataPermission);
 
     /**
      * 新增权限
      * @param dataPermission 权限
      */
-    void addDataPermission(DataPermission dataPermission);
+    Mono<DataPermission> addDataPermission(DataPermission dataPermission);
 
 }

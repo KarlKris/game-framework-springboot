@@ -15,25 +15,36 @@
  */
 package com.li.gamemanager.common.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.li.gamemanager.utils.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
- * @author Zheng Jie
+ * @author li-yuanwen
  */
+@Slf4j
 @Component
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class JwtAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
-    public void commence(HttpServletRequest request,
-                         HttpServletResponse response,
-                         AuthenticationException authException) throws IOException {
+    public Mono<Void> commence(ServerWebExchange serverWebExchange, AuthenticationException e) {
+        ServerHttpResponse response = serverWebExchange.getResponse();
         // 当用户尝试访问安全的REST资源而不提供任何凭据时，将调用此方法发送401 响应
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException == null ? "Unauthorized" : authException.getMessage());
+        return SecurityUtils.writeErrorMessage(objectMapper
+                , response
+                , HttpStatus.UNAUTHORIZED
+                , e == null ? SecurityUtils.UN_AUTHORIZED : e.getMessage());
     }
 }

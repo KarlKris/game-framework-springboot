@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RsaProperties {
 
-    public String privateKey;
+    private String privateKey;
 
     @Value("${rsa.private_key}")
     public void setPrivateKey(String privateKey) {

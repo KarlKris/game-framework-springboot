@@ -17,13 +17,14 @@ package com.li.gamemanager.common.security;
 
 import com.li.gamemanager.common.properties.SecurityProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.function.server.HandlerFilterFunction;
-import org.springframework.web.reactive.function.server.HandlerFunction;
-import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 /**
@@ -31,15 +32,15 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 @Component
-public class TokenFilter implements HandlerFilterFunction {
+public class TokenFilter implements WebFilter {
 
 
     private final TokenProvider tokenProvider;
     private final SecurityProperties properties;
 
     /**
-     * @param tokenProvider     Token
-     * @param properties        JWT
+     * @param tokenProvider Token
+     * @param properties    JWT
      */
     public TokenFilter(TokenProvider tokenProvider, SecurityProperties properties) {
         this.properties = properties;
@@ -47,19 +48,21 @@ public class TokenFilter implements HandlerFilterFunction {
     }
 
     @Override
-    public Mono filter(ServerRequest serverRequest, HandlerFunction handlerFunction) {
-        String token = serverRequest.headers().firstHeader(properties.getHeader());
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        String token = request.getHeaders().getFirst(properties.getHeader());
         if (StringUtils.hasText(token) && token.startsWith(properties.getTokenStartWith())) {
             // 去掉令牌前缀
             token = token.replace(properties.getTokenStartWith(), "");
             if (tokenProvider.checkToken(token) && !tokenProvider.checkTokenExpire(token)) {
                 Authentication authentication = tokenProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                // Token 续期
                 tokenProvider.checkRenewal(token);
+                return chain.filter(exchange)
+                        .subscriberContext(ReactiveSecurityContextHolder.withAuthentication(authentication));
+
             }
         }
-        return handlerFunction.handle(serverRequest);
+        return chain.filter(exchange);
     }
 
 }

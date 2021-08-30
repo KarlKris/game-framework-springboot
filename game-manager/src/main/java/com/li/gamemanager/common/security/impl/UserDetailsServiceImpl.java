@@ -19,8 +19,8 @@ import com.li.gamemanager.common.entity.User;
 import com.li.gamemanager.common.exception.ManagerBadRequestException;
 import com.li.gamemanager.common.model.JwtUserDto;
 import com.li.gamemanager.common.properties.LoginProperties;
-import com.li.gamemanager.common.service.RoleService;
-import com.li.gamemanager.common.service.UserService;
+import com.li.gamemanager.common.service.RoleReactiveService;
+import com.li.gamemanager.common.service.UserReactiveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -43,8 +43,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements ReactiveUserDetailsService {
 
-    private final UserService userService;
-    private final RoleService roleService;
+    private final UserReactiveService userReactiveService;
+    private final RoleReactiveService roleReactiveService;
     private final LoginProperties loginProperties;
 
 
@@ -55,37 +55,36 @@ public class UserDetailsServiceImpl implements ReactiveUserDetailsService {
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        boolean searchDb = true;
-        JwtUserDto jwtUserDto = null;
         if (loginProperties.isCacheEnable() && userDtoCache.containsKey(username)) {
-            jwtUserDto = userDtoCache.get(username);
-            searchDb = false;
+            return Mono.just(userDtoCache.get(username));
         }
-        if (searchDb) {
-            User user;
-            try {
-                user = userService.findByName(username);
-            } catch (Exception e) {
-                // SpringSecurity会自动转换UsernameNotFoundException为BadCredentialsException
-                // throw new UsernameNotFoundException("", e);
-                return Mono.error(e);
-            }
-            if (user == null) {
-                return Mono.error(new UsernameNotFoundException(username));
-            } else {
+        Mono<User> userMono;
+        try {
+            userMono = userReactiveService.findByName(username);
+        } catch (Exception e) {
+            // SpringSecurity会自动转换UsernameNotFoundException为BadCredentialsException
+            // throw new UsernameNotFoundException("", e);
+            return Mono.error(e);
+        }
+        if (userMono == null) {
+            return Mono.error(new UsernameNotFoundException(username));
+        } else {
+            return userMono.flatMap(user -> {
                 if (!user.getEnabled()) {
                     return Mono.error(new ManagerBadRequestException("账号未激活！"));
                 }
-                Set<String> functionPermissions = roleService.findById(user.getRole()).getFunctionPermissions();
-                List<GrantedAuthority> authorities = new ArrayList<>(functionPermissions.size());
-                functionPermissions.forEach(k->authorities.add(new SimpleGrantedAuthority(k)));
-                jwtUserDto = new JwtUserDto(user.getUserName(), user.getPassword(), functionPermissions
-                        , user.getAvatarPath(), user.getAvatarName(), user.getEnabled()
-                        , authorities);
-                userDtoCache.put(username, jwtUserDto);
-            }
+                return roleReactiveService.findById(user.getRole()).flatMap(role -> {
+                    Set<String> functionPermissions = role.getFunctionPermissions();
+                    List<GrantedAuthority> authorities = new ArrayList<>(functionPermissions.size());
+                    functionPermissions.forEach(k -> authorities.add(new SimpleGrantedAuthority(k)));
+                    JwtUserDto userDto = new JwtUserDto(user.getUserName(), user.getPassword(), functionPermissions
+                            , user.getAvatarPath(), user.getAvatarName(), user.getEnabled()
+                            , authorities);
+                    userDtoCache.put(username, userDto);
+                    return Mono.just(userDto);
+                });
+            });
         }
-        return Mono.just(jwtUserDto);
     }
 
 }

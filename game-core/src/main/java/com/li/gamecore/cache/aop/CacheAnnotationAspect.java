@@ -182,6 +182,10 @@ public class CacheAnnotationAspect {
 
         //将参数名与参数值对应起来
         EvaluationContext context = new StandardEvaluationContext();
+        if (params == null) {
+            return context;
+        }
+
         for (int len = 0; len < params.length; len++) {
             context.setVariable(params[len], args[len]);
         }
