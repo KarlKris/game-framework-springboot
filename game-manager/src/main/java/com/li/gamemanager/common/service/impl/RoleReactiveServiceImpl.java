@@ -8,6 +8,7 @@ import com.li.gamemanager.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -27,44 +28,35 @@ public class RoleReactiveServiceImpl implements RoleReactiveService {
 
     @PostConstruct
     private void init() {
-        for (DefaultRole role : DefaultRole.values()) {
-            String roleId = role.name().toLowerCase();
-            containRole(roleId).flatMap(contain -> {
-                if (contain) {
-                    return Mono.empty();
+        roleRepository.count().subscribe(count -> {
+            if (count == null || count == 0) {
+                for (DefaultRole defaultRole : DefaultRole.values()) {
+                    String name = defaultRole.name().toLowerCase();
+                    log.warn("新角色[{}]", defaultRole.name());
+                    roleRepository.save(defaultRole.isAll() ? new Role(name, defaultRole.name()) : new Role(name)).block();
                 }
-                // 创建默认角色
-                return createRole(role.isAll() ? new Role(roleId, "all") : new Role(roleId));
-            });
+                return;
+            }
+            log.warn("角色数量[{}]", count);
+        });
 
-        }
     }
 
 
     @Override
     public Mono<Role> findById(String id) {
-        return roleRepository.findById(id).flatMap(role -> {
-            if (role == null) {
-                return Mono.error(new IllegalArgumentException("can not find role : " + id));
-            }
-            return Mono.just(role);
-        });
+        return roleRepository.findById(id);
     }
 
     @Override
     public Mono<Void> addFunction(String roleId, String... functions) {
         return SecurityUtils.getCurrentUsername().flatMap(userName -> findById(roleId).flatMap(role -> {
             role.addFunctions(userName, functions);
-            return roleRepository.save(role).flatMap(r->Mono.empty());
+            return roleRepository.save(role).flatMap(r -> Mono.empty());
         }));
-
-    }
-
-    private Mono<Boolean> containRole(String roleId) {
-        return roleRepository.findById(roleId).flatMap(role -> role == null ? Mono.just(false) : Mono.just(true));
     }
 
     private Mono<Role> createRole(Role role) {
-        return roleRepository.insert(role);
+        return roleRepository.save(role);
     }
 }

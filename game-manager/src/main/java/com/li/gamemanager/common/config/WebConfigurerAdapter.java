@@ -1,6 +1,7 @@
 package com.li.gamemanager.common.config;
 
 import com.li.gamemanager.common.properties.FileProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
@@ -22,6 +23,7 @@ public class WebConfigurerAdapter implements WebFluxConfigurer {
     /** 文件配置 */
     private final FileProperties properties;
 
+    @Autowired
     public WebConfigurerAdapter(FileProperties properties) {
         this.properties = properties;
     }

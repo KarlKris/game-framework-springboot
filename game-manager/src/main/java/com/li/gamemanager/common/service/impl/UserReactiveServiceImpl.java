@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * @author li-yuanwen
@@ -41,21 +43,15 @@ public class UserReactiveServiceImpl implements UserReactiveService {
 
     @PostConstruct
     private void init() {
-        for (DefaultUser defaultUser : DefaultUser.values()) {
-            findByName(defaultUser.name().toLowerCase()).flatMap(user -> {
-                if (user != null) {
-                    return Mono.empty();
-                }
-                String pwd = passwordEncoder.encode(defaultUser.getPwd());
-                log.error("新用户[{}],加密密码[{}],明文密码[{}]", defaultUser.name(), pwd, defaultUser.getPwd());
-                user = new User(defaultUser.name().toLowerCase(), pwd, defaultUser.getRole());
-                return createUser(user);
-            });
-
-        }
+        Flux.fromArray(DefaultUser.values())
+                .flatMap(defaultUser -> userRepository.findById(defaultUser.name())
+                        .filter(Objects::isNull)
+                        .flatMap(user -> {
+            String pwd = passwordEncoder.encode(defaultUser.getPwd());
+            log.warn("新用户[{}],密码[{}]", defaultUser.name(), defaultUser.getPwd());
+            return userRepository.save(new User(defaultUser.name(), pwd, defaultUser.getRole()));
+        })).blockLast();
     }
-
-
 
 
     @Override
@@ -65,7 +61,12 @@ public class UserReactiveServiceImpl implements UserReactiveService {
 
     @Override
     public Mono<User> createUser(User newUser) {
-        return userRepository.insert(newUser);
+        return userRepository.existsById(newUser.getUserName()).flatMap(exist -> {
+            if (exist) {
+                return Mono.error(new ManagerBadRequestException("用户[" + newUser.getUserName() + "]已存在"));
+            }
+            return userRepository.save(newUser);
+        });
     }
 
     @Override

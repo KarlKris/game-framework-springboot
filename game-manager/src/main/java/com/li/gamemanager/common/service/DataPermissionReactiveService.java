@@ -12,14 +12,6 @@ import java.util.List;
  */
 public interface DataPermissionReactiveService {
 
-
-    /**
-     * 检查当前用户是否拥有权限
-     * @param permissions 权限
-     * @return true　拥有
-     */
-    boolean check(String ...permissions);
-
     /**
      * 查询权限
      * @param userName 用户名称

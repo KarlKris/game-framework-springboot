@@ -5,23 +5,19 @@ import com.li.gamemanager.common.repository.DataPermissionRepository;
 import com.li.gamemanager.common.service.DataPermissionReactiveService;
 import com.li.gamemanager.common.service.RoleReactiveService;
 import com.li.gamemanager.common.service.UserReactiveService;
-import com.li.gamemanager.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author li-yuanwen
  */
 @Slf4j
-@Service("dp")
+@Service
 public class DataPermissionReactiveServiceImpl implements DataPermissionReactiveService {
 
     @Autowired
@@ -30,19 +26,6 @@ public class DataPermissionReactiveServiceImpl implements DataPermissionReactive
     private UserReactiveService userReactiveService;
     @Autowired
     private RoleReactiveService roleReactiveService;
-
-    // todo 不知道是否会报错
-    @Override
-    public boolean check(String... permissions) {
-        // 获取当前用户的所有权限
-        return SecurityUtils.getCurrentUser().flatMap(userDetails -> {
-            List<String> elPermissions = userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-            // 判断当前用户的所有权限是否包含接口上定义的权限
-            return Mono.just(elPermissions.contains("all") || Arrays.stream(permissions).anyMatch(elPermissions::contains));
-        }).block();
-    }
 
     @Override
     public Mono<List<DataPermission>> findByUser(String userName) {

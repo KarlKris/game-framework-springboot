@@ -1,10 +1,10 @@
 package com.li.gamemanager.common.repository;
 
 import com.li.gamemanager.common.entity.User;
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 /**
  * @author li-yuanwen
  */
-public interface UserRepository extends ReactiveMongoRepository<User, String> {
+public interface UserRepository extends ReactiveCrudRepository<User, String> {
 }

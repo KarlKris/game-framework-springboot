@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/channel")
 @Api(tags = "渠道相关接口")
-public class OperatorController {
+public class ChannelController {
 
     @Autowired
     private ChannelReactiveService channelReactiveService;
@@ -33,14 +33,14 @@ public class OperatorController {
 
     @ApiOperation("权限内所有渠道信息")
     @GetMapping(value = "/info")
-    @PreAuthorize("@dp.check('channel:info')")
+    @PreAuthorize("hasAnyRole('admin','channel','channel_info')")
     public Mono<Object> info() {
         return SecurityUtils.getCurrentUsername().flatMap(username-> channelReactiveService.info(username).collectList());
     }
 
     @ApiOperation("添加渠道")
     @PutMapping(value = "/add")
-    @PreAuthorize("@dp.check('channel:add')")
+    @PreAuthorize("hasAnyRole('admin','channel','channel_add')")
     public Mono<Object> addChannel(@RequestBody ChannelVo vo) {
 
         Channel channel = new Channel(vo.getId(), vo.getName(), vo.getLoginKey(), vo.getChargeKey(), vo.getWhiteIps(), vo.getWhiteAccounts());
@@ -50,7 +50,7 @@ public class OperatorController {
 
     @ApiOperation("修改渠道")
     @PutMapping(value = "/modify")
-    @PreAuthorize("@dp.check('channel:modify')")
+    @PreAuthorize("hasAnyRole('admin','channel','channel_modify')")
     public Mono<Object> modifyOperator(@RequestBody ChannelVo vo) {
 
         Channel channel = new Channel(vo.getId(), vo.getName(), vo.getLoginKey(), vo.getChargeKey(), vo.getWhiteIps(), vo.getWhiteAccounts());
@@ -61,7 +61,7 @@ public class OperatorController {
 
     @ApiOperation("删除渠道")
     @DeleteMapping(value = "/delete")
-    @PreAuthorize("@dp.check('channel:delete')")
+    @PreAuthorize("hasAnyRole('admin','channel','channel_delete')")
     public Mono<Object> delOperator(@RequestBody int channelId) {
         channelReactiveService.delChannel(channelId);
         return Mono.just(new ResponseEntity<>(HttpStatus.OK));
