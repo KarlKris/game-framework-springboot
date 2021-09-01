@@ -7,24 +7,24 @@ package com.li.gamemanager.common.model;
 public enum DefaultUser {
 
     /** 管理员账号 **/
-    ADMIN("123456", "admin"),
+    ADMIN("123456", DefaultRole.ADMIN),
 
     ;
 
     /** 密码 **/
     private String pwd;
     /** 角色 **/
-    private String role;
+    private DefaultRole role;
 
     public String getPwd() {
         return pwd;
     }
 
-    public String getRole() {
+    public DefaultRole getRole() {
         return role;
     }
 
-    DefaultUser(String pwd, String role) {
+    DefaultUser(String pwd, DefaultRole role) {
         this.pwd = pwd;
         this.role = role;
     }

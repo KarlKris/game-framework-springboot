@@ -50,12 +50,13 @@ public class TokenFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
-        String token = request.getHeaders().getFirst(properties.getHeader());
-        if (StringUtils.hasText(token) && token.startsWith(properties.getTokenStartWith())) {
+        String token = tokenProvider.getToken(request);
+        if (StringUtils.hasText(token)) {
             // 去掉令牌前缀
             token = token.replace(properties.getTokenStartWith(), "");
-            if (tokenProvider.checkToken(token) && !tokenProvider.checkTokenExpire(token)) {
-                Authentication authentication = tokenProvider.getAuthentication(token);
+            Authentication authentication;
+            if (tokenProvider.checkToken(token) && !tokenProvider.checkTokenExpire(token)
+                    && (authentication = tokenProvider.getAuthentication(token)) != null) {
                 tokenProvider.checkRenewal(token);
                 return chain.filter(exchange)
                         .subscriberContext(ReactiveSecurityContextHolder.withAuthentication(authentication));

@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.util.function.Consumer;
 
 /**
  * @author li-yuanwen
@@ -28,17 +29,17 @@ public class RoleReactiveServiceImpl implements RoleReactiveService {
 
     @PostConstruct
     private void init() {
-        roleRepository.count().subscribe(count -> {
-            if (count == null || count == 0) {
-                for (DefaultRole defaultRole : DefaultRole.values()) {
-                    String name = defaultRole.name().toLowerCase();
-                    log.warn("新角色[{}]", defaultRole.name());
-                    roleRepository.save(defaultRole.isAll() ? new Role(name, defaultRole.name()) : new Role(name)).block();
-                }
-                return;
-            }
-            log.warn("角色数量[{}]", count);
-        });
+
+        Flux.fromArray(DefaultRole.values())
+                .subscribe(defaultRole
+                        -> roleRepository.existsById(defaultRole.name())
+                        .filter(exist -> !exist).
+                                subscribe(exist -> {
+                                    String name = defaultRole.name();
+                                    roleRepository.save(defaultRole.isAll()
+                                            ? new Role(name, defaultRole.name()) : new Role(name))
+                                            .subscribe(role -> log.warn("新角色[{}]", role.getRole()));
+                                }));
 
     }
 

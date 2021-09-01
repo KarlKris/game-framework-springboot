@@ -44,13 +44,17 @@ public class UserReactiveServiceImpl implements UserReactiveService {
     @PostConstruct
     private void init() {
         Flux.fromArray(DefaultUser.values())
-                .flatMap(defaultUser -> userRepository.findById(defaultUser.name())
-                        .filter(Objects::isNull)
-                        .flatMap(user -> {
-            String pwd = passwordEncoder.encode(defaultUser.getPwd());
-            log.warn("新用户[{}],密码[{}]", defaultUser.name(), defaultUser.getPwd());
-            return userRepository.save(new User(defaultUser.name(), pwd, defaultUser.getRole()));
-        })).blockLast();
+                .subscribe(defaultUser
+                        -> {
+                    String userName = defaultUser.name().toLowerCase();
+                    userRepository.existsById(userName)
+                            .filter(exist -> !exist)
+                            .subscribe(exist -> {
+                                String pwd = passwordEncoder.encode(defaultUser.getPwd());
+                                userRepository.save(new User(userName, pwd, defaultUser.getRole().name()))
+                                        .subscribe(user -> log.warn("新用户[{}],密码[{}]", user.getUserName(), user.getPassword()));
+                            });
+                });
     }
 
 
@@ -91,8 +95,8 @@ public class UserReactiveServiceImpl implements UserReactiveService {
         // 验证文件上传的格式
         String image = "gif jpg png jpeg";
         String fileType = FileUtils.getExtensionName(multipartFile.getOriginalFilename());
-        if(fileType != null && !image.contains(fileType)){
-            throw new ManagerBadRequestException("文件格式错误！, 仅支持 " + image +" 格式");
+        if (fileType != null && !image.contains(fileType)) {
+            throw new ManagerBadRequestException("文件格式错误！, 仅支持 " + image + " 格式");
         }
         return SecurityUtils.getCurrentUsername().flatMap(userName -> {
             return findByName(userName).flatMap(user -> {

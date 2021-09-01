@@ -15,10 +15,13 @@
  */
 package com.li.gamemanager.common.security.impl;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.li.gamemanager.common.entity.User;
 import com.li.gamemanager.common.exception.ManagerBadRequestException;
 import com.li.gamemanager.common.model.JwtUserDto;
 import com.li.gamemanager.common.properties.LoginProperties;
+import com.li.gamemanager.common.properties.SecurityProperties;
 import com.li.gamemanager.common.service.RoleReactiveService;
 import com.li.gamemanager.common.service.UserReactiveService;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +33,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author li-yuanwen
@@ -46,17 +51,25 @@ public class UserDetailsServiceImpl implements ReactiveUserDetailsService {
     private final UserReactiveService userReactiveService;
     private final RoleReactiveService roleReactiveService;
     private final LoginProperties loginProperties;
-
+    private final SecurityProperties properties;
 
     /**
      * 用户信息缓存
      */
-    static Map<String, JwtUserDto> userDtoCache = new ConcurrentHashMap<>();
+    public static Cache<String, JwtUserDto> userDtoCache;
+
+    @PostConstruct
+    private void init() {
+        userDtoCache = Caffeine.newBuilder()
+                .expireAfterAccess(properties.getTokenValidityInSeconds() << 2, TimeUnit.MINUTES).build();
+    }
+
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        if (loginProperties.isCacheEnable() && userDtoCache.containsKey(username)) {
-            return Mono.just(userDtoCache.get(username));
+        JwtUserDto temp;
+        if (loginProperties.isCacheEnable() && (temp = userDtoCache.getIfPresent(username)) != null) {
+            return Mono.just(temp);
         }
         Mono<User> userMono;
         try {

@@ -82,14 +82,14 @@ public class SecurityUtils {
      * @param objectMapper jackson序列化工具
      * @param response response
      * @param status 状态
-     * @param msg 描述
      * @return /
      */
     public static Mono<Void> writeErrorMessage(ObjectMapper objectMapper, ServerHttpResponse response, HttpStatus status, String msg) {
+        response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         String body = null;
         try {
-            body = objectMapper.writeValueAsString(new ResponseEntity<>(msg, status));
+            body = objectMapper.writeValueAsString(new ResponseEntity(msg, status));
         } catch (JsonProcessingException e) {
             log.error("序列化ResponseEntity出现未知异常", e);
             body = UN_AUTHORIZED;

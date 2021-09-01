@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -129,7 +130,7 @@ public class AuthorizationController {
 
     @ApiOperation("退出登录")
     @AnonymousDeleteMapping(value = "/logout")
-    public Mono<Object> logout(HttpServletRequest request) {
+    public Mono<Object> logout(ServerHttpRequest request) {
         tokenProvider.kickOut(tokenProvider.getToken(request));
         return Mono.just(new ResponseEntity<>(HttpStatus.OK));
     }

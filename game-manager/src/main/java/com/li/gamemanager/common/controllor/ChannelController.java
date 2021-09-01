@@ -33,14 +33,14 @@ public class ChannelController {
 
     @ApiOperation("权限内所有渠道信息")
     @GetMapping(value = "/info")
-    @PreAuthorize("hasAnyRole('admin','channel','channel_info')")
+    @PreAuthorize("hasAnyRole('ADMIN','CHANNEL','CHANNEL_INFO')")
     public Mono<Object> info() {
         return SecurityUtils.getCurrentUsername().flatMap(username-> channelReactiveService.info(username).collectList());
     }
 
     @ApiOperation("添加渠道")
     @PutMapping(value = "/add")
-    @PreAuthorize("hasAnyRole('admin','channel','channel_add')")
+    @PreAuthorize("hasAnyRole('ADMIN','CHANNEL','CHANNEL_ADD')")
     public Mono<Object> addChannel(@RequestBody ChannelVo vo) {
 
         Channel channel = new Channel(vo.getId(), vo.getName(), vo.getLoginKey(), vo.getChargeKey(), vo.getWhiteIps(), vo.getWhiteAccounts());
@@ -50,7 +50,7 @@ public class ChannelController {
 
     @ApiOperation("修改渠道")
     @PutMapping(value = "/modify")
-    @PreAuthorize("hasAnyRole('admin','channel','channel_modify')")
+    @PreAuthorize("hasAnyRole('ADMIN','CHANNEL','CHANNEL_MODIFY')")
     public Mono<Object> modifyOperator(@RequestBody ChannelVo vo) {
 
         Channel channel = new Channel(vo.getId(), vo.getName(), vo.getLoginKey(), vo.getChargeKey(), vo.getWhiteIps(), vo.getWhiteAccounts());
@@ -61,7 +61,7 @@ public class ChannelController {
 
     @ApiOperation("删除渠道")
     @DeleteMapping(value = "/delete")
-    @PreAuthorize("hasAnyRole('admin','channel','channel_delete')")
+    @PreAuthorize("hasAnyRole('ADMIN','CHANNEL','CHANNEL_DELETE')")
     public Mono<Object> delOperator(@RequestBody int channelId) {
         channelReactiveService.delChannel(channelId);
         return Mono.just(new ResponseEntity<>(HttpStatus.OK));

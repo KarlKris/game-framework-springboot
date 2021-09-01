@@ -20,21 +20,21 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.li.gamemanager.common.model.JwtUserDto;
 import com.li.gamemanager.common.properties.SecurityProperties;
+import com.li.gamemanager.common.security.impl.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -115,8 +115,12 @@ public class TokenProvider implements InitializingBean {
      */
     Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        User principal = new User(claims.getSubject(), "******", new ArrayList<>());
-        return new UsernamePasswordAuthenticationToken(principal, token, new ArrayList<>());
+        String userName = claims.getSubject();
+        JwtUserDto userDto = UserDetailsServiceImpl.userDtoCache.getIfPresent(userName);
+        if (userDto == null) {
+            return null;
+        }
+        return new UsernamePasswordAuthenticationToken(userDto, token, userDto.getAuthorities());
     }
 
     public Claims getClaims(String token) {
@@ -156,8 +160,8 @@ public class TokenProvider implements InitializingBean {
         }
     }
 
-    public String getToken(HttpServletRequest request) {
-        final String requestHeader = request.getHeader(properties.getHeader());
+    public String getToken(ServerHttpRequest request) {
+        final String requestHeader = request.getHeaders().getFirst(properties.getHeader());
         if (requestHeader != null && requestHeader.startsWith(properties.getTokenStartWith())) {
             return requestHeader.substring(properties.getTokenStartWith().length());
         }

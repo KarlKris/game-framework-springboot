@@ -38,7 +38,7 @@ public class ChannelReactiveServiceImpl implements ChannelReactiveService {
 
     @Override
     public Mono<Channel> addChannel(Channel channel) {
-        return channelRepository.insert(channel);
+        return channelRepository.save(channel);
     }
 
     @Override

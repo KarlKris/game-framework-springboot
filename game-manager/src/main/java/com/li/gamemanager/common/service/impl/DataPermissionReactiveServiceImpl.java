@@ -63,6 +63,6 @@ public class DataPermissionReactiveServiceImpl implements DataPermissionReactive
 
     @Override
     public Mono<DataPermission> addDataPermission(DataPermission dataPermission) {
-        return dataPermissionRepository.insert(dataPermission);
+        return dataPermissionRepository.save(dataPermission);
     }
 }

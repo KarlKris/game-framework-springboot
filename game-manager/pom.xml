@@ -12,7 +12,7 @@
     <artifactId>game-manager</artifactId>
     <version>1.0</version>
     <name>game-manager</name>
-    <description>游戏框架之Web管理后台</description>
+    <description>游戏框架之响应式Web管理后台</description>
 
     <properties>
         <java.version>1.8</java.version>
