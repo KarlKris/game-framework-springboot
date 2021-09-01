@@ -71,8 +71,14 @@ public class SendProxyInvoker implements InvocationHandler {
 
         boolean responseType = method.getReturnType() == Response.class;
 
-        InnerMessage message = MessageFactory.toRequestInnerMessage(this.snCtxManager.nextSn()
-                , methodCtx.getCommand(), serializer.getSerializerType(), zip, body);
+        // todo session
+        InnerMessage message = MessageFactory.toInnerMessage(this.snCtxManager.nextSn()
+                , ProtocolConstant.VOCATIONAL_WORK_REQ
+                , methodCtx.getCommand()
+                , serializer.getSerializerType()
+                , zip
+                , body
+                , null);
 
         try {
             CompletableFuture<Response> future = client.send(message, (msg, completableFuture)

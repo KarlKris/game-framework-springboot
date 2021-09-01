@@ -36,10 +36,7 @@ public class InnerMessage implements IMessage {
 
     @Override
     public byte getSerializeType() {
-        byte type = header.getType();
-        type = (byte) ((type & ProtocolConstant.SERIALIZE_TYPE_MARK) >> 4);
-
-        return type;
+        return header.getSerializeType();
     }
 
     @Override

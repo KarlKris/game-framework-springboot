@@ -89,7 +89,34 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
                     log.debug("向玩家[{}]推送消息", identity);
                 }
 
-                OuterMessage message = MessageFactory.toResponseOuterMessage(msg, body, zip);
+                Short lastProtocolHeaderIdentity = session.getChannel().attr(ChannelAttributeKeys.LAST_PROTOCOL_HEADER_IDENTITY).get();
+                if (lastProtocolHeaderIdentity == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("未知玩家[{}]Channel使用的消息类型,忽略本次推送", identity);
+                    }
+                    continue;
+                }
+
+                IMessage message = null;
+                if (lastProtocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
+                    // 内部通信类型
+                    message = MessageFactory.toInnerMessage(msg.getSn()
+                            , ProtocolConstant.toOriginMessageType(msg.getMessageType())
+                            , msg.getCommand()
+                            , serializeType
+                            , zip
+                            , body
+                            , session);
+                }else if(lastProtocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
+                    // 外部通信类型
+                    message = MessageFactory.toOuterMessage(msg.getSn()
+                            , ProtocolConstant.toOriginMessageType(msg.getMessageType())
+                            , msg.getCommand()
+                            , serializeType
+                            , zip
+                            , body);
+                }
+
                 sessionManager.writeAndFlush(session, message);
             }
 
@@ -117,7 +144,24 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
                 log.debug("转发响应消息[{}]至[{}]", msg, session.ip());
             }
 
-            IMessage message = MessageFactory.transformResponse(forwardSnCtx.getSn(), msg, session);
+            IMessage message = null;
+            short protocolHeaderIdentity = msg.getProtocolHeaderIdentity();
+            if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
+                message = MessageFactory.toOuterMessage(forwardSnCtx.getSn()
+                        , ProtocolConstant.toOriginMessageType(msg.getMessageType())
+                        , msg.getCommand()
+                        , msg.getSerializeType()
+                        , msg.zip()
+                        , msg.getBody());
+            }else if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
+                message = MessageFactory.toInnerMessage(forwardSnCtx.getSn()
+                        , ProtocolConstant.toOriginMessageType(msg.getMessageType())
+                        , msg.getCommand()
+                        , msg.getSerializeType()
+                        , msg.zip()
+                        , msg.getBody()
+                        , session);
+            }
 
             sessionManager.writeAndFlush(session, message);
 

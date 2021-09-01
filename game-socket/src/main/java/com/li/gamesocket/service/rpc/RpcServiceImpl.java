@@ -9,6 +9,7 @@ import com.li.gamesocket.client.NioNettyClientFactory;
 import com.li.gamesocket.protocol.IMessage;
 import com.li.gamesocket.protocol.InnerMessage;
 import com.li.gamesocket.protocol.MessageFactory;
+import com.li.gamesocket.protocol.ProtocolConstant;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,13 @@ public class RpcServiceImpl implements RpcService {
         NioNettyClient client = clientFactory.newInstance(address);
         long nextSn = snCtxManager.nextSn();
         // 构建内部消息进行转发
-        InnerMessage innerMessage = MessageFactory.toForwardMessage(message, nextSn, session);
+        InnerMessage innerMessage = MessageFactory.toInnerMessage(nextSn
+                , ProtocolConstant.toOriginMessageType(message.getMessageType())
+                , message.getCommand()
+                , message.getSerializeType()
+                , message.zip()
+                , message.getBody()
+                , session);
 
         try {
             client.send(innerMessage

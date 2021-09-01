@@ -115,7 +115,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         if (methodInvokeCtx == null) {
             // RPC
             if (!this.rpcService.forward(session, message)) {
-                response(session, message, serializer.serialize(Response.INVALID_OP), false);
+                response(session, message, false, serializer.getSerializerType(), serializer.serialize(Response.INVALID_OP));
             }
             return;
         }
@@ -142,7 +142,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
 
                 if (methodInvokeCtx.isIdentity() && identity <= 0) {
                     // 没有标识
-                    response(session, message, serializer.serialize(Response.NO_IDENTITY), false);
+                    response(session, message, false, serializer.getSerializerType(), serializer.serialize(Response.NO_IDENTITY));
                     return;
                 }
 
@@ -152,7 +152,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
 
                 if (methodInvokeCtx.isIdentity() && !session.identity()) {
                     // 没有标识
-                    response(session, message, serializer.serialize(Response.NO_IDENTITY), false);
+                    response(session, message, false, serializer.getSerializerType(), serializer.serialize(Response.NO_IDENTITY));
                     return;
                 }
 
@@ -194,13 +194,30 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             log.error("发生未知异常", e);
             responseBody = serializer.serialize(Response.UNKNOWN);
         }finally {
-            response(session, message, responseBody, zip);
+            response(session, message, zip, serializer.getSerializerType(), responseBody);
         }
     }
 
     /** 响应 **/
-    private void response(Session session, IMessage message, byte[] responseBody, boolean zip) {
-        sessionManager.writeAndFlush(session, MessageFactory.transformResponseMsg(session, message, responseBody, zip));
+    private void response(Session session, IMessage requestMessage, boolean zip, byte serializeType, byte[] responseBody) {
+        IMessage message = null;
+        if (requestMessage.isInnerMessage()) {
+            message = MessageFactory.toInnerMessage(requestMessage.getSn()
+                    , ProtocolConstant.transformResponse(requestMessage.getMessageType())
+                    , requestMessage.getCommand()
+                    , serializeType
+                    , zip
+                    , responseBody
+                    , session);
+        }else if (requestMessage.isOuterMessage()) {
+            message = MessageFactory.toOuterMessage(requestMessage.getSn()
+                    , ProtocolConstant.transformResponse(requestMessage.getMessageType())
+                    , requestMessage.getCommand()
+                    , serializeType
+                    , zip
+                    , responseBody);
+        }
+        sessionManager.writeAndFlush(session, message);
     }
 
 

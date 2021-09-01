@@ -23,6 +23,8 @@ public class OuterMessageHeader {
     private Command command;
     /** 消息体压缩标识(true为压缩) **/
     private boolean zip;
+    /** 消息体序列化标识 **/
+    private byte serializeType;
 
     /** 写入至ByteBuf **/
     void writeTo(ByteBuf out) {
@@ -30,6 +32,9 @@ public class OuterMessageHeader {
         // 长度占位
         out.writeInt(0);
         out.writeLong(sn);
+
+        // 添加序列化类型
+        type = ProtocolConstant.addSerializeType(type, serializeType);
 
         // 加入压缩标识
         if (zip) {
@@ -57,17 +62,19 @@ public class OuterMessageHeader {
         }
 
         header.zip = ProtocolConstant.hasState(header.type, ProtocolConstant.BODY_ZIP_MARK);
+        header.serializeType = ProtocolConstant.getSerializeType(header.type);
 
         return header;
     }
 
 
-    static OuterMessageHeader of(long sn, byte type, Command command, boolean zip) {
+    static OuterMessageHeader of(long sn, byte type, Command command, boolean zip, byte serializeType) {
         OuterMessageHeader header = new OuterMessageHeader();
         header.sn = sn;
         header.type = type;
         header.command = command;
         header.zip = zip;
+        header.serializeType = serializeType;
         return header;
     }
 

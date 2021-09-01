@@ -99,6 +99,15 @@ public interface ProtocolConstant {
     }
 
     /**
+     * 从消息类型中获取序列化类型
+     * @param type 消息类型
+     * @return 序列化类型
+     */
+    static byte getSerializeType(byte type) {
+        return (byte) ((type & ProtocolConstant.SERIALIZE_TYPE_MARK) >> 4);
+    }
+
+    /**
      * 消息类型字段是否含有某种标识
      * @param type 消息类型
      * @param mark 标识掩码
@@ -146,12 +155,21 @@ public interface ProtocolConstant {
     }
 
     /**
-     * 将消息类型转发至响应
+     * 将消息类型转换至响应
      * @param type 原类型
      * @return 响应类型
      */
     static byte transformResponse(byte type) {
-        return type |= REQ_RES_TYPE_MARK;
+        return (byte) ((type |= REQ_RES_TYPE_MARK) & MESSAGE_TYPE_MARK);
+    }
+
+    /**
+     * 还原成纯消息类型（即后四位）
+     * @param type
+     * @return
+     */
+    static byte toOriginMessageType(byte type) {
+        return (byte) (type & MESSAGE_TYPE_MARK);
     }
 
 

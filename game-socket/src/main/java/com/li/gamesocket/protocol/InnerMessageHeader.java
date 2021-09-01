@@ -22,6 +22,8 @@ public class InnerMessageHeader {
     private Command command;
     /** 消息体压缩标识(true为压缩) **/
     private boolean zip;
+    /** 消息体序列化标识 **/
+    private byte serializeType;
 
     /** 消息序号 **/
     private long sn;
@@ -36,6 +38,9 @@ public class InnerMessageHeader {
         out.writeShort(protocolId);
         // 长度占位
         out.writeInt(0);
+
+        // 加入序列化标识
+        type = ProtocolConstant.addSerializeType(type, serializeType);
 
         // 加入压缩标识
         if (zip) {
@@ -74,6 +79,7 @@ public class InnerMessageHeader {
         }
 
         header.zip = ProtocolConstant.hasState(header.type, ProtocolConstant.BODY_ZIP_MARK);
+        header.serializeType = ProtocolConstant.getSerializeType(header.type);
 
         header.sn = in.readLong();
         header.sourceId = in.readLong();
@@ -88,11 +94,12 @@ public class InnerMessageHeader {
     }
 
     static InnerMessageHeader of(byte msgType, Command command
-            , boolean zip, long sn, long sourceId, byte[] ip) {
+            , boolean zip, byte serializeType, long sn, long sourceId, byte[] ip) {
         InnerMessageHeader header = new InnerMessageHeader();
         header.type = msgType;
         header.command = command;
         header.zip = zip;
+        header.serializeType = serializeType;
         header.sn = sn;
         header.sourceId = sourceId;
         header.ip = ip;

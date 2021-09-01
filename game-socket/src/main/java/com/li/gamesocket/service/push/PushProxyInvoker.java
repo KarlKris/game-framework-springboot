@@ -4,6 +4,7 @@ import cn.hutool.core.util.ZipUtil;
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.protocol.InnerMessage;
 import com.li.gamesocket.protocol.MessageFactory;
+import com.li.gamesocket.protocol.ProtocolConstant;
 import com.li.gamesocket.protocol.PushResponse;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
@@ -89,14 +90,21 @@ public class PushProxyInvoker implements InvocationHandler {
                 zip = true;
             }
 
-            InnerMessage message = MessageFactory.toResponseInnerMessage(this.snCtxManager.nextSn()
-                    , methodCtx.getCommand(), serializer.getSerializerType(), zip, body);
+            Session session = entry.getKey();
+
+            InnerMessage message = MessageFactory.toInnerMessage(this.snCtxManager.nextSn()
+                    , ProtocolConstant.VOCATIONAL_WORK_REQ
+                    , methodCtx.getCommand()
+                    , serializer.getSerializerType()
+                    , zip
+                    , body
+                    , session);
 
             if (log.isDebugEnabled()) {
                 log.debug("推送消息[{},{}]", message.getSn(), message.getCommand());
             }
 
-            sessionManager.writeAndFlush(entry.getKey(), message);
+            sessionManager.writeAndFlush(session, message);
         }
 
         return null;
