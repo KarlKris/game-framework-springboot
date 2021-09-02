@@ -1,12 +1,14 @@
-package com.li.gameserver.modules.login.service.impl;
+package com.li.gameserver.modules.account.service.impl;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.li.gamecommon.exception.BadRequestException;
-import com.li.gameremote.modules.login.game.GameServerLoginResultCode;
-import com.li.gameserver.modules.login.manager.Account;
-import com.li.gameserver.modules.login.manager.AccountManager;
-import com.li.gameserver.modules.login.service.AccountService;
+import com.li.gameremote.modules.account.facade.ServerAccountResultCode;
+import com.li.gameremote.modules.account.vo.AccountVo;
+import com.li.gameremote.modules.login.game.facade.GameServerLoginResultCode;
+import com.li.gameserver.modules.account.manager.Account;
+import com.li.gameserver.modules.account.manager.AccountManager;
+import com.li.gameserver.modules.account.service.AccountService;
 import com.li.gamesocket.channelhandler.FirewallService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +60,14 @@ public class AccountServiceImpl implements AccountService {
             throw new BadRequestException(GameServerLoginResultCode.ACCOUNT_NOT_FOUND);
         }
         return accountManager.load(id).getId();
+    }
+
+    @Override
+    public AccountVo transform(long identity) {
+        Account account = accountManager.load(identity);
+        if (account == null) {
+            throw new BadRequestException(ServerAccountResultCode.ACCOUNT_NOT_FOUND);
+        }
+        return new AccountVo(account.getAccountName());
     }
 }

@@ -1,4 +1,4 @@
-package com.li.gameremote.modules.login.gateway;
+package com.li.gameremote.modules.login.gateway.facade;
 
 /**
  * @author li-yuanwen

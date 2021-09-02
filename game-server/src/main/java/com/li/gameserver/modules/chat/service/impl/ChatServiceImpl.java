@@ -1,6 +1,6 @@
 package com.li.gameserver.modules.chat.service.impl;
 
-import com.li.gameserver.modules.chat.facade.ChatPush;
+import com.li.gameremote.modules.chat.facade.ChatPush;
 import com.li.gameremote.modules.chat.vo.ChatContent;
 import com.li.gameserver.modules.chat.service.ChatService;
 import com.li.gamesocket.anno.PushInject;

@@ -1,4 +1,6 @@
-package com.li.gameserver.modules.login.service;
+package com.li.gameserver.modules.account.service;
+
+import com.li.gameremote.modules.account.vo.AccountVo;
 
 /**
  * @author li-yuanwen
@@ -21,5 +23,12 @@ public interface AccountService {
      * @return 账号标识
      */
     long login(String accountName);
+
+    /**
+     * 转换成账号信息展示VO
+     * @param identity 身份标识
+     * @return AccountVo
+     */
+    AccountVo transform(long identity);
 
 }

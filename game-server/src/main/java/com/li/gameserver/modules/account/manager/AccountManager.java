@@ -1,4 +1,4 @@
-package com.li.gameserver.modules.login.manager;
+package com.li.gameserver.modules.account.manager;
 
 import com.li.gamecommon.common.MultiServerIdGenerator;
 import com.li.gamecore.cache.anno.Cachedable;

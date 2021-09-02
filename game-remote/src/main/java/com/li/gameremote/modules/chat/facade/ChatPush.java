@@ -1,4 +1,4 @@
-package com.li.gameserver.modules.chat.facade;
+package com.li.gameremote.modules.chat.facade;
 
 import com.li.gameremote.modules.chat.vo.ChatContent;
 import com.li.gamesocket.anno.*;

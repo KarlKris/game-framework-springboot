@@ -1,4 +1,4 @@
-package com.li.gameserver.modules.chat.facade;
+package com.li.gameremote.modules.chat.facade;
 
 /**
  * @author li-yuanwen

@@ -1,4 +1,4 @@
-package com.li.gameremote.modules.login.game;
+package com.li.gameremote.modules.login.game.facade;
 
 import com.li.gamesocket.anno.InBody;
 import com.li.gamesocket.anno.SocketCommand;

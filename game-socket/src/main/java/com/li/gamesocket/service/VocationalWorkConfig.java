@@ -2,15 +2,19 @@ package com.li.gamesocket.service;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author li-yuanwen
  * @date 2021/8/1 10:28
  * 业务相关参数
  **/
-@Component
 @Getter
+@Configuration
 public class VocationalWorkConfig {
 
     /** 单个单线程池队列最大长度 **/
@@ -22,5 +26,4 @@ public class VocationalWorkConfig {
     /** 超时时长(秒) **/
     @Value("${netty.timeout.second:5}")
     private int timeoutSecond;
-
 }

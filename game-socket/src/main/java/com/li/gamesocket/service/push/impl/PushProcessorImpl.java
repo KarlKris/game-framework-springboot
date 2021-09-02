@@ -9,6 +9,7 @@ import com.li.gamesocket.service.VocationalWorkConfig;
 import com.li.gamesocket.service.command.CommandManager;
 import com.li.gamesocket.service.command.MethodCtx;
 import com.li.gamesocket.service.command.MethodInvokeCtx;
+import com.li.gamesocket.service.handler.DispatcherExecutorService;
 import com.li.gamesocket.service.push.PushProcessor;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
@@ -35,30 +36,34 @@ public class PushProcessorImpl implements PushProcessor {
     private SessionManager sessionManager;
     @Autowired
     private VocationalWorkConfig vocationalWorkConfig;
+    @Autowired
+    private DispatcherExecutorService dispatcherExecutorService;
 
     @Override
     public void process(IMessage message) {
-        MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(message.getCommand());
-        if (methodInvokeCtx == null) {
-            doPush(message);
-            return;
-        }
-
-        // 查询序列化/反序列化方式
-        byte serializeType = message.getSerializeType();
-        Serializer serializer = serializerManager.getSerializer(serializeType);
-        if (serializer == null) {
-            if (log.isWarnEnabled()) {
-                log.warn("推送消息序列化类型[{}],找不到对应的序列化工具,忽略", serializeType);
+        dispatcherExecutorService.execute(() -> {
+            MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(message.getCommand());
+            if (methodInvokeCtx == null) {
+                doPush(message);
+                return;
             }
-            return;
-        }
 
-        PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
-        MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
+            // 查询序列化/反序列化方式
+            byte serializeType = message.getSerializeType();
+            Serializer serializer = serializerManager.getSerializer(serializeType);
+            if (serializer == null) {
+                if (log.isWarnEnabled()) {
+                    log.warn("推送消息序列化类型[{}],找不到对应的序列化工具,忽略", serializeType);
+                }
+                return;
+            }
 
-        Object[] args = CommandUtils.decodePushResponse(methodCtx.getParams(), pushResponse);
-        ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodCtx.getParams(), args);
+            PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
+            MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
+
+            Object[] args = CommandUtils.decodePushResponse(methodCtx.getParams(), pushResponse);
+            ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
+        });
     }
 
 

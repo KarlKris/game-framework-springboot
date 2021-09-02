@@ -49,6 +49,11 @@ public class RpcServiceImpl implements RpcService {
             return false;
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("向[{}]转发消息[{},{}]", address.getIp()
+                    , message.getCommand().getModule(), message.getCommand().getInstruction());
+        }
+
         byte[] body = message.getBody();
         boolean zip = message.zip();
         if (session.identity()) {

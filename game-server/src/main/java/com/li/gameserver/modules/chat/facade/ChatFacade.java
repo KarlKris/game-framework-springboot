@@ -1,5 +1,6 @@
 package com.li.gameserver.modules.chat.facade;
 
+import com.li.gameremote.modules.chat.facade.ChatModule;
 import com.li.gamesocket.anno.Identity;
 import com.li.gamesocket.anno.InBody;
 import com.li.gamesocket.anno.SocketCommand;

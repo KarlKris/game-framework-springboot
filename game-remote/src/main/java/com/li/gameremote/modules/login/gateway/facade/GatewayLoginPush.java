@@ -1,4 +1,4 @@
-package com.li.gameremote.modules.login.gateway;
+package com.li.gameremote.modules.login.gateway.facade;
 
 import com.li.gamesocket.anno.PushIds;
 import com.li.gamesocket.anno.SocketCommand;

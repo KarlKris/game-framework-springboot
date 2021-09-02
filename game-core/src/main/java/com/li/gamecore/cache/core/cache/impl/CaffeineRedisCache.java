@@ -66,8 +66,6 @@ public class CaffeineRedisCache extends AbstractCache {
         this.cache.put(key, content);
         // 再添加二级缓存
         this.distributedCacheManager.set(key, content, expire);
-
-        notifyOtherToRemove(key);
     }
 
     @Override

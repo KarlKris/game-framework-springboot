@@ -2,6 +2,7 @@ package com.li.gamesocket.service.handler.impl;
 
 import cn.hutool.core.convert.ConvertException;
 import cn.hutool.core.thread.NamedThreadFactory;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.ZipUtil;
 import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamecommon.exception.SerializeFailException;
@@ -16,6 +17,7 @@ import com.li.gamesocket.service.command.CommandManager;
 import com.li.gamesocket.service.command.MethodCtx;
 import com.li.gamesocket.service.command.MethodInvokeCtx;
 import com.li.gamesocket.service.handler.Dispatcher;
+import com.li.gamesocket.service.handler.DispatcherExecutorService;
 import com.li.gamesocket.service.rpc.RpcService;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
@@ -39,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  **/
 @Component
 @Slf4j
-public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextClosedEvent> {
+public class DispatcherImpl implements Dispatcher, DispatcherExecutorService,  ApplicationListener<ContextClosedEvent> {
 
 
     @Autowired
@@ -73,6 +75,21 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         }
     }
 
+    @Override
+    public void execute(Session session, Runnable runnable) {
+        long id = session.getSessionId();
+        if (session.identity()) {
+            id = session.getIdentity();
+        }
+
+        int index = canAndGetExecutorServiceArrayIndex(hash(id));
+        this.executorServices[index].submit(runnable);
+    }
+
+    @Override
+    public void execute(Runnable runnable) {
+        this.executorServices[RandomUtil.randomInt(this.executorServices.length)].submit(runnable);
+    }
 
     @Override
     public void dispatch(IMessage message, Session session) {
@@ -82,14 +99,8 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             }
             return;
         }
-
-        long id = session.getSessionId();
-        if (session.identity()) {
-            id = session.getIdentity();
-        }
-
-        int index = canAndGetExecutorServiceArrayIndex(hash(id));
-        this.executorServices[index].submit(() -> { doDispatch(session, message); });
+        // 提交方法
+        execute(session, () -> doDispatch(session, message));
     }
 
     /** 分发消息 **/

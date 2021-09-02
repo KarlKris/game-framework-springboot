@@ -1,6 +1,6 @@
 package com.li.gamegateway.modules.login.service;
 
-import com.li.gameremote.modules.login.game.GameServerLoginFacade;
+import com.li.gameremote.modules.login.game.facade.GameServerLoginFacade;
 import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.service.rpc.RpcService;
 import com.li.gamesocket.service.session.Session;

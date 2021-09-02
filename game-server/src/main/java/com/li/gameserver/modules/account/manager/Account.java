@@ -1,4 +1,4 @@
-package com.li.gameserver.modules.login.manager;
+package com.li.gameserver.modules.account.manager;
 
 import com.li.gamecore.dao.IEntity;
 import lombok.Getter;
@@ -34,6 +34,9 @@ public class Account implements IEntity<Long> {
 
     /** 渠道标识 **/
     private int channel;
+
+    /** 账号等级 **/
+    private int level = 1;
 
     @Override
     public Long getId() {

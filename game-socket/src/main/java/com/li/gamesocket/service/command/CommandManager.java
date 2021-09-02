@@ -34,6 +34,8 @@ public class CommandManager extends InstantiationAwareBeanPostProcessorAdapter {
     public Set<Short> getModules() {
         return commandInvokeCtxHolder
                 .keySet().stream()
+                // 忽略推送Bean
+                .filter(command -> command.getInstruction() > 0)
                 .map(Command::getModule)
                 .collect(Collectors.toSet());
     }
