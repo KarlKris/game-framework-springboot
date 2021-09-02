@@ -3,6 +3,7 @@ package com.li.gamegateway.modules.login.facade;
 import cn.hutool.crypto.SecureUtil;
 import com.li.gamegateway.commom.GatewaySystemConfig;
 import com.li.gamegateway.modules.login.service.GatewayLoginService;
+import com.li.gameremote.modules.login.gateway.GatewayLoginFacade;
 import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.service.session.Session;
 import org.apache.commons.lang.StringUtils;

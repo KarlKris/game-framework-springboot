@@ -1,4 +1,4 @@
-package com.li.gamegateway.modules.login.facade;
+package com.li.gameremote.modules.login.gateway;
 
 import com.li.gamesocket.anno.InBody;
 import com.li.gamesocket.anno.SocketCommand;
@@ -48,5 +48,8 @@ public interface GatewayLoginFacade {
             , @InBody(name = "serverId") int serverId
             , @InBody(name = "timestamp") int timestamp
             , @InBody(name = "sign") String sign);
+
+
+
 
 }

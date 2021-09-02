@@ -1,5 +1,6 @@
 package com.li.gamesocket.protocol;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.li.gamecommon.exception.code.ResultCode;
 import lombok.Getter;
 
@@ -37,6 +38,7 @@ public class Response<T> {
     }
 
     /** 是否是业务逻辑失败 **/
+    @JsonIgnore
     public boolean isVocationalException() {
         return code > 0;
     }

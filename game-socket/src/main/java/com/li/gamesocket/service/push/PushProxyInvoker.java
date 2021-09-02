@@ -93,15 +93,17 @@ public class PushProxyInvoker implements InvocationHandler {
             Session session = entry.getKey();
 
             InnerMessage message = MessageFactory.toInnerMessage(this.snCtxManager.nextSn()
-                    , ProtocolConstant.VOCATIONAL_WORK_REQ
+                    , ProtocolConstant.VOCATIONAL_WORK_RES
                     , methodCtx.getCommand()
                     , serializer.getSerializerType()
                     , zip
                     , body
-                    , session);
+                    , session.ip());
 
             if (log.isDebugEnabled()) {
-                log.debug("推送消息[{},{}]", message.getSn(), message.getCommand());
+                log.debug("推送消息[{},{}-{}]", message.getSn()
+                        , message.getCommand().getModule()
+                        , message.getCommand().getInstruction());
             }
 
             sessionManager.writeAndFlush(session, message);

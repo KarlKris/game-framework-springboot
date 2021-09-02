@@ -11,10 +11,16 @@ import java.lang.reflect.Type;
  **/
 public class IdentityMethodParameter implements MethodParameter {
 
+    public static final String TYPE = "Identity";
+
     public static final IdentityMethodParameter IDENTITY_PARAMETER = new IdentityMethodParameter();
 
     public Type getParameterType() {
         return Long.TYPE;
     }
 
+    @Override
+    public String type() {
+        return TYPE;
+    }
 }

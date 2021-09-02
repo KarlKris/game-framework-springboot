@@ -16,4 +16,6 @@ public abstract class SnCtx {
         this.innerSn = innerSn;
     }
 
+    /** 消息类型 **/
+    public abstract byte getType();
 }

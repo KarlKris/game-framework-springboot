@@ -34,7 +34,8 @@ public class NioNettyClientImpl implements NioNettyClient {
     /** 共享线程组 **/
     private final EventLoopGroup eventLoopGroup;
     /** ChannelInitializer **/
-    private final ChannelInitializer channelInitializer = ApplicationContextHolder.getBean(NioNettyClientMessageHandler.class);
+    private final ChannelInitializer channelInitializer
+            = ApplicationContextHolder.getBean(NioNettyClientMessageHandler.class);
 
     /** 代理对象 **/
     private final Map<String, Object> proxy = new HashMap<>();

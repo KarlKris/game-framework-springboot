@@ -1,5 +1,6 @@
-package com.li.gamesocket.service.rpc;
+package com.li.gamesocket.service.rpc.impl;
 
+import com.li.gamesocket.service.rpc.SnCtx;
 import io.netty.channel.Channel;
 import lombok.Getter;
 
@@ -9,6 +10,8 @@ import lombok.Getter;
  */
 @Getter
 public class ForwardSnCtx extends SnCtx {
+
+    public static final byte TYPE = 0x1;
 
     /** 请求消息序号 **/
     private long sn;
@@ -21,4 +24,8 @@ public class ForwardSnCtx extends SnCtx {
         this.channel = channel;
     }
 
+    @Override
+    public byte getType() {
+        return TYPE;
+    }
 }

@@ -2,6 +2,8 @@ package com.li.gamesocket.service.rpc;
 
 import com.li.gamecommon.rpc.RemoteServerSeekService;
 import com.li.gamesocket.protocol.Response;
+import com.li.gamesocket.service.rpc.impl.ForwardSnCtx;
+import com.li.gamesocket.service.rpc.impl.RpcSnCtx;
 import io.netty.channel.Channel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -27,7 +29,7 @@ public class SnCtxManager {
 
     /** 获取下一个消息序号 **/
     public long nextSn() {
-        return  this.snGenerator.incrementAndGet();
+        return this.snGenerator.incrementAndGet();
 
     }
 

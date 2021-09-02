@@ -53,9 +53,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public long login(String accountName) {
-        if (!accountNames.mightContain(accountName)) {
-            throw new BadRequestException(GameServerLoginResultCode.ACCOUNT_NOT_FOUND);
-        }
         Long id = accountManager.getIdByAccountName(accountName);
         if (id == null) {
             throw new BadRequestException(GameServerLoginResultCode.ACCOUNT_NOT_FOUND);

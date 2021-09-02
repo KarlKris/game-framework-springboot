@@ -1,20 +1,12 @@
 package com.li.gamesocket.client.channelhandler;
 
-import cn.hutool.core.util.ZipUtil;
-import com.li.gamecommon.exception.BadRequestException;
-import com.li.gamecommon.exception.SocketException;
-import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
-import com.li.gamesocket.protocol.*;
-import com.li.gamesocket.protocol.serialize.Serializer;
-import com.li.gamesocket.protocol.serialize.SerializerManager;
-import com.li.gamesocket.service.VocationalWorkConfig;
-import com.li.gamesocket.service.rpc.ForwardSnCtx;
-import com.li.gamesocket.service.rpc.RpcSnCtx;
+import com.li.gamesocket.protocol.IMessage;
+import com.li.gamesocket.protocol.MessageFactory;
+import com.li.gamesocket.service.push.PushProcessor;
+import com.li.gamesocket.service.rpc.RemoteResultProcessor;
 import com.li.gamesocket.service.rpc.SnCtx;
 import com.li.gamesocket.service.rpc.SnCtxManager;
-import com.li.gamesocket.service.session.Session;
-import com.li.gamesocket.service.session.SessionManager;
-import io.netty.channel.Channel;
+import com.li.gamesocket.service.rpc.impl.RemoteResultProcessorHolder;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -25,25 +17,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author li-yuanwen
  */
-@ChannelHandler.Sharable
 @Slf4j
 @Component
+@ChannelHandler.Sharable
 public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMessage> {
 
     @Autowired
     private SnCtxManager snCtxManager;
     @Autowired
-    private SessionManager sessionManager;
+    private PushProcessor pushProcessor;
     @Autowired
-    private SerializerManager serializerManager;
-    @Autowired
-    private VocationalWorkConfig vocationalWorkConfig;
+    private RemoteResultProcessorHolder remoteResultProcessorHolder;
+
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
@@ -56,70 +45,9 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             return;
         }
 
-        // 处理从服务端收到的推送消息
+        // 处理收到的推送消息
         if (msg.getCommand().push()) {
-
-            Serializer serializer = serializerManager.getSerializer(msg.getSerializeType());
-            PushResponse pushResponse = serializer.deserialize(msg.getBody(), PushResponse.class);
-
-            Response response = Response.SUCCESS(pushResponse.getContent());
-
-            Byte serializeType = null;
-            byte[] body = null;
-            boolean zip = false;
-
-            for (long identity : pushResponse.getTargets()) {
-                Session session = sessionManager.getIdentitySession(identity);
-                if (session == null) {
-                    continue;
-                }
-
-                Byte type = session.getChannel().attr(ChannelAttributeKeys.LAST_SERIALIZE_TYPE).get();
-                if (!Objects.equals(type, serializeType)) {
-                    serializeType = type;
-                    serializer = serializerManager.getSerializer(type);
-                    body = serializer.serialize(response);
-                    if (body.length > vocationalWorkConfig.getBodyZipLength()) {
-                        body = ZipUtil.gzip(body);
-                        zip = true;
-                    }
-                }
-
-                if (log.isDebugEnabled()) {
-                    log.debug("向玩家[{}]推送消息", identity);
-                }
-
-                Short lastProtocolHeaderIdentity = session.getChannel().attr(ChannelAttributeKeys.LAST_PROTOCOL_HEADER_IDENTITY).get();
-                if (lastProtocolHeaderIdentity == null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("未知玩家[{}]Channel使用的消息类型,忽略本次推送", identity);
-                    }
-                    continue;
-                }
-
-                IMessage message = null;
-                if (lastProtocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
-                    // 内部通信类型
-                    message = MessageFactory.toInnerMessage(msg.getSn()
-                            , ProtocolConstant.toOriginMessageType(msg.getMessageType())
-                            , msg.getCommand()
-                            , serializeType
-                            , zip
-                            , body
-                            , session);
-                }else if(lastProtocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
-                    // 外部通信类型
-                    message = MessageFactory.toOuterMessage(msg.getSn()
-                            , ProtocolConstant.toOriginMessageType(msg.getMessageType())
-                            , msg.getCommand()
-                            , serializeType
-                            , zip
-                            , body);
-                }
-
-                sessionManager.writeAndFlush(session, message);
-            }
-
+            pushProcessor.process(msg);
             return;
         }
 
@@ -132,60 +60,9 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             return;
         }
 
-        // 直接转发给源目标
-        if (snCtx instanceof ForwardSnCtx) {
-
-            ForwardSnCtx forwardSnCtx = (ForwardSnCtx) snCtx;
-
-            Channel channel = forwardSnCtx.getChannel();
-            Session session = channel.attr(ChannelAttributeKeys.SESSION).get();
-
-            if (log.isDebugEnabled()) {
-                log.debug("转发响应消息[{}]至[{}]", msg, session.ip());
-            }
-
-            IMessage message = null;
-            short protocolHeaderIdentity = msg.getProtocolHeaderIdentity();
-            if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
-                message = MessageFactory.toOuterMessage(forwardSnCtx.getSn()
-                        , ProtocolConstant.toOriginMessageType(msg.getMessageType())
-                        , msg.getCommand()
-                        , msg.getSerializeType()
-                        , msg.zip()
-                        , msg.getBody());
-            }else if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
-                message = MessageFactory.toInnerMessage(forwardSnCtx.getSn()
-                        , ProtocolConstant.toOriginMessageType(msg.getMessageType())
-                        , msg.getCommand()
-                        , msg.getSerializeType()
-                        , msg.zip()
-                        , msg.getBody()
-                        , session);
-            }
-
-            sessionManager.writeAndFlush(session, message);
-
-            return;
-        }
-
-        if (snCtx instanceof RpcSnCtx) {
-
-            RpcSnCtx rpcSnCtx = (RpcSnCtx) snCtx;
-
-            CompletableFuture<Response> future = rpcSnCtx.getFuture();
-
-            Serializer serializer = serializerManager.getSerializer(msg.getSerializeType());
-            Response response = serializer.deserialize(msg.getBody(), Response.class);
-            if (response.success()) {
-                future.complete(response);
-            } else {
-                if (response.isVocationalException()) {
-                    future.completeExceptionally(new BadRequestException(response.getCode(), "请求远程服务业务异常"));
-                } else {
-                    future.completeExceptionally(new SocketException(response.getCode(), "请求远程服务通讯异常"));
-                }
-            }
-
+        RemoteResultProcessor processor = remoteResultProcessorHolder.getProcessor(snCtx);
+        if (processor != null) {
+            processor.process(snCtx, msg);
             return;
         }
 

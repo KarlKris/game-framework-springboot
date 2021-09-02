@@ -2,6 +2,7 @@ package com.li.gamesocket.service.session;
 
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.IMessage;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -50,12 +51,14 @@ public class SessionManager {
         }
 
         if (session.identity()) {
-            this.identities.remove(session.getIdentity());
+            Integer sessionId = this.identities.remove(session.getIdentity());
+            long count = this.sessions.keySet().stream().filter(id -> Objects.equals(id, sessionId)).count();
+            // 一对多,不移除Sessions
+            if (count != 1) {
+                return session;
+            }
         }
-
-        this.sessions.remove(session.getSessionId());
-
-        return session;
+        return this.sessions.remove(session.getSessionId());
     }
 
     /** 是否在线 **/
@@ -67,12 +70,17 @@ public class SessionManager {
      * 绑定身份
      * @param session 连接Session
      * @param identity 身份标识
+     * @param inner true 内网服务器
      * @return null 身份标识第一次绑定,若是顶号,则返回旧Session
      */
-    public Session bindIdentity(Session session, long identity) {
+    public Session bindIdentity(Session session, long identity, boolean inner) {
 
         if (log.isDebugEnabled()) {
             log.debug("session[{}]绑定某个身份[{}]", session.getSessionId(), identity);
+        }
+
+        if (!inner) {
+            session.bind(identity);
         }
 
         Integer oldSessionId = this.identities.put(identity, session.getSessionId());
@@ -80,12 +88,27 @@ public class SessionManager {
             log.warn("玩家[{}]被顶号", identity);
             return this.sessions.remove(oldSessionId);
         }
+
         return null;
+    }
+
+    /** 断开连接 **/
+    public void kickOut(Session session) {
+        session.kick();
+    }
+
+    /** 断开连接 **/
+    public void kickOut(long identity) {
+        Session session = this.getIdentitySession(identity);
+        if (session != null) {
+            session.kick();
+        }
     }
 
     /** 获取指定Session **/
     public Session getIdentitySession(long identity) {
-        return this.sessions.get(this.identities.get(identity));
+        Integer sessionId = this.identities.get(identity);
+        return sessionId != null ? this.sessions.get(sessionId) : null;
     }
 
     /** 获取已绑定身份的标识集 **/
@@ -102,6 +125,8 @@ public class SessionManager {
             }
             return;
         }
+
+
         session.writeAndFlush(message);
     }
 

@@ -25,17 +25,36 @@ public class MessageEncoder extends MessageToByteEncoder<IMessage> {
         short protocolHeaderIdentity = msg.getProtocolHeaderIdentity();
         if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
             ((OuterMessage) msg).writeTo(out);
-            int i = out.readableBytes();
             // ByteBuf 长度字段是排在协议头字段之后,即index为2,长度字节为int 即除去长度字段+协议头字段 剩余的就是长度
-            out.setInt(2, i - 6);
+            int length = out.readableBytes() - 6;
+            out.setInt(2, length);
+
+            if (log.isDebugEnabled()) {
+                log.debug("向连接[{}]发送外部消息,消息类型[{}],消息长度[{}],消息命令[{}-{}]"
+                        , ctx.channel().remoteAddress()
+                        , msg.getMessageType()
+                        , length
+                        , msg.getCommand().getModule()
+                        , msg.getCommand().getInstruction());
+            }
+
             return;
         }
 
         if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
             ((InnerMessage) msg).writeTo(out);
-            int i = out.readableBytes();
             // ByteBuf 长度字段是排在协议头字段之后,即index为2,长度字节为int 即除去长度字段+协议头字段 剩余的就是长度
-            out.setInt(2, i - 6);
+            int length = out.readableBytes() - 6;
+            out.setInt(2, length);
+
+            if (log.isDebugEnabled()) {
+                log.debug("向连接[{}]发送内部消息,消息类型[{}],消息长度[{}],消息命令[{}-{}]"
+                        , ctx.channel().remoteAddress()
+                        , msg.getMessageType()
+                        , length
+                        , msg.getCommand().getModule()
+                        , msg.getCommand().getInstruction());
+            }
             return;
         }
 

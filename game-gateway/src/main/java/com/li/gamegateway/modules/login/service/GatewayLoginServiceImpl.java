@@ -40,7 +40,11 @@ public class GatewayLoginServiceImpl implements GatewayLoginService {
         Response<Long> response = sendProxy.login(null, account, channel);
         Long identity = response.getContent();
         // 绑定身份
-        sessionManager.bindIdentity(session, identity, false);
+        Session oldSession = sessionManager.bindIdentity(session, identity, false);
+        if (oldSession != null) {
+            // 断开先前连接
+            sessionManager.kickOut(oldSession);
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("网关服请求游戏服[{}]登录账号成功,绑定session[{},{}]", serverId, session.getSessionId(), identity);

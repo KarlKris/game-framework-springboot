@@ -11,6 +11,13 @@ import java.util.List;
  */
 public class PushIdsMethodParameter implements MethodParameter {
 
+    public static final String TYPE = "PushIds";
+
+    @Override
+    public String type() {
+        return TYPE;
+    }
+
     public static final PushIdsMethodParameter PUSH_IDS_METHOD_PARAMETER = new PushIdsMethodParameter();
 
     public Type getParameterType() {

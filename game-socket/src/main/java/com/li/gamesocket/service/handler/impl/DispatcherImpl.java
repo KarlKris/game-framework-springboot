@@ -11,6 +11,7 @@ import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.service.VocationalWorkConfig;
+import com.li.gamesocket.service.command.Command;
 import com.li.gamesocket.service.command.CommandManager;
 import com.li.gamesocket.service.command.MethodCtx;
 import com.li.gamesocket.service.command.MethodInvokeCtx;
@@ -88,11 +89,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
         }
 
         int index = canAndGetExecutorServiceArrayIndex(hash(id));
-        this.executorServices[index].submit(() -> {
-            doDispatch(session, message);
-        });
-
-
+        this.executorServices[index].submit(() -> { doDispatch(session, message); });
     }
 
     /** 分发消息 **/
@@ -107,11 +104,16 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
             return;
         }
 
+        Command command = message.getCommand();
+        if (log.isDebugEnabled()) {
+            log.debug("收到消息[{}-{}],协议头[{}]", command.getModule(), command.getInstruction(), message.getProtocolHeaderIdentity());
+        }
+
         // 记录序列化/反序列化方式
         session.getChannel().attr(ChannelAttributeKeys.LAST_SERIALIZE_TYPE).set(serializeType);
 
         // 方法调用上下文
-        MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(message.getCommand());
+        MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(command);
         if (methodInvokeCtx == null) {
             // RPC
             if (!this.rpcService.forward(session, message)) {
@@ -136,23 +138,19 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
 
             Object result = null;
             if (message.isInnerMessage()) {
-                InnerMessage innerMessage = (InnerMessage) message;
-
-                long identity = innerMessage.getIdentity();
-
-                if (methodInvokeCtx.isIdentity() && identity <= 0) {
+                // 内部消息发送源标识放置在方法体中
+                if (methodInvokeCtx.isIdentity() && !request.hasIdentity()) {
                     // 没有标识
-                    response(session, message, false, serializer.getSerializerType(), serializer.serialize(Response.NO_IDENTITY));
+                    responseBody = serializer.serialize(Response.NO_IDENTITY);
                     return;
                 }
-
-                result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget()
-                        , CommandUtils.decodeRequest(session, innerMessage.getIdentity(), methodCtx.getParams(), request));
+                Object[] args = CommandUtils.decodeRequest(session, -1, methodCtx.getParams(), request);
+                result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
             } else {
-
+                // 外部消息发送源标识放置在Session中
                 if (methodInvokeCtx.isIdentity() && !session.identity()) {
                     // 没有标识
-                    response(session, message, false, serializer.getSerializerType(), serializer.serialize(Response.NO_IDENTITY));
+                    responseBody = serializer.serialize(Response.NO_IDENTITY);
                     return;
                 }
 
@@ -208,7 +206,7 @@ public class DispatcherImpl implements Dispatcher, ApplicationListener<ContextCl
                     , serializeType
                     , zip
                     , responseBody
-                    , session);
+                    , session.ip());
         }else if (requestMessage.isOuterMessage()) {
             message = MessageFactory.toOuterMessage(requestMessage.getSn()
                     , ProtocolConstant.transformResponse(requestMessage.getMessageType())

@@ -8,5 +8,10 @@ package com.li.gamesocket.service.command;
 public interface MethodParameter {
 
 
+    /**
+     * 方法参数类型
+     * @return 类型
+     */
+    String type();
 
 }

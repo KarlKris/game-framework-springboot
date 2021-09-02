@@ -1,4 +1,4 @@
-package com.li.gamegateway.modules.login.facade;
+package com.li.gameremote.modules.login.gateway;
 
 /**
  * @author li-yuanwen
@@ -16,5 +16,9 @@ public interface GatewayLoginModule {
 
     /** 登录 **/
     byte GAME_SERVER_LOGIN = 2;
+
+    /** 强退 **/
+    byte KICK_OUT = -1;
+
 
 }

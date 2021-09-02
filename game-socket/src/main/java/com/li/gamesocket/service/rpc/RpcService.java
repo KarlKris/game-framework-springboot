@@ -18,7 +18,6 @@ public interface RpcService {
      */
     boolean forward(Session session, IMessage message);
 
-
     /**
      * 获取远程代理
      * @param tClass 目标对象

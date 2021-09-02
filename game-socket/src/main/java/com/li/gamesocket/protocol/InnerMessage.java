@@ -15,10 +15,6 @@ public class InnerMessage implements IMessage {
     /** 消息体 **/
     private byte[] body;
 
-    public long getIdentity() {
-        return header.getSourceId();
-    }
-
     @Override
     public short getProtocolHeaderIdentity() {
         return header.getProtocolId();

@@ -1,6 +1,7 @@
-package com.li.gamesocket.service.rpc;
+package com.li.gamesocket.service.rpc.impl;
 
 import com.li.gamesocket.protocol.Response;
+import com.li.gamesocket.service.rpc.SnCtx;
 import lombok.Getter;
 
 import java.util.concurrent.CompletableFuture;
@@ -12,12 +13,18 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public class RpcSnCtx extends SnCtx {
 
+    public static final byte TYPE = 0x0;
+
     /** future **/
     private CompletableFuture<Response> future;
 
-    protected RpcSnCtx(long innerSn, CompletableFuture<Response> future) {
+    public RpcSnCtx(long innerSn, CompletableFuture<Response> future) {
         super(innerSn);
         this.future = future;
     }
 
+    @Override
+    public byte getType() {
+        return TYPE;
+    }
 }

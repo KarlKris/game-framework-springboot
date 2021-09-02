@@ -1,4 +1,4 @@
-package com.li.gamesocket.service.rpc;
+package com.li.gamesocket.service.rpc.impl;
 
 import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamecommon.exception.code.ResultCode;
@@ -10,6 +10,10 @@ import com.li.gamesocket.protocol.IMessage;
 import com.li.gamesocket.protocol.InnerMessage;
 import com.li.gamesocket.protocol.MessageFactory;
 import com.li.gamesocket.protocol.ProtocolConstant;
+import com.li.gamesocket.protocol.serialize.Serializer;
+import com.li.gamesocket.protocol.serialize.SerializerManager;
+import com.li.gamesocket.service.rpc.RpcService;
+import com.li.gamesocket.service.rpc.SnCtxManager;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +30,8 @@ public class RpcServiceImpl implements RpcService {
 
     @Autowired
     private NioNettyClientFactory clientFactory;
+    @Autowired
+    private SerializerManager serializerManager;
     @Autowired(required = false)
     private RemoteServerSeekService remoteServerSeekService;
     @Autowired(required = false)
@@ -35,12 +41,26 @@ public class RpcServiceImpl implements RpcService {
     public boolean forward(Session session, IMessage message) {
         checkAndThrowRemoteService();
 
-        Address address = this.remoteServerSeekService.seekApplicationAddressByModule(message.getCommand().getModule()
+        Address address = this.remoteServerSeekService.
+                seekApplicationAddressByModule(message.getCommand().getModule()
                 , session.getIdentity());
 
         if (address == null) {
             return false;
         }
+
+        byte[] body = message.getBody();
+        boolean zip = message.zip();
+        if (session.identity()) {
+            Serializer serializer = serializerManager.getSerializer(message.getSerializeType());
+            if (serializer != null) {
+               body = MessageFactory.addIdentityInRequestBody(session.getIdentity(), body, zip, serializer);
+            }else {
+                log.warn("远程调用服务将请求消息序列化,无匹配的序列化器[{}],消息原封不动发送"
+                        , message.getSerializeType());
+            }
+        }
+
 
         NioNettyClient client = clientFactory.newInstance(address);
         long nextSn = snCtxManager.nextSn();
@@ -49,9 +69,9 @@ public class RpcServiceImpl implements RpcService {
                 , ProtocolConstant.toOriginMessageType(message.getMessageType())
                 , message.getCommand()
                 , message.getSerializeType()
-                , message.zip()
-                , message.getBody()
-                , session);
+                , zip
+                , body
+                , null);
 
         try {
             client.send(innerMessage
@@ -63,7 +83,6 @@ public class RpcServiceImpl implements RpcService {
             return false;
         }
     }
-
 
     @Override
     public <T> T getSendProxy(Class<T> tClass, long identity) {
@@ -98,4 +117,6 @@ public class RpcServiceImpl implements RpcService {
             throw new BadRequestException(ResultCode.CANT_CONNECT_REMOTE);
         }
     }
+
+
 }

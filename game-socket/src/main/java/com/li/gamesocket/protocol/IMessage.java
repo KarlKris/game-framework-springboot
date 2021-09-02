@@ -13,7 +13,6 @@ public interface IMessage {
      * @return /
      */
     short getProtocolHeaderIdentity();
-
     /**
      * 查询消息类型
      * @return 消息类型

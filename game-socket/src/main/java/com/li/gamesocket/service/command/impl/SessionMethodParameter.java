@@ -11,6 +11,13 @@ import java.lang.reflect.Type;
  */
 public class SessionMethodParameter implements MethodParameter {
 
+    public static final String TYPE = "Session";
+
+    @Override
+    public String type() {
+        return TYPE;
+    }
+
     public static final SessionMethodParameter SESSION_PARAMETER = new SessionMethodParameter();
 
     public Type getParameterType() {

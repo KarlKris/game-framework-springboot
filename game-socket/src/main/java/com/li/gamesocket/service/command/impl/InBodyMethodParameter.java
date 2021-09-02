@@ -1,6 +1,7 @@
 package com.li.gamesocket.service.command.impl;
 
 import com.li.gamesocket.service.command.MethodParameter;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.lang.reflect.Type;
 
@@ -10,6 +11,8 @@ import java.lang.reflect.Type;
  * 用@InBody注解装饰的参数
  **/
 public class InBodyMethodParameter implements MethodParameter {
+
+    public static final String TYPE = "InBody";
 
     /** 参数名 **/
     private String name;
@@ -36,4 +39,8 @@ public class InBodyMethodParameter implements MethodParameter {
         return required;
     }
 
+    @Override
+    public String type() {
+        return TYPE;
+    }
 }

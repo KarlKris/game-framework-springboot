@@ -14,7 +14,7 @@ public interface ChannelAttributeKeys {
     AttributeKey<Short> LAST_PROTOCOL_HEADER_IDENTITY = AttributeKey.newInstance("protocol_header_identity");
 
     /** Channel绑定属性Session **/
-    AttributeKey<Session> SESSION = AttributeKey.newInstance("Session");
+    AttributeKey<Session> SESSION = AttributeKey.newInstance("session");
 
     /** Channel上次使用的序列化/反序列化类型 **/
     AttributeKey<Byte> LAST_SERIALIZE_TYPE = AttributeKey.newInstance("last_serialize_type");

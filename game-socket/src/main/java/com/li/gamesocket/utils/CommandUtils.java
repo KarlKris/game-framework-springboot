@@ -161,7 +161,7 @@ public class CommandUtils {
             }
 
             if (parameter instanceof IdentityMethodParameter) {
-                objs[i] = identity;
+                objs[i] = identity > 0 ? identity : map.get(IdentityMethodParameter.TYPE);
                 continue;
             }
 
@@ -188,6 +188,47 @@ public class CommandUtils {
 
 
     /**
+     * 将PushResponse转成方法调用参数
+     * @param params 方法参数内容
+     * @param pushResponse pushResponse
+     * @return /
+     */
+    public static Object[] decodePushResponse(MethodParameter[] params, PushResponse pushResponse) {
+        Map<String, Object> content = pushResponse.getContent();
+
+        int length = params.length;
+        Object[] objs = new Object[length];
+
+        for (int i = 0; i < length; i++) {
+            MethodParameter parameter = params[i];
+            if (parameter instanceof InBodyMethodParameter) {
+                InBodyMethodParameter param = (InBodyMethodParameter) parameter;
+                String parameterName = param.getParameterName();
+                Object o = content.get(parameterName);
+                if (o != null) {
+                    objs[i] = Convert.convert(param.getParameterType(), o);
+                    continue;
+                }
+
+                if (!param.isRequired()) {
+                    objs[i] = null;
+                    continue;
+                }
+            }
+
+            if (parameter instanceof PushIdsMethodParameter) {
+                objs[i] = pushResponse.getTargets();
+                continue;
+            }
+
+            throw new UnsupportedOperationException("常规业务参数类型不支持[" + parameter + "]解析");
+        }
+
+        return objs;
+    }
+
+
+    /**
      * 构建 RPC Request
      *
      * @param params 方法参数信息
@@ -204,10 +245,25 @@ public class CommandUtils {
 
         for (int i = 0; i < length; i++) {
             MethodParameter parameter = params[i];
+            // 身份标识参数
+            if (parameter instanceof IdentityMethodParameter) {
+                map.put(IdentityMethodParameter.TYPE, args[i]);
+                continue;
+            }
+
+            // 普通参数
             if (parameter instanceof InBodyMethodParameter) {
                 InBodyMethodParameter param = (InBodyMethodParameter) parameter;
                 map.put(param.getParameterName(), args[i]);
+                continue;
             }
+
+            // session
+            if (parameter instanceof SessionMethodParameter) {
+                continue;
+            }
+
+            throw new IllegalArgumentException("RPC 调用方法参数注解非法[" + parameter.type() + "]");
         }
 
         return new Request(map);

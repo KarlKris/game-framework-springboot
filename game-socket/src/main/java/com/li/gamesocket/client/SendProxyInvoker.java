@@ -71,7 +71,6 @@ public class SendProxyInvoker implements InvocationHandler {
 
         boolean responseType = method.getReturnType() == Response.class;
 
-        // todo session
         InnerMessage message = MessageFactory.toInnerMessage(this.snCtxManager.nextSn()
                 , ProtocolConstant.VOCATIONAL_WORK_REQ
                 , methodCtx.getCommand()

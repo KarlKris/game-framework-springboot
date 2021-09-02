@@ -27,9 +27,7 @@ public class InnerMessageHeader {
 
     /** 消息序号 **/
     private long sn;
-    /** 消息来源标识 **/
-    private long sourceId;
-    /** 消息来源IP地址 **/
+    /** 消息来源IP地址(存在为null的情况) **/
     private byte[] ip;
 
 
@@ -55,7 +53,6 @@ public class InnerMessageHeader {
         }
 
         out.writeLong(sn);
-        out.writeLong(sourceId);
 
         // 判断是否有ip地址
         if (ArrayUtil.isEmpty(ip)) {
@@ -82,7 +79,6 @@ public class InnerMessageHeader {
         header.serializeType = ProtocolConstant.getSerializeType(header.type);
 
         header.sn = in.readLong();
-        header.sourceId = in.readLong();
 
         byte ipBytes = in.readByte();
         if (ipBytes > 0) {
@@ -94,14 +90,13 @@ public class InnerMessageHeader {
     }
 
     static InnerMessageHeader of(byte msgType, Command command
-            , boolean zip, byte serializeType, long sn, long sourceId, byte[] ip) {
+            , boolean zip, byte serializeType, long sn, byte[] ip) {
         InnerMessageHeader header = new InnerMessageHeader();
         header.type = msgType;
         header.command = command;
         header.zip = zip;
         header.serializeType = serializeType;
         header.sn = sn;
-        header.sourceId = sourceId;
         header.ip = ip;
         return header;
     }
