@@ -1,11 +1,13 @@
 package com.li.gamecore.cache.core.cache.impl;
 
 import com.li.gamecore.cache.core.cache.Cache;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author li-yuanwen
  * 实现基本的数据统计的缓存基类
  */
+@Slf4j
 public abstract class AbstractCache implements Cache {
 
     /** 缓存名称 **/
@@ -29,9 +31,9 @@ public abstract class AbstractCache implements Cache {
     }
 
     @Override
-    public Object get(Object key) {
+    public <T> T get(String key, Class<T> tClass) {
         incrementQuery();
-        Object value = get0(key);
+        T value = get0(key, tClass);
         if (value != null) {
             incrementHit();
         }
@@ -43,7 +45,7 @@ public abstract class AbstractCache implements Cache {
      * @param key 缓存key
      * @return value
      */
-    protected abstract Object get0(Object key);
+    protected abstract <T> T get0(String key, Class<T> tClass);
 
     protected void incrementQuery() {
         this.cacheStat.incrementQuery();

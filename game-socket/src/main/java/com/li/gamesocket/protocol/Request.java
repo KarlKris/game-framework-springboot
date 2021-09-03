@@ -29,6 +29,12 @@ public class Request {
         return params.containsKey(IdentityMethodParameter.TYPE);
     }
 
+    /** 获取身份标识 **/
+    public Long getIdentity() {
+        Object identity;
+        return (identity = params.get(IdentityMethodParameter.TYPE)) == null ? null : (Long) identity;
+    }
+
     public Map<String, Object> getParams() {
         return Collections.unmodifiableMap(params);
     }

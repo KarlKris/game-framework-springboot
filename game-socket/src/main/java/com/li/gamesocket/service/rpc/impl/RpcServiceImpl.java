@@ -54,6 +54,8 @@ public class RpcServiceImpl implements RpcService {
                     , message.getCommand().getModule(), message.getCommand().getInstruction());
         }
 
+        NioNettyClient client = clientFactory.newInstance(address);
+
         byte[] body = message.getBody();
         boolean zip = message.zip();
         if (session.identity()) {
@@ -66,8 +68,6 @@ public class RpcServiceImpl implements RpcService {
             }
         }
 
-
-        NioNettyClient client = clientFactory.newInstance(address);
         long nextSn = snCtxManager.nextSn();
         // 构建内部消息进行转发
         InnerMessage innerMessage = MessageFactory.toInnerMessage(nextSn

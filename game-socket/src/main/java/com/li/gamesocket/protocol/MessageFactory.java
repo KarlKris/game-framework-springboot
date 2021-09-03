@@ -1,5 +1,6 @@
 package com.li.gamesocket.protocol;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ZipUtil;
 import com.li.gamesocket.protocol.serialize.SerializeType;
 import com.li.gamesocket.protocol.serialize.Serializer;
@@ -7,6 +8,7 @@ import com.li.gamesocket.service.command.Command;
 import com.li.gamesocket.service.command.impl.IdentityMethodParameter;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,9 +84,16 @@ public class MessageFactory {
         if (zip) {
             body = ZipUtil.unGzip(body);
         }
-        Request request = serializer.deserialize(body, Request.class);
-        Map<String, Object> params = new HashMap<>(request.getParams());
-        params.put(IdentityMethodParameter.TYPE, identity);
+
+        Map<String, Object> params;
+        if (!ArrayUtil.isEmpty(body)) {
+            Request request = serializer.deserialize(body, Request.class);
+            params = new HashMap<>(request.getParams());
+            params.put(IdentityMethodParameter.TYPE, identity);
+        }else {
+            params = Collections.singletonMap(IdentityMethodParameter.TYPE, identity);
+        }
+
         body = serializer.serialize(new Request(params));
 
         if (zip) {

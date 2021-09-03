@@ -1,6 +1,7 @@
 package com.li.gameserver.modules.account.manager;
 
 import com.li.gamecore.dao.IEntity;
+import com.li.gamecore.dao.anno.Enhance;
 import lombok.Getter;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
@@ -41,6 +42,11 @@ public class Account implements IEntity<Long> {
     @Override
     public Long getId() {
         return id;
+    }
+
+    @Enhance
+    synchronized void levelUp() {
+        this.level++;
     }
 
     public static Account of(long id, int channel, String accountName) {

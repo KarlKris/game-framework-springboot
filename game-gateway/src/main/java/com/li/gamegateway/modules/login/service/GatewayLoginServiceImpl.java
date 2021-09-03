@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 /**
  * @author li-yuanwen
  */
@@ -39,12 +41,13 @@ public class GatewayLoginServiceImpl implements GatewayLoginService {
         GameServerLoginFacade sendProxy = rpcService.getSendProxy(GameServerLoginFacade.class, String.valueOf(serverId));
         Response<Long> response = sendProxy.login(null, account, channel);
         Long identity = response.getContent();
-        // 绑定身份
-        Session oldSession = sessionManager.bindIdentity(session, identity, false);
-        if (oldSession != null) {
+        Session oldSession = sessionManager.getIdentitySession(identity);
+        if (oldSession != null && !Objects.equals(oldSession, session)) {
             // 断开先前连接
             sessionManager.kickOut(oldSession);
         }
+
+        sessionManager.bindIdentity(session, identity, false);
 
         if (log.isDebugEnabled()) {
             log.debug("网关服请求游戏服[{}]登录账号成功,绑定session[{},{}]", serverId, session.getSessionId(), identity);

@@ -105,7 +105,7 @@ public class JavassistProxyFactory {
                 }
                 ctClass.addMethod(ctMethod);
             } catch (NotFoundException | CannotCompileException e) {
-                throw new IllegalArgumentException("增强实体[" + className + "]方法出现未知异常", e);
+                throw new IllegalArgumentException("增强实体[" + className + "]方法[" + method.getName() + "]出现未知异常", e);
             }
 
         }, method -> {
@@ -162,11 +162,11 @@ public class JavassistProxyFactory {
 
         if (returnType == void.class) {
             ctMethod.setBody("{" + ENTITY_FIELD + "." + methodName + "($$); " +
-                    "" + PERSISTER_FIELD +".asynPersist(PersistType.UPDATE, " + ENTITY_FIELD + ");}");
+                    "" + PERSISTER_FIELD +".asynPersist(" + ENTITY_FIELD + ");}");
         } else {
             String returnClass = returnType.isArray() ? toArrayTypeDeclared(returnType) : returnType.getName();
             ctMethod.setBody("{" + returnClass + " ret = " + ENTITY_FIELD + "." + methodName + "($$); "
-                    + PERSISTER_FIELD +".asynPersist(PersistType.UPDATE, " + ENTITY_FIELD + ");"
+                    + PERSISTER_FIELD +".asynPersist(" + ENTITY_FIELD + ");"
                     + "return ret;}");
         }
 

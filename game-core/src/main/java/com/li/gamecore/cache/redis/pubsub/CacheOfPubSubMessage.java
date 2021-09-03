@@ -18,9 +18,9 @@ public class CacheOfPubSubMessage implements Serializable {
     /** 缓存名 **/
     private String cacheName;
     /** key **/
-    private Object key;
+    private String key;
 
-    public CacheOfPubSubMessage(String cacheName, Object key) {
+    public CacheOfPubSubMessage(String cacheName, String key) {
         this.cacheName = cacheName;
         this.key = key;
     }

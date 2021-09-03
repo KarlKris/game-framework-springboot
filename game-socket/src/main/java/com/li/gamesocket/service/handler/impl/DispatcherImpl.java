@@ -155,6 +155,13 @@ public class DispatcherImpl implements Dispatcher, DispatcherExecutorService,  A
                     responseBody = serializer.serialize(Response.NO_IDENTITY);
                     return;
                 }
+
+                Long identity;
+                if ((identity = request.getIdentity()) != null && sessionManager.online(identity)) {
+                    // 绑定身份
+                    sessionManager.bindIdentity(session, request.getIdentity(), true);
+                }
+
                 Object[] args = CommandUtils.decodeRequest(session, -1, methodCtx.getParams(), request);
                 result = ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
             } else {

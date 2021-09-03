@@ -22,4 +22,9 @@ public class ServerAccountFacadeImpl implements ServerAccountFacade {
         AccountVo vo = accountService.transform(identity);
         return Response.SUCCESS(vo);
     }
+
+    @Override
+    public void levelUp(long identity) {
+        accountService.levelUp(identity);
+    }
 }

@@ -51,18 +51,13 @@ public class SessionManager {
         }
 
         if (session.identity()) {
-            Integer sessionId = this.identities.remove(session.getIdentity());
-            long count = this.sessions.keySet().stream().filter(id -> Objects.equals(id, sessionId)).count();
-            // 一对多,不移除Sessions
-            if (count != 1) {
-                return session;
-            }
+            this.identities.remove(session.getIdentity());
         }
         return this.sessions.remove(session.getSessionId());
     }
 
     /** 是否在线 **/
-    public boolean online(long identity) {
+    public boolean online(Long identity) {
         return this.identities.containsKey(identity);
     }
 
@@ -71,9 +66,8 @@ public class SessionManager {
      * @param session 连接Session
      * @param identity 身份标识
      * @param inner true 内网服务器
-     * @return null 身份标识第一次绑定,若是顶号,则返回旧Session
      */
-    public Session bindIdentity(Session session, long identity, boolean inner) {
+    public void bindIdentity(Session session, long identity, boolean inner) {
 
         if (log.isDebugEnabled()) {
             log.debug("session[{}]绑定某个身份[{}]", session.getSessionId(), identity);
@@ -86,10 +80,11 @@ public class SessionManager {
         Integer oldSessionId = this.identities.put(identity, session.getSessionId());
         if (oldSessionId != null && !Objects.equals(session.getSessionId(), oldSessionId)) {
             log.warn("玩家[{}]被顶号", identity);
-            return this.sessions.remove(oldSessionId);
+            // 不返回旧Session是因为踢下线的时候会因为旧Session移除使玩家数据异常
+            // 外部处理踢下线逻辑
+            this.sessions.remove(oldSessionId);
         }
 
-        return null;
     }
 
     /** 断开连接 **/

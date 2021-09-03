@@ -1,6 +1,8 @@
 package com.li.gamecore.cache.aop;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.li.gamecore.cache.anno.CachedPut;
 import com.li.gamecore.cache.anno.CachedRemove;
 import com.li.gamecore.cache.anno.Cachedable;
@@ -41,6 +43,8 @@ public class CacheAnnotationAspect {
 
     @Autowired
     private CacheManager cacheManager;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /** 缓存移除 **/
     @Pointcut(value = "@annotation(com.li.gamecore.cache.anno.CachedRemove)")
@@ -59,17 +63,16 @@ public class CacheAnnotationAspect {
 
     /** 缓存移除 **/
     @After("cachedRemovePointcut()")
-    public void afterRemoveInvoke(JoinPoint jp) throws NoSuchMethodException {
+    public void afterRemoveInvoke(JoinPoint jp) throws NoSuchMethodException, JsonProcessingException {
         Method targetMethod = getTargetMethod(jp);
         CachedRemove cachedRemove = AnnotationUtils.findAnnotation(targetMethod, CachedRemove.class);
 
         String cacheName = cachedRemove.name();
         EvaluationContext evaluationContext = null;
         if (cacheName.startsWith(SPEL_PREFIX)) {
-            Expression expression = parser.parseExpression(cacheName);
             Object[] args = jp.getArgs();
             evaluationContext = bindParam(targetMethod, args);
-            cacheName = expression.getValue(evaluationContext, String.class);
+            cacheName = getSpElValue(cacheName, evaluationContext);
         }
 
 
@@ -77,14 +80,13 @@ public class CacheAnnotationAspect {
         Cache cache = cacheManager.getCache(cachedRemove.type(), cacheName);
         if (cache != null) {
             String keySpEl = cachedRemove.key();
-            Object key = keySpEl;
+            String key = keySpEl;
             if (keySpEl.startsWith(SPEL_PREFIX)) {
-                Expression expression = parser.parseExpression(keySpEl);
                 if (evaluationContext == null) {
                     Object[] args = jp.getArgs();
                     evaluationContext = bindParam(targetMethod, args);
                 }
-                key = expression.getValue(evaluationContext);
+                key = getSpElValue(keySpEl, evaluationContext);
             }
             cache.remove(key);
         }
@@ -92,17 +94,16 @@ public class CacheAnnotationAspect {
 
     /** 缓存更新 **/
     @AfterReturning(value = "cachedPutPointcut()", returning = "result")
-    public void afterPutInvoke(JoinPoint jp, Object result) throws NoSuchMethodException {
+    public void afterPutInvoke(JoinPoint jp, Object result) throws NoSuchMethodException, JsonProcessingException {
         Method targetMethod = getTargetMethod(jp);
         CachedPut cachedPut = AnnotationUtils.findAnnotation(targetMethod, CachedPut.class);
 
         String cacheName = cachedPut.name();
         EvaluationContext evaluationContext = null;
         if (cacheName.startsWith(SPEL_PREFIX)) {
-            Expression expression = parser.parseExpression(cacheName);
             Object[] args = jp.getArgs();
             evaluationContext = bindParam(targetMethod, args);
-            cacheName = expression.getValue(evaluationContext, String.class);
+            cacheName = getSpElValue(cacheName, evaluationContext);
         }
 
         Cache cache = cacheManager.getCache(cachedPut.type(), cacheName);
@@ -111,14 +112,13 @@ public class CacheAnnotationAspect {
         }
 
         String keySpEl = cachedPut.key();
-        Object key = keySpEl;
+        String key = keySpEl;
         if (keySpEl.startsWith(SPEL_PREFIX)) {
-            Expression expression = parser.parseExpression(keySpEl);
             if (evaluationContext == null) {
                 Object[] args = jp.getArgs();
                 evaluationContext = bindParam(targetMethod, args);
             }
-            key = expression.getValue(evaluationContext);
+            key = getSpElValue(keySpEl, evaluationContext);
         }
 
         cache.put(key, result);
@@ -126,33 +126,33 @@ public class CacheAnnotationAspect {
 
     /** 查询缓存 **/
     @Around("cachedablePointcut()")
-    public Object aroundInvoke(ProceedingJoinPoint joinPoint) throws NoSuchMethodException {
+    public Object aroundInvoke(ProceedingJoinPoint joinPoint) throws NoSuchMethodException, JsonProcessingException {
         Method targetMethod = getTargetMethod(joinPoint);
         Cachedable cachedable = AnnotationUtils.findAnnotation(targetMethod, Cachedable.class);
 
         String cacheName = cachedable.name();
         EvaluationContext evaluationContext = null;
         if (cacheName.startsWith(SPEL_PREFIX)) {
-            Expression expression = parser.parseExpression(cacheName);
             Object[] args = joinPoint.getArgs();
             evaluationContext = bindParam(targetMethod, args);
-            cacheName = expression.getValue(evaluationContext, String.class);
+            cacheName = getSpElValue(cacheName, evaluationContext);
         }
 
         String keySpEl = cachedable.key();
-        Object key = keySpEl;
+        String key = keySpEl;
         if (keySpEl.startsWith(SPEL_PREFIX)) {
-            Expression expression = parser.parseExpression(keySpEl);
             if (evaluationContext == null) {
                 Object[] args = joinPoint.getArgs();
                 evaluationContext = bindParam(targetMethod, args);
             }
-            key = expression.getValue(evaluationContext);
+            key = getSpElValue(keySpEl, evaluationContext);
         }
+
+        Class<?> returnType = targetMethod.getReturnType();
 
         Object result = null;
         Cache cache = cacheManager.getCache(cachedable.type(), cacheName);
-        if (cache == null || (result = cache.get(key)) == null) {
+        if (cache == null || (result = cache.get(key, returnType)) == null) {
             cache = cacheManager.createCache(cachedable.type(), cacheName, cachedable.maximum(), cachedable.expire());
 
             try {
@@ -205,4 +205,16 @@ public class CacheAnnotationAspect {
         return pjp.getTarget().getClass().getMethod(method.getName(), method.getParameterTypes());
     }
 
+
+    private String getSpElValue(String spEl, EvaluationContext evaluationContext) throws JsonProcessingException {
+        String key;
+        Expression expression = parser.parseExpression(spEl);
+        Object expressionValue = expression.getValue(evaluationContext);
+        if (expressionValue instanceof String) {
+            key = (String) expressionValue;
+        }else {
+            key = objectMapper.writeValueAsString(expressionValue);
+        }
+        return key;
+    }
 }

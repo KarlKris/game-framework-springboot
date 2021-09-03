@@ -18,22 +18,20 @@ import java.util.Map;
 @Slf4j
 public class PushManager {
 
-    /**
-     * 代理对象
-     **/
-    private final Map<String, Object> proxy = new HashMap<>();
+    /** 代理对象 **/
+    private final Map<String, Object> innerProxy = new HashMap<>();
+    private final Map<String, Object> outerProxy = new HashMap<>();
 
-    /**
-     * 获得推送代理对象
-     **/
-    public <T> T getPushProxy(Class<T> clz) {
+
+    /** 获得推送代理对象 **/
+    public <T> T getInnerPushProxy(Class<T> clz) {
         String name = clz.getName();
-        Object target = this.proxy.get(name);
+        Object target = this.innerProxy.get(name);
         if (target != null) {
             return (T) target;
         }
-        synchronized (this.proxy) {
-            target = this.proxy.get(name);
+        synchronized (this.innerProxy) {
+            target = this.innerProxy.get(name);
             if (target != null) {
                 return (T) target;
             }
@@ -43,9 +41,34 @@ public class PushManager {
 
             target = Proxy.newProxyInstance(clz.getClassLoader()
                     , new Class[]{clz}
-                    , new PushProxyInvoker(methodCtx));
+                    , new InnerPushProxyInvoker(methodCtx));
 
-            this.proxy.put(name, target);
+            this.innerProxy.put(name, target);
+        }
+        return (T) target;
+    }
+
+    /** 获得推送代理对象 **/
+    public <T> T getOuterPushProxy(Class<T> clz) {
+        String name = clz.getName();
+        Object target = this.outerProxy.get(name);
+        if (target != null) {
+            return (T) target;
+        }
+        synchronized (this.outerProxy) {
+            target = this.outerProxy.get(name);
+            if (target != null) {
+                return (T) target;
+            }
+
+            List<MethodCtx> methodCtx =
+                    CommandUtils.analysisCommands(clz, false);
+
+            target = Proxy.newProxyInstance(clz.getClassLoader()
+                    , new Class[]{clz}
+                    , new OuterPushProxyInvoker(methodCtx));
+
+            this.outerProxy.put(name, target);
         }
         return (T) target;
     }

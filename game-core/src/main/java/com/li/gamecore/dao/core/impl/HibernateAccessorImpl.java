@@ -10,6 +10,7 @@ import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -91,7 +92,11 @@ public class HibernateAccessorImpl implements DataBaseAccessor, DataBaseQuerier 
                 }
             }
 
-            return (T) query.getSingleResult();
+            List list = query.getResultList();
+            if (CollectionUtils.isEmpty(list)) {
+                return null;
+            }
+            return (T) list.get(0);
         });
     }
 }

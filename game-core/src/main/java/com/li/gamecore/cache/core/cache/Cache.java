@@ -19,7 +19,7 @@ public interface Cache {
      * 移除缓存
      * @param key 缓存key
      */
-    void remove(Object key);
+    void remove(String key);
 
 
     /**
@@ -27,14 +27,14 @@ public interface Cache {
      * @param key 缓存key
      * @param content 缓存内容
      */
-    void put(Object key, Object content);
+    void put(String key, Object content);
 
     /**
      * 查询缓存
      * @param key 缓存key
      * @return 缓存内容
      */
-    Object get(Object key);
+    <T> T get(String key, Class<T> tClass);
 
     /**
      * 清空缓存

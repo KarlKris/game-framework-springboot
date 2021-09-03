@@ -2,6 +2,7 @@ package com.li.gamecore.cache.redis.pubsub;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.li.gamecore.cache.config.CachedType;
+import com.li.gamecore.cache.core.cache.impl.CaffeineRedisCache;
 import com.li.gamecore.cache.core.manager.CacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,11 @@ public class CacheOfPubSubMessageListener implements MessageListener {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("收到Channel[{}]发布的消息[{},{}]"
+            log.debug("收到Redis[{}]发布的消息[{},{}]"
                     , new String(message.getChannel(), StandardCharsets.UTF_8)
                     , msg.getCacheName(), msg.getKey());
         }
 
-        cacheManager.getCache(CachedType.REMOTE, msg.getCacheName()).remove(msg.getKey());
+        ((CaffeineRedisCache)cacheManager.getCache(CachedType.REMOTE, msg.getCacheName())).removeLocalKey(msg.getKey());
     }
 }

@@ -7,10 +7,9 @@ import java.lang.annotation.Target;
 
 /**
  * @author li-yuanwen
- * 推送注入注解
+ * 推送外网注入注解
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PushInject {
-
+public @interface OuterPushInject {
 }

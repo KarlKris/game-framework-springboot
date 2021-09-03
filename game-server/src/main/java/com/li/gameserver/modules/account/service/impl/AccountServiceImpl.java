@@ -3,6 +3,9 @@ package com.li.gameserver.modules.account.service.impl;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.li.gamecommon.exception.BadRequestException;
+import com.li.gamecore.cache.anno.CachedRemove;
+import com.li.gamecore.cache.config.CachedType;
+import com.li.gameremote.common.cache.CacheNameConstants;
 import com.li.gameremote.modules.account.facade.ServerAccountResultCode;
 import com.li.gameremote.modules.account.vo.AccountVo;
 import com.li.gameremote.modules.login.game.facade.GameServerLoginResultCode;
@@ -64,10 +67,23 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountVo transform(long identity) {
+        Account account = checkAccountAndThrow(identity);
+        return new AccountVo(account.getAccountName(), account.getLevel());
+    }
+
+    @Override
+    @CachedRemove(type = CachedType.REMOTE, name = CacheNameConstants.IDENTITY_TO_ACCOUNT_VO, key = "#identity")
+    public void levelUp(long identity) {
+        Account account = checkAccountAndThrow(identity);
+        accountManager.levelUp(account);
+    }
+
+
+    private Account checkAccountAndThrow(long identity) {
         Account account = accountManager.load(identity);
         if (account == null) {
             throw new BadRequestException(ServerAccountResultCode.ACCOUNT_NOT_FOUND);
         }
-        return new AccountVo(account.getAccountName());
+        return account;
     }
 }

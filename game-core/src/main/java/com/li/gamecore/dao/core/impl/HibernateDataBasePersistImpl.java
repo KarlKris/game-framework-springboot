@@ -48,6 +48,11 @@ public class HibernateDataBasePersistImpl implements DataBasePersister, Applicat
     }
 
     @Override
+    public void asynPersist(IEntity entity) {
+        asynPersist(PersistType.UPDATE, entity);
+    }
+
+    @Override
     public void asynPersist(PersistType type, IEntity entity) {
         queue.offer(new PersistElement(type, entity));
     }

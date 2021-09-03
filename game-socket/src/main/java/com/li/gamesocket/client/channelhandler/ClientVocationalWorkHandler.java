@@ -47,7 +47,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
 
         // 处理收到的推送消息
         if (msg.getCommand().push()) {
-            pushProcessor.process(msg);
+            pushProcessor.processPushMessage(msg);
             return;
         }
 

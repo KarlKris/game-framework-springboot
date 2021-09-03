@@ -13,4 +13,7 @@ public interface ServerAccountModule {
 
     /** 获取账号展示VO **/
     byte GET_SHOW_VO = 1;
+
+    /** 升级 **/
+    byte LEVEL_UP = 2;
 }

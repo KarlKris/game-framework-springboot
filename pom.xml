@@ -14,7 +14,7 @@
     <artifactId>game-framework</artifactId>
     <version>1.0</version>
     <name>game-framework</name>
-    <description>基于SpringBoot2.x的游戏框架</description>
+    <description>基于SpringBoot2.x的游戏服务器框架</description>
 
     <modules>
         <module>game-socket</module>

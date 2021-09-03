@@ -6,7 +6,7 @@ import com.li.gameremote.modules.login.game.facade.GameServerLoginResultCode;
 import com.li.gameremote.modules.login.gateway.facade.GatewayLoginPush;
 import com.li.gameserver.common.GameServerSystemConfig;
 import com.li.gameserver.modules.account.service.AccountService;
-import com.li.gamesocket.anno.PushInject;
+import com.li.gamesocket.anno.InnerPushInject;
 import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
@@ -31,7 +31,7 @@ public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
     @Autowired
     private AccountService accountService;
 
-    @PushInject
+    @InnerPushInject
     private GatewayLoginPush gatewayLoginPush;
 
     @Override

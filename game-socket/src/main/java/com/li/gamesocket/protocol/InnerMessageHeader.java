@@ -36,6 +36,8 @@ public class InnerMessageHeader {
         out.writeShort(protocolId);
         // 长度占位
         out.writeInt(0);
+        // 消息序号
+        out.writeLong(sn);
 
         // 加入序列化标识
         type = ProtocolConstant.addSerializeType(type, serializeType);
@@ -52,8 +54,6 @@ public class InnerMessageHeader {
             command.writeTo(out);
         }
 
-        out.writeLong(sn);
-
         // 判断是否有ip地址
         if (ArrayUtil.isEmpty(ip)) {
             out.writeByte(0);
@@ -69,6 +69,7 @@ public class InnerMessageHeader {
         InnerMessageHeader header = new InnerMessageHeader();
         header.protocolId = in.readShort();
         header.length = in.readInt();
+        header.sn = in.readLong();
         header.type = in.readByte();
 
         if (ProtocolConstant.hasState(header.type, ProtocolConstant.COMMAND_MARK)) {
@@ -77,8 +78,6 @@ public class InnerMessageHeader {
 
         header.zip = ProtocolConstant.hasState(header.type, ProtocolConstant.BODY_ZIP_MARK);
         header.serializeType = ProtocolConstant.getSerializeType(header.type);
-
-        header.sn = in.readLong();
 
         byte ipBytes = in.readByte();
         if (ipBytes > 0) {

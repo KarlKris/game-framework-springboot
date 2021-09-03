@@ -16,5 +16,7 @@ public class AccountVo {
 
     /** 账号名 **/
     private String name;
+    /** 玩家等级 **/
+    private int level;
 
 }

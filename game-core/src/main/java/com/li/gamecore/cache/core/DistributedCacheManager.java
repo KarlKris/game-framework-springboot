@@ -14,7 +14,7 @@ public interface DistributedCacheManager {
      * @param key
      * @return
      */
-    Object get(final Object key);
+    Object get(final String key);
 
     /**
      * 根据正则表达式获取对象
@@ -22,7 +22,7 @@ public interface DistributedCacheManager {
      * @param pattern 正则表达式
      * @return
      */
-    Set<Object> getAll(final String pattern);
+    Set<String> getAll(final String pattern);
 
     /**
      * 设置key-value
@@ -31,7 +31,7 @@ public interface DistributedCacheManager {
      * @param value
      * @param seconds 过期时间(秒)
      */
-    void set(final Object key, final Object value, int seconds);
+    void set(final String key, final Object value, int seconds);
 
     /**
      * 设置key-value 过期时间使用默认配置值
@@ -39,7 +39,7 @@ public interface DistributedCacheManager {
      * @param key
      * @param value
      */
-    void set(final Object key, final Object value);
+    void set(final String key, final Object value);
 
     /**
      * 根据key判断某一对象是否存在
@@ -47,14 +47,14 @@ public interface DistributedCacheManager {
      * @param key
      * @return 是否存在
      */
-    Boolean exists(final Object key);
+    Boolean exists(final String key);
 
     /**
      * 根据key删除对象
      *
      * @param key
      */
-    void del(final Object key);
+    void del(final String key);
 
     /**
      * 根据正则表达式删除对象
@@ -70,7 +70,7 @@ public interface DistributedCacheManager {
      * @param key
      * @return 对应对象的类型
      */
-    String type(final Object key);
+    String type(final String key);
 
     /**
      * 设置key的过期时间
@@ -79,7 +79,7 @@ public interface DistributedCacheManager {
      * @param seconds
      * @return 是否设置成功
      */
-    Boolean expire(final Object key, final int seconds);
+    Boolean expire(final String key, final int seconds);
 
     /**
      * 设置key在指定时间点后过期
@@ -88,7 +88,7 @@ public interface DistributedCacheManager {
      * @param unixTime
      * @return 是否成功
      */
-    Boolean expireAt(final Object key, final long unixTime);
+    Boolean expireAt(final String key, final long unixTime);
 
     /**
      * 获取对应key的过期时间
@@ -96,7 +96,7 @@ public interface DistributedCacheManager {
      * @param key
      * @return
      */
-    Long ttl(final Object key);
+    Long ttl(final String key);
 
     /**
      * 设置新值并返回旧值
@@ -105,7 +105,7 @@ public interface DistributedCacheManager {
      * @param value
      * @return 旧值
      */
-    Object getAndSet(final Object key, final Object value);
+    Object getAndSet(final String key, final Object value);
 
 
     /**
@@ -115,7 +115,7 @@ public interface DistributedCacheManager {
      * @param field
      * @param value
      */
-    void hSet(Object key, Object field, Object value);
+    void hSet(String key, Object field, Object value);
 
     /**
      * 根据key获取对应哈希表的对应field的对象
@@ -124,7 +124,7 @@ public interface DistributedCacheManager {
      * @param field
      * @return
      */
-    Object hGet(Object key, Object field);
+    Object hGet(String key, Object field);
 
     /**
      * 根据key删除对应哈希表的对应field的对象
@@ -133,7 +133,7 @@ public interface DistributedCacheManager {
      * @param field
      * @return
      */
-    void hDel(Object key, Object field);
+    void hDel(String key, Object field);
 
     /**
      * 指定的 key 不存在时,为 key 设置指定的value
@@ -142,7 +142,7 @@ public interface DistributedCacheManager {
      * @param value
      * @return 是否设置成功
      */
-    boolean setnx(Object key, Object value);
+    boolean setnx(String key, Object value);
 
     /**
      * 对应key的值自增
@@ -150,7 +150,7 @@ public interface DistributedCacheManager {
      * @param key
      * @return 自增后的值
      */
-    Long incr(Object key);
+    Long incr(String key);
 
 
     /**
@@ -159,7 +159,7 @@ public interface DistributedCacheManager {
      * @param key
      * @param value
      */
-    void sAdd(Object key, Object value);
+    void sAdd(String key, Object value);
 
     /**
      * 获取指定key的set集合
@@ -167,7 +167,7 @@ public interface DistributedCacheManager {
      * @param key
      * @return
      */
-    Set<?> sAll(Object key);
+    Set<?> sAll(String key);
 
     /**
      * 删除指定key的set集合中的value
@@ -176,7 +176,7 @@ public interface DistributedCacheManager {
      * @param value
      * @return
      */
-    boolean sDel(Object key, Object value);
+    boolean sDel(String key, Object value);
 
     // ----------- Pub/Sub ------------------
 

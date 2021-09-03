@@ -37,6 +37,11 @@ public class AccountManager {
     }
 
 
+    public void levelUp(Account account) {
+        account.levelUp();
+    }
+
+
     @Cachedable(name = "AccountName2Id", key = "#accountName")
     public Long getIdByAccountName(String accountName) {
         return dataBaseQuerier.uniqueQuery(Account.class, Long.TYPE, Account.GET_ID_BY_ACCOUNT_NAME, accountName);

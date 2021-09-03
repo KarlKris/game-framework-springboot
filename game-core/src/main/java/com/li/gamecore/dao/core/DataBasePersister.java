@@ -26,4 +26,11 @@ public interface DataBasePersister {
      */
     void asynPersist(PersistType type, IEntity entity);
 
+
+    /**
+     * 异步回写实体
+     * @param entity 回写实体
+     */
+    void asynPersist(IEntity entity);
+
 }

@@ -1,16 +1,21 @@
 package com.li.gamesocket.service.push.impl;
 
+import cn.hutool.core.convert.ConvertException;
 import cn.hutool.core.util.ZipUtil;
+import com.li.gamecommon.exception.SerializeFailException;
 import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.*;
+import com.li.gamesocket.protocol.serialize.SerializeType;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerManager;
 import com.li.gamesocket.service.VocationalWorkConfig;
+import com.li.gamesocket.service.command.Command;
 import com.li.gamesocket.service.command.CommandManager;
 import com.li.gamesocket.service.command.MethodCtx;
 import com.li.gamesocket.service.command.MethodInvokeCtx;
 import com.li.gamesocket.service.handler.DispatcherExecutorService;
 import com.li.gamesocket.service.push.PushProcessor;
+import com.li.gamesocket.service.rpc.SnCtxManager;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
 import com.li.gamesocket.utils.CommandUtils;
@@ -35,16 +40,22 @@ public class PushProcessorImpl implements PushProcessor {
     @Autowired
     private SessionManager sessionManager;
     @Autowired
+    private SnCtxManager snCtxManager;
+    @Autowired
     private VocationalWorkConfig vocationalWorkConfig;
     @Autowired
     private DispatcherExecutorService dispatcherExecutorService;
 
     @Override
-    public void process(IMessage message) {
+    public void processPushMessage(IMessage message) {
         dispatcherExecutorService.execute(() -> {
             MethodInvokeCtx methodInvokeCtx = commandManager.getMethodInvokeCtx(message.getCommand());
             if (methodInvokeCtx == null) {
-                doPush(message);
+                // 无处理,即仅是中介,直接推送至外网
+                Serializer serializer = serializerManager.getSerializer(message.getSerializeType());
+                PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
+
+                doPushToOuter(pushResponse, message.getSn(), message.getMessageType(), message.getCommand());
                 return;
             }
 
@@ -58,26 +69,65 @@ public class PushProcessorImpl implements PushProcessor {
                 return;
             }
 
-            PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
-            MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
+            try {
+                // 推送中介逻辑处理
+                PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
+                MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
 
-            Object[] args = CommandUtils.decodePushResponse(methodCtx.getParams(), pushResponse);
-            ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
+                Object[] args = CommandUtils.decodePushResponse(methodCtx.getParams(), pushResponse);
+                ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
+            } catch (SerializeFailException e) {
+                log.error("发生序列化/反序列化异常", e);
+            } catch (ConvertException e) {
+                log.error("发生类型转换异常", e);
+            } catch (Exception e) {
+                log.error("发生未知异常", e);
+            }
         });
     }
 
 
-    /** 直接推送给目标 **/
-    private void doPush(IMessage msg) {
-        Serializer serializer = serializerManager.getSerializer(msg.getSerializeType());
-        PushResponse pushResponse = serializer.deserialize(msg.getBody(), PushResponse.class);
+    @Override
+    public void pushToOuter(PushResponse pushResponse, Command command) {
+        doPushToOuter(pushResponse, snCtxManager.nextSn(), ProtocolConstant.VOCATIONAL_WORK_RES, command);
+    }
 
+
+    @Override
+    public void pushToInner(Session session, PushResponse pushResponse, Command command) {
+        Serializer defaultSerializer = serializerManager.getDefaultSerializer();
+        byte[] body = defaultSerializer.serialize(pushResponse);
+        boolean zip = false;
+        if (body.length > vocationalWorkConfig.getBodyZipLength()) {
+            body = ZipUtil.gzip(body);
+            zip = true;
+        }
+
+        InnerMessage message = MessageFactory.toInnerMessage(this.snCtxManager.nextSn()
+                , ProtocolConstant.VOCATIONAL_WORK_RES
+                , command
+                , defaultSerializer.getSerializerType()
+                , zip
+                , body
+                , session.ip());
+
+        if (log.isDebugEnabled()) {
+            log.debug("推送消息至内网[{},{}-{}]", message.getSn()
+                    , message.getCommand().getModule()
+                    , message.getCommand().getInstruction());
+        }
+
+        sessionManager.writeAndFlush(session, message);
+    }
+
+    private void doPushToOuter(PushResponse pushResponse, long sn, byte messageType, Command command) {
         Response response = Response.SUCCESS(pushResponse.getContent());
 
-        Byte serializeType = null;
+        byte serializeType = SerializeType.PROTO_STUFF.getType();
         byte[] body = null;
         boolean zip = false;
 
+        Serializer serializer;
         for (long identity : pushResponse.getTargets()) {
             Session session = sessionManager.getIdentitySession(identity);
             if (session == null) {
@@ -95,40 +145,22 @@ public class PushProcessorImpl implements PushProcessor {
                 }
             }
 
+            IMessage message = MessageFactory.toOuterMessage(sn
+                    , ProtocolConstant.toOriginMessageType(messageType)
+                    , command
+                    , serializeType
+                    , zip
+                    , body);
+
             if (log.isDebugEnabled()) {
-                log.debug("向玩家[{}]推送消息", identity);
-            }
-
-            Short lastProtocolHeaderIdentity = session.getChannel().attr(ChannelAttributeKeys.LAST_PROTOCOL_HEADER_IDENTITY).get();
-            if (lastProtocolHeaderIdentity == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("未知玩家[{}]Channel使用的消息类型,忽略本次推送", identity);
-                }
-                continue;
-            }
-
-            IMessage message = null;
-            if (lastProtocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
-                // 内部通信类型
-                message = MessageFactory.toInnerMessage(msg.getSn()
-                        , ProtocolConstant.toOriginMessageType(msg.getMessageType())
-                        , msg.getCommand()
-                        , serializeType
-                        , zip
-                        , body
-                        , session.ip());
-            } else if (lastProtocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
-                // 外部通信类型
-                message = MessageFactory.toOuterMessage(msg.getSn()
-                        , ProtocolConstant.toOriginMessageType(msg.getMessageType())
-                        , msg.getCommand()
-                        , serializeType
-                        , zip
-                        , body);
+                log.debug("推送消息至外网[{},{}-{}]", message.getSn()
+                        , message.getCommand().getModule()
+                        , message.getCommand().getInstruction());
             }
 
             sessionManager.writeAndFlush(session, message);
         }
     }
+
 
 }

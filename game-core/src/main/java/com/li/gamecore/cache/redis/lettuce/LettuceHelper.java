@@ -20,41 +20,41 @@ public class LettuceHelper implements DistributedCacheManager {
 
 
     @Autowired
-    private RedisTemplate<Object, Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public Object get(Object key) {
+    public Object get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
     @Override
-    public Set<Object> getAll(String pattern) {
+    public Set<String> getAll(String pattern) {
         return redisTemplate.keys(pattern);
     }
 
     @Override
-    public void set(Object key, Object value, int seconds) {
+    public void set(String key, Object value, int seconds) {
         redisTemplate.opsForValue().set(key, value, seconds, TimeUnit.SECONDS);
     }
 
     @Override
-    public void set(Object key, Object value) {
+    public void set(String key, Object value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
     @Override
-    public Boolean exists(Object key) {
+    public Boolean exists(String key) {
         return redisTemplate.hasKey(key);
     }
 
     @Override
-    public void del(Object key) {
+    public void del(String key) {
         redisTemplate.delete(key);
     }
 
     @Override
     public void delAll(String pattern) {
-        Set<Object> keys = redisTemplate.keys(pattern);
+        Set<String> keys = redisTemplate.keys(pattern);
         if (CollectionUtils.isEmpty(keys)) {
             return;
         }
@@ -62,68 +62,68 @@ public class LettuceHelper implements DistributedCacheManager {
     }
 
     @Override
-    public String type(Object key) {
+    public String type(String key) {
         DataType type = redisTemplate.type(key);
         return type == null ? null : type.name();
     }
 
     @Override
-    public Boolean expire(Object key, int seconds) {
+    public Boolean expire(String key, int seconds) {
         return redisTemplate.expire(key, seconds, TimeUnit.SECONDS);
     }
 
     @Override
-    public Boolean expireAt(Object key, long unixTime) {
+    public Boolean expireAt(String key, long unixTime) {
         return redisTemplate.expireAt(key, new Date(unixTime));
     }
 
     @Override
-    public Long ttl(Object key) {
+    public Long ttl(String key) {
         return redisTemplate.getExpire(key);
     }
 
     @Override
-    public Object getAndSet(Object key, Object value) {
+    public Object getAndSet(String key, Object value) {
         return redisTemplate.opsForValue().getAndSet(key, value);
     }
 
     @Override
-    public void hSet(Object key, Object field, Object value) {
+    public void hSet(String key, Object field, Object value) {
         redisTemplate.opsForHash().put(key, field, value);
     }
 
     @Override
-    public Object hGet(Object key, Object field) {
+    public Object hGet(String key, Object field) {
         return redisTemplate.opsForHash().get(key, field);
     }
 
     @Override
-    public void hDel(Object key, Object field) {
+    public void hDel(String key, Object field) {
         redisTemplate.opsForHash().delete(key, field);
     }
 
     @Override
-    public boolean setnx(Object key, Object value) {
+    public boolean setnx(String key, Object value) {
         return redisTemplate.opsForValue().setIfAbsent(key, value);
     }
 
     @Override
-    public Long incr(Object key) {
+    public Long incr(String key) {
         return redisTemplate.opsForValue().increment(key);
     }
 
     @Override
-    public void sAdd(Object key, Object value) {
+    public void sAdd(String key, Object value) {
         redisTemplate.opsForSet().add(key, value);
     }
 
     @Override
-    public Set<?> sAll(Object key) {
+    public Set<?> sAll(String key) {
         return redisTemplate.opsForSet().members(key);
     }
 
     @Override
-    public boolean sDel(Object key, Object value) {
+    public boolean sDel(String key, Object value) {
         return redisTemplate.opsForSet().remove(key, value) == 1;
     }
 

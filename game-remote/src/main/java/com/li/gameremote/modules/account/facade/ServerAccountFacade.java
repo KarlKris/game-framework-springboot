@@ -1,6 +1,7 @@
 package com.li.gameremote.modules.account.facade;
 
 import com.li.gameremote.modules.account.vo.AccountVo;
+import com.li.gamesocket.anno.Identity;
 import com.li.gamesocket.anno.InBody;
 import com.li.gamesocket.anno.SocketCommand;
 import com.li.gamesocket.anno.SocketModule;
@@ -22,5 +23,13 @@ public interface ServerAccountFacade {
      */
     @SocketCommand(command = ServerAccountModule.GET_SHOW_VO)
     Response<AccountVo> getShowVo(@InBody(name = "identity") long identity);
+
+    /**
+     * 账号升级
+     * @param identity 身份标识
+     * @return
+     */
+    @SocketCommand(command = ServerAccountModule.LEVEL_UP)
+    void levelUp(@Identity long identity);
 
 }

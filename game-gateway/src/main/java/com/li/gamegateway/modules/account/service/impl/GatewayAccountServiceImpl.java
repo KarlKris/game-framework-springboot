@@ -3,6 +3,7 @@ package com.li.gamegateway.modules.account.service.impl;
 import com.li.gamecore.cache.anno.Cachedable;
 import com.li.gamecore.cache.config.CachedType;
 import com.li.gamegateway.modules.account.service.GatewayAccountService;
+import com.li.gameremote.common.cache.CacheNameConstants;
 import com.li.gameremote.modules.account.facade.ServerAccountFacade;
 import com.li.gameremote.modules.account.vo.AccountVo;
 import com.li.gamesocket.service.rpc.RpcService;
@@ -22,7 +23,8 @@ public class GatewayAccountServiceImpl implements GatewayAccountService {
     private RpcService rpcService;
 
     @Override
-    @Cachedable(type = CachedType.REMOTE, name = "identity2accountVo", key = "#identity")
+    @Cachedable(type = CachedType.REMOTE
+            , name = CacheNameConstants.IDENTITY_TO_ACCOUNT_VO, key = "#identity")
     public AccountVo transformById(long identity) {
         return rpcService.getSendProxy(ServerAccountFacade.class, identity)
                 .getShowVo(identity)

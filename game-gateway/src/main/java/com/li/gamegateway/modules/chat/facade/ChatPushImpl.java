@@ -5,7 +5,7 @@ import com.li.gamegateway.modules.chat.vo.GatewayChatContent;
 import com.li.gameremote.modules.account.vo.AccountVo;
 import com.li.gameremote.modules.chat.facade.ChatPush;
 import com.li.gameremote.modules.chat.vo.ChatContent;
-import com.li.gamesocket.anno.PushInject;
+import com.li.gamesocket.anno.OuterPushInject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class ChatPushImpl implements ChatPush {
     @Autowired
     private GatewayAccountService gatewayAccountService;
 
-    @PushInject
+    @OuterPushInject
     private GatewayChatPush gatewayChatPush;
 
     @Override

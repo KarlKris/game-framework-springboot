@@ -31,4 +31,11 @@ public interface AccountService {
      */
     AccountVo transform(long identity);
 
+
+    /**
+     * 升级
+     * @param identity 身份标识
+     */
+    void levelUp(long identity);
+
 }
