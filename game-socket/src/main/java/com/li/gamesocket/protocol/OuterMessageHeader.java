@@ -50,7 +50,7 @@ public class OuterMessageHeader {
     }
 
     /** 从ByteBuf中读取 **/
-    static OuterMessageHeader readIn(ByteBuf in) {
+    public static OuterMessageHeader readIn(ByteBuf in) {
         OuterMessageHeader header = new OuterMessageHeader();
         header.protocolId = in.readShort();
         header.length = in.readInt();
@@ -68,7 +68,7 @@ public class OuterMessageHeader {
     }
 
 
-    static OuterMessageHeader of(long sn, byte type, Command command, boolean zip, byte serializeType) {
+    public static OuterMessageHeader of(long sn, byte type, Command command, boolean zip, byte serializeType) {
         OuterMessageHeader header = new OuterMessageHeader();
         header.sn = sn;
         header.type = type;

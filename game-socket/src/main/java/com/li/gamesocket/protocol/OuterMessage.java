@@ -72,7 +72,7 @@ public class OuterMessage implements IMessage {
         return message;
     }
 
-    static OuterMessage of(OuterMessageHeader header, byte[] body) {
+    public static OuterMessage of(OuterMessageHeader header, byte[] body) {
         OuterMessage message = new OuterMessage();
         message.header = header;
         message.body = body;

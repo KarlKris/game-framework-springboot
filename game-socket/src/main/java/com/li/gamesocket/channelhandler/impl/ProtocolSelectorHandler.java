@@ -1,5 +1,6 @@
 package com.li.gamesocket.channelhandler.impl;
 
+import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.codec.MessageDecoder;
 import com.li.gamesocket.codec.MessageEncoder;
 import com.li.gamesocket.codec.WebSocketDecoder;
@@ -53,8 +54,6 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
 
     @Autowired
     private MessageEncoder messageEncoder;
-    @Autowired
-    private MessageDecoder messageDecoder;
     @Autowired
     private HeartBeatHandler heartBeatHandler;
 
@@ -139,7 +138,8 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
             channelHandlerContext.pipeline().addBefore(idleStateHandlerName
                     , MessageEncoder.class.getSimpleName(), this.messageEncoder);
             channelHandlerContext.pipeline().addBefore(idleStateHandlerName
-                    , MessageDecoder.class.getSimpleName(), this.messageDecoder);
+                    , MessageDecoder.class.getSimpleName()
+                    , ApplicationContextHolder.getBean(MessageDecoder.class));
 
             // 心跳
             channelHandlerContext.pipeline().addBefore(VocationalWorkHandler.class.getSimpleName()

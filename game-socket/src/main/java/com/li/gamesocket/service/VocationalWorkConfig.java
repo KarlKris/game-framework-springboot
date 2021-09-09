@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 public class VocationalWorkConfig {
 
     /** 单个单线程池队列最大长度 **/
-    @Value("${netty.server.single.threadPool.maxQueueLength:5000}")
+    @Value("${netty.server.single.threadPool.maxQueueLength:50000}")
     private int maxQueueLength;
     /** 消息体进行压缩的长度值 **/
     @Value("${netty.body.zip.length:10240}")

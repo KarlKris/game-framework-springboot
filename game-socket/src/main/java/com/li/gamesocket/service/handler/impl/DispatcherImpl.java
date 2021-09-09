@@ -209,7 +209,7 @@ public class DispatcherImpl implements Dispatcher, DispatcherExecutorService,  A
         } catch (Exception e){
             log.error("发生未知异常", e);
             responseBody = serializer.serialize(Response.UNKNOWN);
-        }finally {
+        } finally {
             response(session, message, zip, serializer.getSerializerType(), responseBody);
         }
     }
