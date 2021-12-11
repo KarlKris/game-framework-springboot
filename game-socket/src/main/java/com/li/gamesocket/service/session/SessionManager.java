@@ -1,17 +1,16 @@
 package com.li.gamesocket.service.session;
 
-import com.li.gamesocket.channelhandler.ChannelAttributeKeys;
+import com.li.gamesocket.channelhandler.common.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.IMessage;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author li-yuanwen
@@ -22,38 +21,43 @@ import java.util.stream.Collectors;
 public class SessionManager {
 
     /** session id generator **/
-    private final AtomicInteger sessionIdGenerator = new AtomicInteger(0);
-
-    /** SessionId2Session 字典 **/
-    private final ConcurrentHashMap<Integer, Session> sessions = new ConcurrentHashMap<>();
+    private final AtomicLong sessionIdGenerator = new AtomicLong(0);
 
     /** Identity2Session 字典 **/
-    private final ConcurrentHashMap<Long, Integer> identities = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, ISession> identities = new ConcurrentHashMap<>();
 
-    /** 为Channel注册Session **/
-    public Session registerSession(Channel channel) {
-        int nextId = this.sessionIdGenerator.incrementAndGet();
-        Session session = Session.newInstance(nextId, channel);
-        this.sessions.put(nextId, session);
-
+    /** 为Channel注册PlayerSession **/
+    public PlayerSession registerPlayerSession(Channel channel) {
+        long nextId = this.sessionIdGenerator.incrementAndGet();
+        PlayerSession playerSession = new PlayerSession(nextId, channel);
         // channel绑定属性
-        channel.attr(ChannelAttributeKeys.SESSION).set(session);
+        channel.attr(ChannelAttributeKeys.SESSION).set(playerSession);
+        return playerSession;
+    }
 
-        return session;
+    /** 为Channel注册PlayerSession **/
+    public ServerSession registerServerSession(Channel channel) {
+        long nextId = this.sessionIdGenerator.incrementAndGet();
+        ServerSession serverSession = new ServerSession(nextId, channel);
+        // channel绑定属性
+        channel.attr(ChannelAttributeKeys.SESSION).set(serverSession);
+        return serverSession;
     }
 
 
     /** 删除为Channel注册的Session **/
-    public Session removeSession(Channel channel) {
-        Session session = channel.attr(ChannelAttributeKeys.SESSION).get();
+    public PlayerSession removePlayerSession(Channel channel) {
+        PlayerSession session = (PlayerSession) channel.attr(ChannelAttributeKeys.SESSION).get();
         if (session == null) {
             return null;
         }
 
-        if (session.identity()) {
+        // todo 网关服需要考虑通知游戏服更新玩家断开链接
+        if (session.isIdentity()) {
             this.identities.remove(session.getIdentity());
         }
-        return this.sessions.remove(session.getSessionId());
+
+        return session;
     }
 
     /** 是否在线 **/
@@ -65,45 +69,47 @@ public class SessionManager {
      * 绑定身份
      * @param session 连接Session
      * @param identity 身份标识
-     * @param inner true 内网服务器
+     * @return 旧Session or null
      */
-    public void bindIdentity(Session session, long identity, boolean inner) {
+    public ISession bindIdentity(ISession session, long identity) {
 
         if (log.isDebugEnabled()) {
             log.debug("session[{}]绑定某个身份[{}]", session.getSessionId(), identity);
         }
 
-        if (!inner) {
-            session.bind(identity);
+        if (session instanceof PlayerSession) {
+            ((PlayerSession) session).bindIdentity(identity);
         }
 
-        Integer oldSessionId = this.identities.put(identity, session.getSessionId());
-        if (oldSessionId != null && !Objects.equals(session.getSessionId(), oldSessionId)) {
-            log.warn("玩家[{}]被顶号", identity);
-            // 不返回旧Session是因为踢下线的时候会因为旧Session移除使玩家数据异常
-            // 外部处理踢下线逻辑
-            this.sessions.remove(oldSessionId);
+        ISession oldSession = this.identities.put(identity, session);
+        if (oldSession != null && !Objects.equals(session.getSessionId(), oldSession.getSessionId())) {
+            if (log.isDebugEnabled()) {
+                log.debug("玩家[{}]被顶号", identity);
+            }
+
+            return oldSession;
         }
+
+        return null;
 
     }
 
     /** 断开连接 **/
-    public void kickOut(Session session) {
-        session.kick();
+    public void kickOut(ISession session) {
+        session.close();
     }
 
     /** 断开连接 **/
     public void kickOut(long identity) {
-        Session session = this.getIdentitySession(identity);
+        ISession session = this.getIdentitySession(identity);
         if (session != null) {
-            session.kick();
+            session.close();
         }
     }
 
     /** 获取指定Session **/
-    public Session getIdentitySession(long identity) {
-        Integer sessionId = this.identities.get(identity);
-        return sessionId != null ? this.sessions.get(sessionId) : null;
+    public ISession getIdentitySession(long identity) {
+        return this.identities.get(identity);
     }
 
     /** 获取已绑定身份的标识集 **/
@@ -113,10 +119,10 @@ public class SessionManager {
 
 
     /** 写入Channel **/
-    public void writeAndFlush(Session session, IMessage message) {
+    public static void writeAndFlush(ISession session, IMessage message) {
         if (message == null) {
             if (log.isWarnEnabled()) {
-                log.warn("向连接[{}]写入null信息,忽略", session.getChannel().remoteAddress());
+                log.warn("向连接[{}]写入null信息,忽略", session.getIp());
             }
             return;
         }

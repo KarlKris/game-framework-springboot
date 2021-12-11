@@ -10,7 +10,7 @@ import java.util.Collection;
  * @date 2021/9/2 21:59
  **/
 @SocketPush
-@SocketModule(module = GatewayChatModule.MODULE)
+@SocketController(module = GatewayChatModule.MODULE)
 public interface GatewayChatPush {
 
 
@@ -19,7 +19,7 @@ public interface GatewayChatPush {
      * @param pushIds 推送玩家集
      * @param content 消息内容
      */
-    @SocketCommand(command = GatewayChatModule.PUSH_MESSAGE)
-    void pushMessage(@PushIds Collection<Long> pushIds, @InBody(name = "content") GatewayChatContent content);
+    @SocketMethod(id = GatewayChatModule.PUSH_MESSAGE)
+    void pushMessage(@PushIds Collection<Long> pushIds, @InBody GatewayChatContent content);
 
 }

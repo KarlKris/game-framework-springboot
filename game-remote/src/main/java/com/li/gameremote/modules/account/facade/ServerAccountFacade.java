@@ -3,8 +3,8 @@ package com.li.gameremote.modules.account.facade;
 import com.li.gameremote.modules.account.vo.AccountVo;
 import com.li.gamesocket.anno.Identity;
 import com.li.gamesocket.anno.InBody;
-import com.li.gamesocket.anno.SocketCommand;
-import com.li.gamesocket.anno.SocketModule;
+import com.li.gamesocket.anno.SocketMethod;
+import com.li.gamesocket.anno.SocketController;
 import com.li.gamesocket.protocol.Response;
 
 /**
@@ -12,7 +12,7 @@ import com.li.gamesocket.protocol.Response;
  * @date 2021/9/2 21:46
  * 账号模块接口
  **/
-@SocketModule(module = ServerAccountModule.MODULE)
+@SocketController(module = ServerAccountModule.MODULE)
 public interface ServerAccountFacade {
 
 
@@ -21,7 +21,7 @@ public interface ServerAccountFacade {
      * @param identity 身份标识
      * @return AccountVo
      */
-    @SocketCommand(command = ServerAccountModule.GET_SHOW_VO)
+    @SocketMethod(command = ServerAccountModule.GET_SHOW_VO)
     Response<AccountVo> getShowVo(@InBody(name = "identity") long identity);
 
     /**
@@ -29,7 +29,7 @@ public interface ServerAccountFacade {
      * @param identity 身份标识
      * @return
      */
-    @SocketCommand(command = ServerAccountModule.LEVEL_UP)
+    @SocketMethod(command = ServerAccountModule.LEVEL_UP)
     void levelUp(@Identity long identity);
 
 }

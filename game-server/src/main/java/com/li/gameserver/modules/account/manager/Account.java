@@ -1,5 +1,6 @@
 package com.li.gameserver.modules.account.manager;
 
+import cn.hutool.core.date.DateUtil;
 import com.li.gamecore.dao.IEntity;
 import com.li.gamecore.dao.anno.Enhance;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.Date;
 
 /**
  * @author li-yuanwen
@@ -39,14 +41,43 @@ public class Account implements IEntity<Long> {
     /** 账号等级 **/
     private int level = 1;
 
+    /** 最近登录时间 **/
+    private long loginTime;
+
+    /** 最近登出时间 **/
+    private long logoutTime;
+
+    /** 今日在线总时长(毫秒) **/
+    private long dayOnlineTime;
+
+    /** 账号在线总时长(毫秒) **/
+    private long totalOnlineTime;
+
     @Override
     public Long getId() {
         return id;
     }
 
     @Enhance
-    synchronized void levelUp() {
+    void levelUp() {
         this.level++;
+    }
+
+    @Enhance
+    void login() {
+        this.loginTime = System.currentTimeMillis();
+    }
+
+    @Enhance
+    void logout() {
+        this.logoutTime = System.currentTimeMillis();
+
+        if (DateUtil.isSameDay(new Date(this.loginTime), new Date(this.logoutTime))) {
+            this.dayOnlineTime += (this.logoutTime - this.loginTime);
+            this.totalOnlineTime += (this.logoutTime - this.loginTime);
+        } else {
+            // todo 跨天登出
+        }
     }
 
     public static Account of(long id, int channel, String accountName) {

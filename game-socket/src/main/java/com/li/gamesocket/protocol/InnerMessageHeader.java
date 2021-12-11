@@ -1,7 +1,7 @@
 package com.li.gamesocket.protocol;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.gamesocket.service.command.Command;
+import com.li.gamesocket.service.protocol.SocketProtocol;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 
@@ -13,13 +13,13 @@ import lombok.Getter;
 public class InnerMessageHeader {
 
     /** 协议标识 **/
-    private short protocolId = ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY;
+    private short protocolHeader = ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY;
     /** 消息字节长度 **/
     private int length;
     /** 消息类型 **/
     private byte type;
-    /** 请求业务标识 **/
-    private Command command;
+    /** 请求业务协议号 **/
+    private SocketProtocol socketProtocol;
     /** 消息体压缩标识(true为压缩) **/
     private boolean zip;
     /** 消息体序列化标识 **/
@@ -27,13 +27,15 @@ public class InnerMessageHeader {
 
     /** 消息序号 **/
     private long sn;
+    /** 消息身份标识(-1表示未知) **/
+    private long identity;
     /** 消息来源IP地址(存在为null的情况) **/
     private byte[] ip;
 
 
     /** 写入至ByteBuf **/
     void writeTo(ByteBuf out) {
-        out.writeShort(protocolId);
+        out.writeShort(protocolHeader);
         // 长度占位
         out.writeInt(0);
         // 消息序号
@@ -51,8 +53,11 @@ public class InnerMessageHeader {
 
         // 命令标识
         if (ProtocolConstant.hasState(type, ProtocolConstant.COMMAND_MARK)) {
-            command.writeTo(out);
+            socketProtocol.write(out);
         }
+
+        // 身份标识
+        out.writeLong(identity);
 
         // 判断是否有ip地址
         if (ArrayUtil.isEmpty(ip)) {
@@ -67,17 +72,18 @@ public class InnerMessageHeader {
     /** 从ByteBuf中读取 **/
     static InnerMessageHeader readIn(ByteBuf in) {
         InnerMessageHeader header = new InnerMessageHeader();
-        header.protocolId = in.readShort();
+        header.protocolHeader = in.readShort();
         header.length = in.readInt();
         header.sn = in.readLong();
         header.type = in.readByte();
 
         if (ProtocolConstant.hasState(header.type, ProtocolConstant.COMMAND_MARK)) {
-            header.command = Command.readIn(in);
+            header.socketProtocol = SocketProtocol.read(in);
         }
 
         header.zip = ProtocolConstant.hasState(header.type, ProtocolConstant.BODY_ZIP_MARK);
         header.serializeType = ProtocolConstant.getSerializeType(header.type);
+        header.identity = in.readLong();
 
         byte ipBytes = in.readByte();
         if (ipBytes > 0) {
@@ -88,14 +94,15 @@ public class InnerMessageHeader {
         return header;
     }
 
-    static InnerMessageHeader of(byte msgType, Command command
-            , boolean zip, byte serializeType, long sn, byte[] ip) {
+    static InnerMessageHeader of(byte msgType, SocketProtocol socketProtocol
+            , boolean zip, byte serializeType, long sn, long identity, byte[] ip) {
         InnerMessageHeader header = new InnerMessageHeader();
         header.type = msgType;
-        header.command = command;
+        header.socketProtocol = socketProtocol;
         header.zip = zip;
         header.serializeType = serializeType;
         header.sn = sn;
+        header.identity = identity;
         header.ip = ip;
         return header;
     }

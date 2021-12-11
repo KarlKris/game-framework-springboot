@@ -3,7 +3,7 @@ package com.li.gamecommon.rpc.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author li-yuanwen
@@ -21,6 +21,6 @@ public class ServerInfo {
     /** 服务器端口 **/
     private int port;
     /** 服务器所负责的模块号 **/
-    private Set<Short> modules;
+    private List<Short> modules;
 
 }

@@ -8,19 +8,14 @@ import lombok.Getter;
  * 错误请求异常
  **/
 @Getter
-public class BadRequestException extends RuntimeException {
-
-    private int errorCode;
-    private String message;
+public class BadRequestException extends SocketException {
 
     public BadRequestException(int errorCode) {
-        super();
-        this.errorCode = errorCode;
+        super(errorCode);
     }
 
     public BadRequestException(int errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        super(errorCode, message);
     }
 
 

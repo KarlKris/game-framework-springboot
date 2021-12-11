@@ -1,8 +1,11 @@
 package com.li.gamesocket.channelhandler;
 
 import com.li.gamecommon.ApplicationContextHolder;
-import com.li.gamesocket.channelhandler.impl.ProtocolSelectorHandler;
-import com.li.gamesocket.channelhandler.impl.VocationalWorkHandler;
+import com.li.gamesocket.channelhandler.common.NioNettyFilter;
+import com.li.gamesocket.channelhandler.common.impl.ProtocolSelectorHandler;
+import com.li.gamesocket.channelhandler.server.AbstractServerVocationalWorkHandler;
+import com.li.gamesocket.protocol.IMessage;
+import com.li.gamesocket.service.session.ISession;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import javax.net.ssl.SSLEngine;
 import java.util.List;
 
@@ -25,16 +29,14 @@ import java.util.List;
 @Component
 @Slf4j
 public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChannel> {
-    /** ssl协议ClientHello协议头 **/
-    public static final short SSL_CLIENT_HELLO = 0x1603;
 
     @Autowired(required = false)
     @Qualifier("serverSslContext")
     private SslContext sslContext;
-    @Autowired
+    @Resource
     private List<NioNettyFilter> filters;
-    @Autowired
-    private VocationalWorkHandler vocationalWorkHandler;
+    @Resource
+    private AbstractServerVocationalWorkHandler<IMessage, ISession> vocationalWorkHandler;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -61,7 +63,7 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
                 , ApplicationContextHolder.getBean("serverIdleStateHandler", IdleStateHandler.class));
 
         // 业务
-        pipeline.addLast(VocationalWorkHandler.class.getSimpleName(), this.vocationalWorkHandler);
+        pipeline.addLast(AbstractServerVocationalWorkHandler.class.getSimpleName(), this.vocationalWorkHandler);
 
     }
 }

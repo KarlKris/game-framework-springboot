@@ -8,6 +8,8 @@ import com.li.gameserver.common.GameServerSystemConfig;
 import com.li.gameserver.modules.account.service.AccountService;
 import com.li.gamesocket.anno.InnerPushInject;
 import com.li.gamesocket.protocol.Response;
+import com.li.gamesocket.service.session.ISession;
+import com.li.gamesocket.service.session.ServerSession;
 import com.li.gamesocket.service.session.Session;
 import com.li.gamesocket.service.session.SessionManager;
 import lombok.extern.slf4j.Slf4j;
@@ -35,31 +37,31 @@ public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
     private GatewayLoginPush gatewayLoginPush;
 
     @Override
-    public Response<Long> create(Session session, String account, int channel) {
+    public Response<Long> create(ServerSession session, String account, int channel) {
         if (!checkChannel(channel)) {
             return Response.ERROR(GameServerLoginResultCode.REJECT);
         }
         String accountName = account + "." + channel;
         long nextId = accountService.createAccount(accountName, channel);
-        sessionManager.bindIdentity(session, nextId, true);
+        sessionManager.bindIdentity(session, nextId);
         return Response.SUCCESS(nextId);
     }
 
     @Override
-    public Response<Long> login(Session session, String account, int channel) {
+    public Response<Long> login(ServerSession session, String account, int channel) {
         if (!checkChannel(channel)) {
             return Response.ERROR(GameServerLoginResultCode.REJECT);
         }
         String accountName = account + "." + channel;
         long identity = accountService.login(accountName);
         // 先判断玩家是否在线
-        Session oldSession = sessionManager.getIdentitySession(identity);
+        ISession oldSession = sessionManager.getIdentitySession(identity);
         if (oldSession != null
                 && !Objects.equals(session.getSessionId(), oldSession.getSessionId())) {
             // 推送给网关服,使其断开连接
             gatewayLoginPush.kickOut(Collections.singleton(identity));
         }
-        sessionManager.bindIdentity(session, identity, true);
+        sessionManager.bindIdentity(session, identity);
         return Response.SUCCESS(identity);
     }
 

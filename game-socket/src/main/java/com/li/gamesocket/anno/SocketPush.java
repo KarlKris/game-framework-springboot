@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author li-yuanwen
  * 标记推送接口
+ * @author li-yuanwen
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

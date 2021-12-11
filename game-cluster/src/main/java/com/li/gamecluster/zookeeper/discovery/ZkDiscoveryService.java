@@ -2,21 +2,20 @@ package com.li.gamecluster.zookeeper.discovery;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.li.gamecluster.zookeeper.config.CuratorFrameworkConfiguration;
 import com.li.gamecluster.zookeeper.model.ServerType;
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,11 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ZkDiscoveryService implements ApplicationListener<ContextClosedEvent> {
 
-    @Autowired
+    @Resource
     private CuratorFramework curatorFramework;
-    @Autowired
-    private CuratorFrameworkConfiguration config;
-    @Autowired
+    @Resource
     private ObjectMapper objectMapper;
 
 
@@ -56,7 +53,7 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
                     try {
                         synchronized (module2Type) {
                             for (short module : objectMapper.readValue(bytes
-                                    , new TypeReference<Set<Short>>() {})) {
+                                    , new TypeReference<List<Short>>() {})) {
                                 ServerType old1 = module2Type.putIfAbsent(module, type);
                                 if (old1 != null) {
                                     log.warn("出现相同模块号[{}],不同服务[{},{}]"

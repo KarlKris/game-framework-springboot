@@ -1,6 +1,6 @@
 package com.li.gamesocket.service.push;
 
-import com.li.gamesocket.service.command.MethodCtx;
+import com.li.gamesocket.service.protocol.MethodCtx;
 import lombok.Getter;
 
 /**
@@ -16,13 +16,6 @@ public class PushMethodCtx {
     private final MethodCtx methodCtx;
 
     PushMethodCtx(MethodCtx methodCtx) {
-        if (!methodCtx.getCommand().push()) {
-            throw new IllegalArgumentException("推送方法["
-                    + methodCtx.getMethod().getName()
-                    + "]的命令号["
-                    + methodCtx.getCommand().getInstruction()
-                    + "]>0");
-        }
         this.methodCtx = methodCtx;
     }
 

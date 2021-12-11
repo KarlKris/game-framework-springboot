@@ -14,9 +14,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InBody {
 
-    /** 属性名 **/
-    String name();
-
-    /** 是否必须 **/
-    boolean required() default true;
 }

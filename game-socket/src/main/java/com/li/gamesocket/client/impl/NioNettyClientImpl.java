@@ -2,12 +2,12 @@ package com.li.gamesocket.client.impl;
 
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamecommon.rpc.model.Address;
+import com.li.gamesocket.channelhandler.NioNettyClientMessageHandler;
 import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.client.SendProxyInvoker;
-import com.li.gamesocket.client.channelhandler.NioNettyClientMessageHandler;
 import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.service.command.MethodCtx;
-import com.li.gamesocket.utils.CommandUtils;
+import com.li.gamesocket.service.protocol.MethodCtx;
+import com.li.gamesocket.utils.ProtocolUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -93,7 +93,7 @@ public class NioNettyClientImpl implements NioNettyClient {
                 return (T) target;
             }
 
-            List<MethodCtx> methodCtx = CommandUtils.analysisCommands(clasz, false);
+            List<MethodCtx> methodCtx = ProtocolUtil.getMethodCtxBySocketCommand(clasz);
             target = Proxy.newProxyInstance(clasz.getClassLoader()
                     , new Class[]{clasz}
                     , new SendProxyInvoker(this, methodCtx));

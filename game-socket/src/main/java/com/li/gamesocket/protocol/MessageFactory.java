@@ -1,16 +1,8 @@
 package com.li.gamesocket.protocol;
 
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.ZipUtil;
 import com.li.gamesocket.protocol.serialize.SerializeType;
-import com.li.gamesocket.protocol.serialize.Serializer;
-import com.li.gamesocket.service.command.Command;
-import com.li.gamesocket.service.command.impl.IdentityMethodParameter;
+import com.li.gamesocket.service.protocol.SocketProtocol;
 import org.springframework.util.StringUtils;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author li-yuanwen
@@ -21,10 +13,10 @@ public class MessageFactory {
 
     /** 服务器内部心跳消息包 **/
     public static final InnerMessage HEART_BEAT_REQ_INNER_MSG = InnerMessage.of(
-            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_REQ, null, false, SerializeType.PROTO_STUFF.getType(),  0, null)
+            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_REQ, null, false, SerializeType.PROTO_STUFF.getType(),  0, -1, null)
             , null);
     public static final InnerMessage HEART_BEAT_RES_INNER_MSG = InnerMessage.of(
-            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_RES, null, false, SerializeType.PROTO_STUFF.getType(),  0, null)
+            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_RES, null, false, SerializeType.PROTO_STUFF.getType(),  0, -1, null)
             , null);
 
     /** 服务器外部心跳消息包 **/
@@ -41,17 +33,17 @@ public class MessageFactory {
      * 构建内部消息
      * @param sn 消息序号
      * @param type 消息类型
-     * @param command 命令
+     * @param protocol 协议
      * @param serializeType 序列化类型
      * @param zip 消息体是否压缩
      * @param body 消息体
      * @param ip ip
      * @return 内部消息
      */
-    public static InnerMessage toInnerMessage(long sn, byte type, Command command
-            , byte serializeType, boolean zip, byte[] body, String ip) {
+    public static InnerMessage toInnerMessage(long sn, byte type, SocketProtocol protocol
+            , byte serializeType, boolean zip, byte[] body, long identity, String ip) {
         byte[] ipBytes = StringUtils.isEmpty(ip) ? null : ip.getBytes();
-        InnerMessageHeader header = InnerMessageHeader.of(type, command, zip, serializeType, sn, ipBytes);
+        InnerMessageHeader header = InnerMessageHeader.of(type, protocol, zip, serializeType, sn, identity, ipBytes);
         return InnerMessage.of(header, body);
     }
 
@@ -60,47 +52,17 @@ public class MessageFactory {
      * 构建外部消息
      * @param sn 消息序号
      * @param type 消息类型
-     * @param command 命令
+     * @param protocol 协议
      * @param serializeType 序列化类型
      * @param zip 消息体是否压缩
      * @param body 消息体
      * @return 外部消息
      */
-    public static OuterMessage toOuterMessage(long sn, byte type, Command command
+    public static OuterMessage toOuterMessage(long sn, byte type, SocketProtocol protocol
             , byte serializeType, boolean zip, byte[] body) {
-        OuterMessageHeader header = OuterMessageHeader.of(sn, type, command, zip, serializeType);
+        OuterMessageHeader header = OuterMessageHeader.of(sn, type, protocol, zip, serializeType);
         return OuterMessage.of(header, body);
     }
 
-    /**
-     * 将请求消息体增加Identity身份标识参数
-     * @param identity 身份标识
-     * @param body 原消息体
-     * @param zip 消息体是否压缩
-     * @param serializer 序列化器
-     * @return 增加后消息体
-     */
-    public static byte[] addIdentityInRequestBody(long identity, byte[] body, boolean zip, Serializer serializer) {
-        if (zip) {
-            body = ZipUtil.unGzip(body);
-        }
-
-        Map<String, Object> params;
-        if (!ArrayUtil.isEmpty(body)) {
-            Request request = serializer.deserialize(body, Request.class);
-            params = new HashMap<>(request.getParams());
-            params.put(IdentityMethodParameter.TYPE, identity);
-        }else {
-            params = Collections.singletonMap(IdentityMethodParameter.TYPE, identity);
-        }
-
-        body = serializer.serialize(new Request(params));
-
-        if (zip) {
-            body = ZipUtil.gzip(body);
-        }
-
-        return body;
-    }
 
 }

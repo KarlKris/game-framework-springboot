@@ -4,6 +4,7 @@ import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
+import net.webby.protostuff.runtime.Generators;
 
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +24,6 @@ public class ProtoStuffUtils {
 
     /**
      * 序列化方法，把指定对象序列化成字节数组
-     *
      * @param obj
      * @param <T>
      * @return
@@ -71,4 +71,16 @@ public class ProtoStuffUtils {
 
         return schema;
     }
+
+    /**
+     * 生成.proto文件字符串
+     * @param clazz java类
+     * @param <T> /
+     * @return .proto文件字符串
+     */
+    public static <T> String toProto(Class<T> clazz) {
+        Schema<T> schema = getSchema(clazz);
+        return Generators.newProtoGenerator(schema).generate();
+    }
+
 }

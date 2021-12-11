@@ -1,13 +1,13 @@
 package com.li.gamesocket.service.handler;
 
-import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.ISession;
 
 /**
+ * 业务分发线程池入口
  * @author li-yuanwen
  * @date 2021/9/2 22:38
- * 业务分发线程池入口
  **/
-public interface DispatcherExecutorService {
+public interface DispatcherExecutorService<S extends ISession> {
 
 
     /**
@@ -15,7 +15,7 @@ public interface DispatcherExecutorService {
      * @param runnable
      * @param session
      */
-    void execute(Session session, Runnable runnable);
+    void execute(S session, Runnable runnable);
 
 
     /**

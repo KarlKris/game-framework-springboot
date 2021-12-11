@@ -2,7 +2,7 @@ package com.li.gamesocket.service.push;
 
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.protocol.PushResponse;
-import com.li.gamesocket.service.command.MethodCtx;
+import com.li.gamesocket.service.protocol.MethodCtx;
 import com.li.gamesocket.utils.CommandUtils;
 
 import java.lang.reflect.InvocationHandler;
@@ -20,12 +20,12 @@ public class OuterPushProxyInvoker implements InvocationHandler {
     /** 方法参数上下文 **/
     private final Map<Method, PushMethodCtx> methodCtxHolder;
     /** 推送执行器 **/
-    private final PushProcessor pushProcessor;
+    private final IPushExecutor pushExecutor;
 
     OuterPushProxyInvoker(List<MethodCtx> methodCtxes) {
         this.methodCtxHolder = new HashMap<>(methodCtxes.size());
         methodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
-        this.pushProcessor = ApplicationContextHolder.getBean(PushProcessor.class);
+        this.pushExecutor = ApplicationContextHolder.getBean(IPushExecutor.class);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class OuterPushProxyInvoker implements InvocationHandler {
         MethodCtx methodCtx = pushMethodCtx.getMethodCtx();
 
         PushResponse pushResponse = CommandUtils.encodePushResponse(methodCtx.getParams(), args);
-        pushProcessor.pushToOuter(pushResponse, methodCtx.getCommand());
+        pushExecutor.pushToOuter(pushResponse, methodCtx.getProtocol());
 
         return null;
     }

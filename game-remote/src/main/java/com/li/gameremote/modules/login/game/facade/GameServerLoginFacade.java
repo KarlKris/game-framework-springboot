@@ -1,16 +1,16 @@
 package com.li.gameremote.modules.login.game.facade;
 
 import com.li.gamesocket.anno.InBody;
-import com.li.gamesocket.anno.SocketCommand;
-import com.li.gamesocket.anno.SocketModule;
+import com.li.gamesocket.anno.SocketMethod;
+import com.li.gamesocket.anno.SocketController;
 import com.li.gamesocket.protocol.Response;
-import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.ServerSession;
 
 /**
  * @author li-yuanwen
  * 游戏登录模块
  */
-@SocketModule(module = GameServerLoginModule.MODULE)
+@SocketController(module = GameServerLoginModule.MODULE)
 public interface GameServerLoginFacade {
 
 
@@ -21,8 +21,8 @@ public interface GameServerLoginFacade {
      * @param channel 渠道标识
      * @return /
      */
-    @SocketCommand(command = GameServerLoginModule.CREATE)
-    Response<Long> create(Session session
+    @SocketMethod(command = GameServerLoginModule.CREATE)
+    Response<Long> create(ServerSession session
             , @InBody(name = "account") String account
             , @InBody(name = "channel") int channel);
 
@@ -34,8 +34,8 @@ public interface GameServerLoginFacade {
      * @param channel 渠道标识
      * @return
      */
-    @SocketCommand(command = GameServerLoginModule.LOGIN)
-    Response<Long> login(Session session
+    @SocketMethod(command = GameServerLoginModule.LOGIN)
+    Response<Long> login(ServerSession session
             , @InBody(name = "account") String account
             , @InBody(name = "channel") int channel);
 }

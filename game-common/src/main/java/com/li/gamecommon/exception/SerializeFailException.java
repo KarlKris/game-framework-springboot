@@ -1,7 +1,7 @@
 package com.li.gamecommon.exception;
 
 
-import com.li.gamecommon.exception.code.ResultCode;
+import com.li.gamecommon.exception.code.ServerErrorCode;
 
 /**
  * @author li-yuanwen
@@ -12,7 +12,7 @@ public class SerializeFailException extends SocketException {
 
 
     public SerializeFailException(String message, Throwable cause) {
-        super(ResultCode.SERIALIZE_FAIL, message, cause);
+        super(ServerErrorCode.SERIALIZE_FAIL, message, cause);
     }
 
 }

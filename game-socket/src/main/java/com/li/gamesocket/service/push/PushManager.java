@@ -1,7 +1,7 @@
 package com.li.gamesocket.service.push;
 
-import com.li.gamesocket.service.command.MethodCtx;
-import com.li.gamesocket.utils.CommandUtils;
+import com.li.gamesocket.service.protocol.MethodCtx;
+import com.li.gamesocket.utils.ProtocolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,10 @@ public class PushManager {
             }
 
             List<MethodCtx> methodCtx =
-                    CommandUtils.analysisCommands(clz, false);
+                    ProtocolUtil.getMethodCtxBySocketPush(clz);
+            if (methodCtx.isEmpty()) {
+                throw new RuntimeException("接口" + clz.getSimpleName() + "没有任何推送方法");
+            }
 
             target = Proxy.newProxyInstance(clz.getClassLoader()
                     , new Class[]{clz}
@@ -62,7 +65,10 @@ public class PushManager {
             }
 
             List<MethodCtx> methodCtx =
-                    CommandUtils.analysisCommands(clz, false);
+                    ProtocolUtil.getMethodCtxBySocketPush(clz);
+            if (methodCtx.isEmpty()) {
+                throw new RuntimeException("接口" + clz.getSimpleName() + "没有任何推送方法");
+            }
 
             target = Proxy.newProxyInstance(clz.getClassLoader()
                     , new Class[]{clz}

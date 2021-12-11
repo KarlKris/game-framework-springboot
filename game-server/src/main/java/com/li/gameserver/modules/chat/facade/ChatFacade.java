@@ -3,13 +3,13 @@ package com.li.gameserver.modules.chat.facade;
 import com.li.gameremote.modules.chat.facade.ChatModule;
 import com.li.gamesocket.anno.Identity;
 import com.li.gamesocket.anno.InBody;
-import com.li.gamesocket.anno.SocketCommand;
-import com.li.gamesocket.anno.SocketModule;
+import com.li.gamesocket.anno.SocketMethod;
+import com.li.gamesocket.anno.SocketController;
 
 /**
  * @author li-yuanwen
  */
-@SocketModule(module = ChatModule.MODULE)
+@SocketController(module = ChatModule.MODULE)
 public interface ChatFacade {
 
 
@@ -18,7 +18,7 @@ public interface ChatFacade {
      * @param identity 标识
      * @param msg 消息
      */
-    @SocketCommand(command = ChatModule.SEND)
+    @SocketMethod(command = ChatModule.SEND)
     void send(@Identity long identity
             , @InBody(name = "msg") String msg);
 

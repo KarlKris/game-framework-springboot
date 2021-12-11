@@ -5,7 +5,7 @@ import com.li.gamegateway.commom.GatewaySystemConfig;
 import com.li.gamegateway.modules.login.service.GatewayLoginService;
 import com.li.gameremote.modules.login.gateway.facade.GatewayLoginFacade;
 import com.li.gamesocket.protocol.Response;
-import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.PlayerSession;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class GatewayLoginFacadeImpl implements GatewayLoginFacade {
     private GatewayLoginService gatewayLoginService;
 
     @Override
-    public Response<Object> create(Session session, String account, int channel, int serverId, int timestamp, String sign) {
+    public Response<Object> create(PlayerSession session, String account, int channel, int serverId, int timestamp, String sign) {
         if (StringUtils.isBlank(account)) {
             return Response.ERROR(GatewayLoginResultCode.ACCOUNT_INVALID);
         }
@@ -35,7 +35,7 @@ public class GatewayLoginFacadeImpl implements GatewayLoginFacade {
     }
 
     @Override
-    public Response<Object> login(Session session, String account, int channel, int serverId, int timestamp, String sign) {
+    public Response<Object> login(PlayerSession session, String account, int channel, int serverId, int timestamp, String sign) {
         if (StringUtils.isBlank(account)) {
             return Response.ERROR(GatewayLoginResultCode.ACCOUNT_INVALID);
         }

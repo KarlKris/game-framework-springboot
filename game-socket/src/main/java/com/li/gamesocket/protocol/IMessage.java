@@ -1,6 +1,6 @@
 package com.li.gamesocket.protocol;
 
-import com.li.gamesocket.service.command.Command;
+import com.li.gamesocket.service.protocol.SocketProtocol;
 
 /**
  * @author li-yuanwen
@@ -13,6 +13,7 @@ public interface IMessage {
      * @return /
      */
     short getProtocolHeaderIdentity();
+
     /**
      * 查询消息类型
      * @return 消息类型
@@ -20,10 +21,10 @@ public interface IMessage {
     byte getMessageType();
 
     /**
-     * 获取请求指令号
-     * @return command
+     * 获取请求协议号
+     * @return protocol
      */
-    Command getCommand();
+    SocketProtocol getProtocol();
 
     /**
      * 获取消息体解析类型

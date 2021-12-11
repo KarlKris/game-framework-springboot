@@ -25,6 +25,7 @@
         <module>game-server</module>
         <module>game-core</module>
         <module>game-manager</module>
+        <module>game-client</module>
     </modules>
 
     <properties>

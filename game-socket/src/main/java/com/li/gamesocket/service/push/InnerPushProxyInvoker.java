@@ -2,8 +2,8 @@ package com.li.gamesocket.service.push;
 
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.protocol.PushResponse;
-import com.li.gamesocket.service.command.MethodCtx;
-import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.protocol.MethodCtx;
+import com.li.gamesocket.service.session.ISession;
 import com.li.gamesocket.service.session.SessionManager;
 import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +25,13 @@ public class InnerPushProxyInvoker implements InvocationHandler {
     /** 方法参数上下文 **/
     private final Map<Method, PushMethodCtx> methodCtxHolder;
     /** 推送处理器 **/
-    private final PushProcessor pushProcessor;
+    private final IPushExecutor pushProcessor;
 
     InnerPushProxyInvoker(List<MethodCtx> methodCtxes) {
         this.methodCtxHolder = new HashMap<>(methodCtxes.size());
         methodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
         this.sessionManager = ApplicationContextHolder.getBean(SessionManager.class);
-        this.pushProcessor = ApplicationContextHolder.getBean(PushProcessor.class);
+        this.pushProcessor = ApplicationContextHolder.getBean(IPushExecutor.class);
     }
 
     @Override
@@ -39,25 +39,25 @@ public class InnerPushProxyInvoker implements InvocationHandler {
 
         PushMethodCtx pushMethodCtx = this.methodCtxHolder.get(method);
         if (pushMethodCtx == null) {
-            throw new IllegalArgumentException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
+            throw new RuntimeException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
         }
         MethodCtx methodCtx = pushMethodCtx.getMethodCtx();
 
         PushResponse pushResponse = CommandUtils.encodePushResponse(methodCtx.getParams(), args);
 
         // 构建每个Channel需要发送的目标
-        Map<Session, Set<Long>> session2Identities = new HashMap<>(pushResponse.getTargets().size());
+        Map<ISession, Set<Long>> session2Identities = new HashMap<>(pushResponse.getTargets().size());
         for (long identity : pushResponse.getTargets()) {
-            Session session = sessionManager.getIdentitySession(identity);
+            ISession session = sessionManager.getIdentitySession(identity);
             if (session == null) {
                 continue;
             }
             session2Identities.computeIfAbsent(session, k -> new HashSet<>()).add(identity);
         }
 
-        for (Map.Entry<Session, Set<Long>> entry : session2Identities.entrySet()) {
+        for (Map.Entry<ISession, Set<Long>> entry : session2Identities.entrySet()) {
             PushResponse response = new PushResponse(entry.getValue(), pushResponse.getContent());
-            pushProcessor.pushToInner(entry.getKey(), response, methodCtx.getCommand());
+            pushProcessor.pushToInner(entry.getKey(), response, methodCtx.getProtocol());
         }
 
         return null;

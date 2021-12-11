@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * @author li-yuanwen
@@ -15,9 +14,8 @@ import java.util.Map;
 public class PushResponse {
 
     /** 推送目标标识 **/
-    private Collection<Long> targets;
-
-    /** 推送内容 **/
-    private Map<String, Object> content;
+    private final Collection<Long> targets;
+    /** 推送内容(不允许压缩) **/
+    private final byte[] content;
 
 }

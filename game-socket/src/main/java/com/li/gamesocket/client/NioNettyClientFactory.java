@@ -67,11 +67,11 @@ public class NioNettyClientFactory {
 
 
     /**
-     * 构建客户端
+     * 连接目标地址
      * @param address ip地址
      * @return 客户端
      */
-    public NioNettyClient newInstance(Address address) {
+    public NioNettyClient connectTo(Address address) {
         return this.clients.computeIfAbsent(address, addr -> {
             checkAndInitEventLoopGroup();
             return NioNettyClientImpl.newInstance(addr

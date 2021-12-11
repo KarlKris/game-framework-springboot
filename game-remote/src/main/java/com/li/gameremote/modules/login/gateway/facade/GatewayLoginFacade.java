@@ -1,16 +1,16 @@
 package com.li.gameremote.modules.login.gateway.facade;
 
 import com.li.gamesocket.anno.InBody;
-import com.li.gamesocket.anno.SocketCommand;
-import com.li.gamesocket.anno.SocketModule;
+import com.li.gamesocket.anno.SocketMethod;
+import com.li.gamesocket.anno.SocketController;
 import com.li.gamesocket.protocol.Response;
-import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.PlayerSession;
 
 /**
  * @author li-yuanwen
  * 网关服登录
  */
-@SocketModule(module = GatewayLoginModule.MODULE)
+@SocketController(module = GatewayLoginModule.MODULE)
 public interface GatewayLoginFacade {
 
 
@@ -23,8 +23,8 @@ public interface GatewayLoginFacade {
      * @param timestamp 时间戳(精确到秒)
      * @param sign 签名
      */
-    @SocketCommand(command = GatewayLoginModule.GAME_SERVER_CREATE)
-    Response<Object> create(Session session
+    @SocketMethod(command = GatewayLoginModule.GAME_SERVER_CREATE)
+    Response<Object> create(PlayerSession session
             , @InBody(name = "account") String account
             , @InBody(name = "channel") int channel
             , @InBody(name = "serverId") int serverId
@@ -41,8 +41,8 @@ public interface GatewayLoginFacade {
      * @param timestamp 时间戳(精确到秒)
      * @param sign 签名
      */
-    @SocketCommand(command = GatewayLoginModule.GAME_SERVER_LOGIN)
-    Response<Object> login(Session session
+    @SocketMethod(command = GatewayLoginModule.GAME_SERVER_LOGIN)
+    Response<Object> login(PlayerSession session
             , @InBody(name = "account") String account
             , @InBody(name = "channel") int channel
             , @InBody(name = "serverId") int serverId

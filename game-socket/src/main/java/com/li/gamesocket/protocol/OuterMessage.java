@@ -1,7 +1,7 @@
 package com.li.gamesocket.protocol;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.gamesocket.service.command.Command;
+import com.li.gamesocket.service.protocol.SocketProtocol;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -17,7 +17,7 @@ public class OuterMessage implements IMessage {
 
     @Override
     public short getProtocolHeaderIdentity() {
-        return header.getProtocolId();
+        return header.getProtocolHeader();
     }
 
     @Override
@@ -26,8 +26,8 @@ public class OuterMessage implements IMessage {
     }
 
     @Override
-    public Command getCommand() {
-        return header.getCommand();
+    public SocketProtocol getProtocol() {
+        return header.getSocketProtocol();
     }
 
     @Override

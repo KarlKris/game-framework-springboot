@@ -12,7 +12,7 @@ import com.li.gameremote.modules.login.game.facade.GameServerLoginResultCode;
 import com.li.gameserver.modules.account.manager.Account;
 import com.li.gameserver.modules.account.manager.AccountManager;
 import com.li.gameserver.modules.account.service.AccountService;
-import com.li.gamesocket.channelhandler.FirewallService;
+import com.li.gamesocket.channelhandler.common.FirewallService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

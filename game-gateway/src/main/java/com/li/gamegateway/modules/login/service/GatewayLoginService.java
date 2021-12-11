@@ -1,6 +1,6 @@
 package com.li.gamegateway.modules.login.service;
 
-import com.li.gamesocket.service.session.Session;
+import com.li.gamesocket.service.session.PlayerSession;
 
 /**
  * @author li-yuanwen
@@ -16,7 +16,7 @@ public interface GatewayLoginService {
      * @param channel 渠道标识
      * @param serverId 服务器标识
      */
-    void create(Session session, String account, int channel, int serverId);
+    void create(PlayerSession session, String account, int channel, int serverId);
 
 
     /**
@@ -26,6 +26,6 @@ public interface GatewayLoginService {
      * @param channel 渠道标识
      * @param serverId 服务器标识
      */
-    void login(Session session, String account, int channel, int serverId);
+    void login(PlayerSession session, String account, int channel, int serverId);
 
 }

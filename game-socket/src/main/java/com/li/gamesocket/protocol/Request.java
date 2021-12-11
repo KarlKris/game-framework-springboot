@@ -1,6 +1,6 @@
 package com.li.gamesocket.protocol;
 
-import com.li.gamesocket.service.command.impl.IdentityMethodParameter;
+import com.li.gamesocket.service.protocol.impl.IdentityMethodParameter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
