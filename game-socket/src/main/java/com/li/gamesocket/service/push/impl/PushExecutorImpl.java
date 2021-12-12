@@ -1,14 +1,13 @@
 package com.li.gamesocket.service.push.impl;
 
-import cn.hutool.core.util.ZipUtil;
-import com.li.gamesocket.channelhandler.common.ChannelAttributeKeys;
 import com.li.gamesocket.protocol.*;
-import com.li.gamesocket.protocol.serialize.SerializeType;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerHolder;
-import com.li.gamesocket.service.VocationalWorkConfig;
-import com.li.gamesocket.service.handler.ThreadSessionIdentityHolder;
+import com.li.gamesocket.service.protocol.MethodCtx;
+import com.li.gamesocket.service.protocol.MethodParameter;
 import com.li.gamesocket.service.protocol.SocketProtocol;
+import com.li.gamesocket.service.protocol.SocketProtocolManager;
+import com.li.gamesocket.service.protocol.impl.InBodyMethodParameter;
 import com.li.gamesocket.service.push.IPushExecutor;
 import com.li.gamesocket.service.session.ISession;
 import com.li.gamesocket.service.session.SessionManager;
@@ -16,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -29,21 +30,18 @@ public class PushExecutorImpl implements IPushExecutor {
     @Resource
     private SerializerHolder serializerHolder;
     @Resource
-    private VocationalWorkConfig vocationalWorkConfig;
-    @Resource
     private SessionManager sessionManager;
+    @Resource
+    private MessageFactory messageFactory;
+    @Resource
+    private SocketProtocolManager socketProtocolManager;
 
 
     @Override
     public void pushToOuter(PushResponse pushResponse, SocketProtocol protocol) {
-        byte[] body = pushResponse.getContent();
-        boolean zip = false;
-        if (body.length > vocationalWorkConfig.getBodyZipLength()) {
-            body = ZipUtil.gzip(body);
-            zip = true;
-        }
+        byte[] content = pushResponse.getContent();
 
-        Serializer serializer;
+        Map<Byte, byte[]> serializeType2body = new HashMap<>(2);
         for (long identity : pushResponse.getTargets()) {
             ISession session = sessionManager.getIdentitySession(identity);
             if (session == null) {
@@ -55,51 +53,50 @@ public class PushExecutorImpl implements IPushExecutor {
             if (type == null) {
                 continue;
             }
-            if (!Objects.equals(type, serializerHolder.getDefaultSerializer().getSerializerType())) {
-                serializerHolder.getDefaultSerializer();
-                serializer = serializerHolder.getSerializer(type);
-                body = serializer.serialize(response);
-                if (body.length > vocationalWorkConfig.getBodyZipLength()) {
-                    body = ZipUtil.gzip(body);
-                    zip = true;
+
+            byte[] body = serializeType2body.get(type);
+            if (body == null) {
+                if (!Objects.equals(type, SerializerHolder.DEFAULT_SERIALIZER.getSerializerType())) {
+                    MethodCtx ctx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);
+                    for (MethodParameter parameter : ctx.getParams()) {
+                        if (parameter instanceof InBodyMethodParameter) {
+                            Object obj = SerializerHolder.DEFAULT_SERIALIZER.deserialize(content, parameter.getParameterClass());
+                            Serializer serializer = serializerHolder.getSerializer(type);
+                            body = serializer.serialize(obj);
+                        }
+                    }
+                } else {
+                    body = content;
                 }
+
+                serializeType2body.put(type, body);
             }
 
-            IMessage message = MessageFactory.toOuterMessage(0
+            OuterMessage outerMessage = messageFactory.toOuterMessage(0L
                     , ProtocolConstant.VOCATIONAL_WORK_RES
-                    , socketProtocol
-                    , serializeType
-                    , zip
+                    , protocol
+                    , type
                     , body);
 
             if (log.isDebugEnabled()) {
-                log.debug("推送消息至外网[{},{}-{}]", message.getSn()
-                        , message.getProtocol().getModule()
-                        , message.getProtocol().getInstruction());
+                log.debug("推送消息至外网[{},{}]", outerMessage.getSn(), outerMessage.getProtocol());
             }
 
-            SessionManager.writeAndFlush(session, message);
+            SessionManager.writeAndFlush(session, outerMessage);
         }
     }
 
 
     @Override
     public void pushToInner(ISession session, PushResponse pushResponse, SocketProtocol protocol) {
-        Serializer defaultSerializer = serializerHolder.getDefaultSerializer();
-        byte[] body = defaultSerializer.serialize(pushResponse);
-        boolean zip = false;
-        if (body.length > vocationalWorkConfig.getBodyZipLength()) {
-            body = ZipUtil.gzip(body);
-            zip = true;
-        }
 
-        InnerMessage message = MessageFactory.toInnerMessage(0L
+        byte[] body = SerializerHolder.DEFAULT_SERIALIZER.serialize(pushResponse);
+        InnerMessage message = messageFactory.toInnerMessage(0L
                 , ProtocolConstant.VOCATIONAL_WORK_RES
                 , protocol
-                , defaultSerializer.getSerializerType()
-                , zip
+                , SerializerHolder.DEFAULT_SERIALIZER.getSerializerType()
                 , body
-                , ThreadSessionIdentityHolder.getIdentity()
+                , -1L
                 , session.getIp());
 
         if (log.isDebugEnabled()) {

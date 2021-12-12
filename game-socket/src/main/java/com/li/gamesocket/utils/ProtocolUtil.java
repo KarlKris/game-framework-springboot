@@ -45,10 +45,6 @@ public class ProtocolUtil {
      * @return /
      */
     public static List<MethodCtx> getMethodCtxBySocketCommand(Class<?> targetClass) {
-        // 接口忽略
-        if (targetClass.isInterface()) {
-            return Collections.emptyList();
-        }
 
         SocketController socketController = AnnotationUtils.findAnnotation(targetClass, SocketController.class);
         if (socketController == null) {
@@ -135,7 +131,7 @@ public class ProtocolUtil {
 
         SocketController socketController = AnnotationUtils.findAnnotation(targetClass, SocketController.class);
         if (socketController == null) {
-            throw new IllegalArgumentException("推送接口" + targetClass.getSimpleName() + "必须含有@SocketModule注解");
+            throw new IllegalArgumentException("推送接口" + targetClass.getSimpleName() + "必须含有@SocketController");
         }
 
         // 模块号
@@ -194,7 +190,6 @@ public class ProtocolUtil {
 
         return ctx;
     }
-
 
 
     /**

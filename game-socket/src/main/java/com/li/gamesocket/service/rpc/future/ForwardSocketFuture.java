@@ -1,8 +1,7 @@
 ﻿package com.li.gamesocket.service.rpc.future;
 
-import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.protocol.MessageFactory;
-import com.li.gamesocket.protocol.ProtocolConstant;
+import com.li.gamecommon.ApplicationContextHolder;
+import com.li.gamesocket.protocol.*;
 import com.li.gamesocket.service.session.ISession;
 import com.li.gamesocket.service.session.SessionManager;
 import lombok.extern.slf4j.Slf4j;
@@ -27,26 +26,14 @@ public class ForwardSocketFuture extends SocketFuture {
     }
 
     @Override
-    public void complete(IMessage message) {
+    public void complete(InnerMessage message) {
         if (log.isDebugEnabled()) {
             log.debug("转发响应消息[{}]至[{}]", message.getSn(), session.getIp());
         }
 
-        Byte serializeType = session.getSerializeType();
-        boolean zip = message.zip();
-        byte[] body = message.getBody();
-        if (serializeType != message.getSerializeType()) {
-            // 理论上不会执行这里
-            log.warn("转发响应消息时发现序列化方式不一致,仔细检查转发逻辑");
-        }
+        OuterMessage outerMessage = ApplicationContextHolder.getBean(MessageFactory.class)
+                .convertToOuterMessage(message, session);
 
-        IMessage msg = MessageFactory.toOuterMessage(outerSn
-                , ProtocolConstant.toOriginMessageType(message.getMessageType())
-                , message.getProtocol()
-                , serializeType
-                , zip
-                , body);
-
-        SessionManager.writeAndFlush(session, msg);
+        SessionManager.writeAndFlush(session, outerMessage);
     }
 }

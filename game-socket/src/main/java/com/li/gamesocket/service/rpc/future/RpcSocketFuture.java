@@ -1,7 +1,7 @@
 ﻿package com.li.gamesocket.service.rpc.future;
 
 import com.li.gamecommon.ApplicationContextHolder;
-import com.li.gamesocket.protocol.IMessage;
+import com.li.gamesocket.protocol.InnerMessage;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerHolder;
 import com.li.gamesocket.service.protocol.SocketProtocol;
@@ -27,7 +27,7 @@ public class RpcSocketFuture extends SocketFuture {
     }
 
     @Override
-    public void complete(IMessage message) {
+    public void complete(InnerMessage message) {
         Serializer serializer = ApplicationContextHolder.getBean(SerializerHolder.class).getSerializer(message.getSerializeType());
         SocketProtocol protocol = message.getProtocol();
         // todo 如果是返回错误码

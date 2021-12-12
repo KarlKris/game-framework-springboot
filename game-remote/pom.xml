@@ -12,7 +12,7 @@
     <artifactId>game-remote</artifactId>
     <version>1.0</version>
     <name>game-remote</name>
-    <description>游戏框架RPC包</description>
+    <description>游戏服务器协议包</description>
 
 
     <dependencies>

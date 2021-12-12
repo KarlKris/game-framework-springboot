@@ -2,14 +2,15 @@ package com.li.gamesocket.service.push;
 
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.protocol.PushResponse;
+import com.li.gamesocket.protocol.serialize.SerializerHolder;
 import com.li.gamesocket.service.protocol.MethodCtx;
-import com.li.gamesocket.utils.CommandUtils;
+import com.li.gamesocket.service.protocol.MethodParameter;
+import com.li.gamesocket.service.protocol.impl.InBodyMethodParameter;
+import com.li.gamesocket.service.protocol.impl.PushIdsMethodParameter;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author li-yuanwen
@@ -35,9 +36,20 @@ public class OuterPushProxyInvoker implements InvocationHandler {
             throw new IllegalArgumentException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
         }
         MethodCtx methodCtx = pushMethodCtx.getMethodCtx();
+        MethodParameter[] params = methodCtx.getParams();
+        byte[] content = null;
+        Collection<Long> targets = Collections.emptyList();
+        for (int i = 0; i < args.length; i++) {
+            if (params[i] instanceof InBodyMethodParameter) {
+                content = SerializerHolder.DEFAULT_SERIALIZER.serialize(args[i]);
+                continue;
+            }
 
-        PushResponse pushResponse = CommandUtils.encodePushResponse(methodCtx.getParams(), args);
-        pushExecutor.pushToOuter(pushResponse, methodCtx.getProtocol());
+            if (params[i] instanceof PushIdsMethodParameter) {
+                targets = (Collection<Long>) args[i];
+            }
+        }
+        pushExecutor.pushToOuter(new PushResponse(targets, content), methodCtx.getProtocol());
 
         return null;
     }

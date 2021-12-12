@@ -3,19 +3,22 @@ package com.li.gamesocket.channelhandler.client;
 import cn.hutool.core.convert.ConvertException;
 import com.li.gamecommon.exception.SerializeFailException;
 import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.protocol.MessageFactory;
+import com.li.gamesocket.protocol.InnerMessage;
+import com.li.gamesocket.protocol.OuterMessage;
 import com.li.gamesocket.protocol.PushResponse;
 import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerHolder;
 import com.li.gamesocket.service.handler.DispatcherExecutorService;
 import com.li.gamesocket.service.protocol.MethodCtx;
 import com.li.gamesocket.service.protocol.MethodInvokeCtx;
+import com.li.gamesocket.service.protocol.MethodParameter;
 import com.li.gamesocket.service.protocol.SocketProtocolManager;
+import com.li.gamesocket.service.protocol.impl.InBodyMethodParameter;
+import com.li.gamesocket.service.protocol.impl.PushIdsMethodParameter;
 import com.li.gamesocket.service.push.IPushExecutor;
 import com.li.gamesocket.service.rpc.SocketFutureManager;
 import com.li.gamesocket.service.rpc.future.SocketFuture;
 import com.li.gamesocket.service.session.ISession;
-import com.li.gamesocket.utils.CommandUtils;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -50,10 +53,16 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
+        // 理论上消息都是内部消息
+        if (msg instanceof OuterMessage) {
+            log.warn("客户端收到外部消息OuterMessage[{}],理论上消息都是内部消息,请检查逻辑", msg);
+            return;
+        }
+
         // 处理从服务端收到的信息
         if (msg.isRequest()) {
             if (log.isDebugEnabled()) {
-                log.debug("客户端ClientVocationalWorkHandler收到请求信息,忽略");
+                log.debug("客户端收到请求信息,忽略");
             }
 
             return;
@@ -67,14 +76,11 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
 
         SocketFuture socketFuture = socketFutureManager.removeSocketFuture(msg.getSn());
         if (socketFuture == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("客户端ClientVocationalWorkHandler收到过期信息,序号[{}],忽略", msg.getSn());
-            }
-
+            log.warn("客户端收到过期信息,序号[{}],忽略", msg.getSn());
             return;
         }
 
-        socketFuture.complete(msg);
+        socketFuture.complete((InnerMessage) msg);
 
     }
 
@@ -95,7 +101,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             // 开启心跳,则向对方发送心跳检测包
             if (event.state() == IdleState.WRITER_IDLE) {
                 // 发生心跳检测包
-                ctx.channel().writeAndFlush(MessageFactory.HEART_BEAT_REQ_INNER_MSG);
+                ctx.channel().writeAndFlush(InnerMessage.HEART_BEAT_REQ);
                 return;
             }
         }
@@ -128,8 +134,19 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
                 // 推送中介逻辑处理
                 PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
                 MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
+                MethodParameter[] params = methodCtx.getParams();
+                Object[] args = new Object[params.length];
+                for (int i = 0; i < params.length; i++) {
+                    if (params[i] instanceof PushIdsMethodParameter) {
+                        args[i] = pushResponse.getContent();
+                        continue;
+                    }
 
-                Object[] args = CommandUtils.decodePushResponse(methodCtx.getParams(), pushResponse);
+                    if (params[i] instanceof InBodyMethodParameter) {
+                        args[i] = serializer.deserialize(pushResponse.getContent(), params[i].getParameterClass());
+                    }
+                }
+
                 ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
             } catch (SerializeFailException e) {
                 log.error("发生序列化/反序列化异常", e);

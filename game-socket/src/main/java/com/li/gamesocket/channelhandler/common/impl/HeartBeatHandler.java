@@ -1,9 +1,7 @@
 package com.li.gamesocket.channelhandler.common.impl;
 
 import com.li.gamesocket.channelhandler.common.ChannelAttributeKeys;
-import com.li.gamesocket.protocol.IMessage;
-import com.li.gamesocket.protocol.MessageFactory;
-import com.li.gamesocket.protocol.ProtocolConstant;
+import com.li.gamesocket.protocol.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -35,13 +33,13 @@ public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
             if (message.isHeartBeatRequest()) {
                 if (message.isInnerMessage()) {
                     // 发生心跳响应包
-                    ctx.channel().writeAndFlush(MessageFactory.HEART_BEAT_RES_INNER_MSG);
+                    ctx.channel().writeAndFlush(InnerMessage.HEART_BEAT_RES);
                     return;
                 }
 
                 if (message.isOuterMessage()) {
                     // 发生心跳响应包
-                    ctx.channel().writeAndFlush(MessageFactory.HEART_BEAT_RES_OUTER_MSG);
+                    ctx.channel().writeAndFlush(OuterMessage.HEART_BEAT_RES);
                     return;
                 }
 
@@ -76,13 +74,13 @@ public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
                 }
                 if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
                     // 发生心跳检测包
-                    ctx.channel().writeAndFlush(MessageFactory.HEART_BEAT_REQ_INNER_MSG);
+                    ctx.channel().writeAndFlush(InnerMessage.HEART_BEAT_RES);
                     return;
                 }
 
                 if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
                     // 发生心跳检测包
-                    ctx.channel().writeAndFlush(MessageFactory.HEART_BEAT_RES_OUTER_MSG);
+                    ctx.channel().writeAndFlush(OuterMessage.HEART_BEAT_RES);
                     return;
                 }
 

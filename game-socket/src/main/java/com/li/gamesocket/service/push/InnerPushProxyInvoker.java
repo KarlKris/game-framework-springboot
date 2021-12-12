@@ -2,10 +2,13 @@ package com.li.gamesocket.service.push;
 
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamesocket.protocol.PushResponse;
+import com.li.gamesocket.protocol.serialize.SerializerHolder;
 import com.li.gamesocket.service.protocol.MethodCtx;
+import com.li.gamesocket.service.protocol.MethodParameter;
+import com.li.gamesocket.service.protocol.impl.InBodyMethodParameter;
+import com.li.gamesocket.service.protocol.impl.PushIdsMethodParameter;
 import com.li.gamesocket.service.session.ISession;
 import com.li.gamesocket.service.session.SessionManager;
-import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -25,13 +28,13 @@ public class InnerPushProxyInvoker implements InvocationHandler {
     /** 方法参数上下文 **/
     private final Map<Method, PushMethodCtx> methodCtxHolder;
     /** 推送处理器 **/
-    private final IPushExecutor pushProcessor;
+    private final IPushExecutor pushExecutor;
 
     InnerPushProxyInvoker(List<MethodCtx> methodCtxes) {
         this.methodCtxHolder = new HashMap<>(methodCtxes.size());
         methodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
         this.sessionManager = ApplicationContextHolder.getBean(SessionManager.class);
-        this.pushProcessor = ApplicationContextHolder.getBean(IPushExecutor.class);
+        this.pushExecutor = ApplicationContextHolder.getBean(IPushExecutor.class);
     }
 
     @Override
@@ -42,12 +45,23 @@ public class InnerPushProxyInvoker implements InvocationHandler {
             throw new RuntimeException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
         }
         MethodCtx methodCtx = pushMethodCtx.getMethodCtx();
+        MethodParameter[] params = methodCtx.getParams();
+        byte[] content = null;
+        Collection<Long> targets = Collections.emptyList();
+        for (int i = 0; i < args.length; i++) {
+            if (params[i] instanceof InBodyMethodParameter) {
+                content = SerializerHolder.DEFAULT_SERIALIZER.serialize(args[i]);
+                continue;
+            }
 
-        PushResponse pushResponse = CommandUtils.encodePushResponse(methodCtx.getParams(), args);
+            if (params[i] instanceof PushIdsMethodParameter) {
+                targets = (Collection<Long>) args[i];
+            }
+        }
 
         // 构建每个Channel需要发送的目标
-        Map<ISession, Set<Long>> session2Identities = new HashMap<>(pushResponse.getTargets().size());
-        for (long identity : pushResponse.getTargets()) {
+        Map<ISession, Set<Long>> session2Identities = new HashMap<>(targets.size());
+        for (long identity : targets) {
             ISession session = sessionManager.getIdentitySession(identity);
             if (session == null) {
                 continue;
@@ -56,8 +70,8 @@ public class InnerPushProxyInvoker implements InvocationHandler {
         }
 
         for (Map.Entry<ISession, Set<Long>> entry : session2Identities.entrySet()) {
-            PushResponse response = new PushResponse(entry.getValue(), pushResponse.getContent());
-            pushProcessor.pushToInner(entry.getKey(), response, methodCtx.getProtocol());
+            PushResponse response = new PushResponse(entry.getValue(), content);
+            pushExecutor.pushToInner(entry.getKey(), response, methodCtx.getProtocol());
         }
 
         return null;

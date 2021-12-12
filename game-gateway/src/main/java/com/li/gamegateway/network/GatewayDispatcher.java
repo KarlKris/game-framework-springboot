@@ -4,15 +4,18 @@ import com.li.gamecommon.rpc.RemoteServerSeekService;
 import com.li.gamecommon.rpc.model.Address;
 import com.li.gamesocket.client.NioNettyClient;
 import com.li.gamesocket.client.NioNettyClientFactory;
-import com.li.gamesocket.protocol.*;
+import com.li.gamesocket.protocol.InnerMessage;
+import com.li.gamesocket.protocol.MessageFactory;
+import com.li.gamesocket.protocol.OuterMessage;
+import com.li.gamesocket.protocol.Response;
 import com.li.gamesocket.protocol.serialize.Serializer;
+import com.li.gamesocket.service.handler.AbstractDispatcher;
 import com.li.gamesocket.service.handler.ThreadSessionIdentityHolder;
 import com.li.gamesocket.service.protocol.MethodCtx;
 import com.li.gamesocket.service.protocol.MethodInvokeCtx;
 import com.li.gamesocket.service.protocol.MethodParameter;
 import com.li.gamesocket.service.protocol.impl.IdentityMethodParameter;
 import com.li.gamesocket.service.protocol.impl.SessionMethodParameter;
-import com.li.gamesocket.service.handler.AbstractDispatcher;
 import com.li.gamesocket.service.rpc.SocketFutureManager;
 import com.li.gamesocket.service.rpc.future.ForwardSocketFuture;
 import com.li.gamesocket.service.session.PlayerSession;
@@ -38,6 +41,8 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     private NioNettyClientFactory clientFactory;
     @Resource
     private SocketFutureManager socketFutureManager;
+    @Resource
+    private MessageFactory messageFactory;
 
     @Override
     public void dispatch(OuterMessage message, PlayerSession session) {
@@ -84,23 +89,15 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
             return false;
         }
 
-        NioNettyClient client = clientFactory.connectTo(address);
+        InnerMessage innerMessage = messageFactory.convertToInnerMessage(message, session);
 
-        long nextSn = socketFutureManager.nextSn();
-        // 构建内部消息进行转发
-        InnerMessage innerMessage = MessageFactory.toInnerMessage(nextSn
-                , ProtocolConstant.toOriginMessageType(message.getMessageType())
-                , message.getProtocol()
-                , message.getSerializeType()
-                , message.zip()
-                , message.getBody()
-                , session.getIdentity()
-                , null);
+        NioNettyClient client = clientFactory.connectTo(address);
 
         try {
             client.send(innerMessage
                     , (msg, completableFuture)
-                            -> socketFutureManager.addSocketFuture(new ForwardSocketFuture(nextSn, message.getSn(), session)));
+                            -> socketFutureManager.addSocketFuture(new ForwardSocketFuture(msg.getSn()
+                            , message.getSn(), session)));
             return true;
         } catch (InterruptedException e) {
             log.error("消息转发至[{}]发生未知异常", address, e);

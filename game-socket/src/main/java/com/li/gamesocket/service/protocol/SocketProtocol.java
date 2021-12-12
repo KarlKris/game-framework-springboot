@@ -2,6 +2,7 @@
 
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.Objects;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
  * @date 2021/12/10
  */
 @Getter
+@ToString
 public class SocketProtocol {
 
     /** 模块号 **/

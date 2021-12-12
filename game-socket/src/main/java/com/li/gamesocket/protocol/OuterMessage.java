@@ -1,6 +1,8 @@
 package com.li.gamesocket.protocol;
 
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ZipUtil;
+import com.li.gamesocket.protocol.serialize.SerializeType;
 import com.li.gamesocket.service.protocol.SocketProtocol;
 import io.netty.buffer.ByteBuf;
 
@@ -9,6 +11,14 @@ import io.netty.buffer.ByteBuf;
  * 外部自定义协议消息
  */
 public class OuterMessage implements IMessage {
+
+    /** 服务器外部心跳消息包 **/
+    public static final OuterMessage HEART_BEAT_REQ = OuterMessage.of(
+            OuterMessageHeader.of(0, ProtocolConstant.HEART_BEAT_REQ, null, false, SerializeType.JSON.getType())
+            , null);
+    public static final OuterMessage HEART_BEAT_RES = OuterMessage.of(
+            OuterMessageHeader.of(0, ProtocolConstant.HEART_BEAT_RES, null, false, SerializeType.JSON.getType())
+            , null);
 
     /** 协议头 **/
     private OuterMessageHeader header;
@@ -67,12 +77,16 @@ public class OuterMessage implements IMessage {
         if (in.readableBytes() > 0) {
             message.body = new byte[in.readShort()];
             in.readBytes(message.body);
+            // 消息体解压缩
+            if (message.zip()) {
+                message.body = ZipUtil.unGzip(message.body);
+            }
         }
 
         return message;
     }
 
-    public static OuterMessage of(OuterMessageHeader header, byte[] body) {
+    static OuterMessage of(OuterMessageHeader header, byte[] body) {
         OuterMessage message = new OuterMessage();
         message.header = header;
         message.body = body;

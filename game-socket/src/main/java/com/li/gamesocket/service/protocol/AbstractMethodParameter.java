@@ -8,7 +8,7 @@
 public class AbstractMethodParameter implements MethodParameter {
 
     /** 参数类型 **/
-    protected final Class<?> clazz;
+    private final Class<?> clazz;
 
     public AbstractMethodParameter(Class<?> clazz) {
         this.clazz = clazz;

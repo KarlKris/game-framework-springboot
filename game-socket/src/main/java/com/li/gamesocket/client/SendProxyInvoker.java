@@ -1,6 +1,5 @@
 package com.li.gamesocket.client;
 
-import cn.hutool.core.util.ZipUtil;
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamecommon.exception.SocketException;
@@ -9,15 +8,14 @@ import com.li.gamecommon.utils.IpUtils;
 import com.li.gamesocket.protocol.InnerMessage;
 import com.li.gamesocket.protocol.MessageFactory;
 import com.li.gamesocket.protocol.ProtocolConstant;
-import com.li.gamesocket.protocol.Request;
-import com.li.gamesocket.protocol.serialize.Serializer;
 import com.li.gamesocket.protocol.serialize.SerializerHolder;
 import com.li.gamesocket.service.VocationalWorkConfig;
 import com.li.gamesocket.service.handler.ThreadSessionIdentityHolder;
 import com.li.gamesocket.service.protocol.MethodCtx;
+import com.li.gamesocket.service.protocol.MethodParameter;
+import com.li.gamesocket.service.protocol.impl.InBodyMethodParameter;
 import com.li.gamesocket.service.rpc.SocketFutureManager;
 import com.li.gamesocket.service.rpc.future.RpcSocketFuture;
-import com.li.gamesocket.utils.CommandUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -41,19 +39,17 @@ public class SendProxyInvoker implements InvocationHandler {
     private final NioNettyClient client;
     /** 方法参数上下文 **/
     private final Map<Method, MethodCtx> methodCtxHolder;
-    /** 默认序列化/反序列化工具 **/
-    private final Serializer serializer = ApplicationContextHolder.getBean(SerializerHolder.class).getDefaultSerializer();
-    /** 默认压缩body阙值 **/
-    private final int bodyZipLength = ApplicationContextHolder.getBean(VocationalWorkConfig.class).getBodyZipLength();
     /** 远程调用消息Future容器 **/
     private final SocketFutureManager socketFutureManager = ApplicationContextHolder.getBean(SocketFutureManager.class);
+    /** 消息工厂 **/
+    private final MessageFactory messageFactory = ApplicationContextHolder.getBean(MessageFactory.class);
     /** 超时时间(秒) **/
     private final int timeoutSecond = ApplicationContextHolder.getBean(VocationalWorkConfig.class).getTimeoutSecond();
 
-    public SendProxyInvoker(NioNettyClient client, List<MethodCtx> methodCtxes) {
+    public SendProxyInvoker(NioNettyClient client, List<MethodCtx> methodCtx) {
         this.client = client;
-        this.methodCtxHolder = new HashMap<>(methodCtxes.size());
-        methodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), k));
+        this.methodCtxHolder = new HashMap<>(methodCtx.size());
+        methodCtx.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), k));
     }
 
 
@@ -65,21 +61,19 @@ public class SendProxyInvoker implements InvocationHandler {
             throw new IllegalArgumentException("远程方法[" + method.getName() + "]没有添加 @SocketCommand 注解");
         }
 
-        Request request = CommandUtils.encodeRpcRequest(methodCtx.getParams(), args);
-
-        byte[] body = serializer.serialize(request);
-
-        boolean zip = false;
-        if (body.length > bodyZipLength) {
-            body = ZipUtil.gzip(body);
-            zip = true;
+        byte[] body = null;
+        MethodParameter[] params = methodCtx.getParams();
+        for (int i = 0; i < args.length; i++) {
+            if (params[i] instanceof InBodyMethodParameter) {
+                body = SerializerHolder.DEFAULT_SERIALIZER.serialize(args[i]);
+                break;
+            }
         }
 
-        InnerMessage message = MessageFactory.toInnerMessage(socketFutureManager.nextSn()
+        InnerMessage message = messageFactory.toInnerMessage(socketFutureManager.nextSn()
                 , ProtocolConstant.VOCATIONAL_WORK_REQ
                 , methodCtx.getProtocol()
-                , serializer.getSerializerType()
-                , zip
+                , SerializerHolder.DEFAULT_SERIALIZER.getSerializerType()
                 , body
                 , ThreadSessionIdentityHolder.getIdentity()
                 , IpUtils.getLocalIpAddress());

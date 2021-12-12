@@ -1,6 +1,6 @@
 ﻿package com.li.gamesocket.service.rpc.future;
 
-import com.li.gamesocket.protocol.IMessage;
+import com.li.gamesocket.protocol.InnerMessage;
 
 /**
  * 远程调用Future
@@ -25,5 +25,5 @@ public abstract class SocketFuture {
      * 同步消息结果
      * @param message 消息
      */
-    public abstract void complete(IMessage message);
+    public abstract void complete(InnerMessage message);
 }
