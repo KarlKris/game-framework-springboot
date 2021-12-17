@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 /**
  * @author li-yuanwen
@@ -26,13 +27,16 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory
-            , Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer) {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, byte[]> redisTemplate(RedisConnectionFactory redisConnectionFactory
+            , Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer, RedisSerializer<Object> protostuffRedisSerializer) {
+        RedisTemplate<String, byte[]> redisTemplate = new RedisTemplate<>();
 
+        // key,field使用json
         redisTemplate.setKeySerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setDefaultSerializer(jackson2JsonRedisSerializer);
+        redisTemplate.setHashKeySerializer(jackson2JsonRedisSerializer);
+        // 关闭默认序列化,防止底层对byte[]再序列化
+        redisTemplate.setEnableDefaultSerializer(false);
+
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         return redisTemplate;
     }

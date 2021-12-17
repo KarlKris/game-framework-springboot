@@ -1,26 +1,28 @@
 package com.li.gamecore.cache.redis.lettuce;
 
+import com.li.gamecommon.utils.ProtoStuffUtils;
 import com.li.gamecore.cache.core.DistributedCacheManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 基于Lettuce的工具类
  * @author li-yuanwen
- * 基于Luttuce的工具类
  */
 @Component
 public class LettuceHelper implements DistributedCacheManager {
 
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private RedisTemplate<String, byte[]> redisTemplate;
 
     @Override
     public Object get(String key) {
@@ -34,12 +36,13 @@ public class LettuceHelper implements DistributedCacheManager {
 
     @Override
     public void set(String key, Object value, int seconds) {
-        redisTemplate.opsForValue().set(key, value, seconds, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key, ProtoStuffUtils.serialize(value)
+                , seconds, TimeUnit.SECONDS);
     }
 
     @Override
     public void set(String key, Object value) {
-        redisTemplate.opsForValue().set(key, value);
+        redisTemplate.opsForValue().set(key, ProtoStuffUtils.serialize(value));
     }
 
     @Override
@@ -84,12 +87,12 @@ public class LettuceHelper implements DistributedCacheManager {
 
     @Override
     public Object getAndSet(String key, Object value) {
-        return redisTemplate.opsForValue().getAndSet(key, value);
+        return redisTemplate.opsForValue().getAndSet(key, ProtoStuffUtils.serialize(value));
     }
 
     @Override
     public void hSet(String key, Object field, Object value) {
-        redisTemplate.opsForHash().put(key, field, value);
+        redisTemplate.opsForHash().put(key, field, ProtoStuffUtils.serialize(value));
     }
 
     @Override
@@ -104,7 +107,7 @@ public class LettuceHelper implements DistributedCacheManager {
 
     @Override
     public boolean setnx(String key, Object value) {
-        return redisTemplate.opsForValue().setIfAbsent(key, value);
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, ProtoStuffUtils.serialize(value)));
     }
 
     @Override
@@ -114,7 +117,7 @@ public class LettuceHelper implements DistributedCacheManager {
 
     @Override
     public void sAdd(String key, Object value) {
-        redisTemplate.opsForSet().add(key, value);
+        redisTemplate.opsForSet().add(key, ProtoStuffUtils.serialize(value));
     }
 
     @Override
@@ -124,11 +127,12 @@ public class LettuceHelper implements DistributedCacheManager {
 
     @Override
     public boolean sDel(String key, Object value) {
-        return redisTemplate.opsForSet().remove(key, value) == 1;
+        Long remove = redisTemplate.opsForSet().remove(key, ProtoStuffUtils.serialize(value));
+        return Objects.equals(remove, 1L);
     }
 
     @Override
     public void publish(String channel, Object msg) {
-        redisTemplate.convertAndSend(channel, msg);
+        redisTemplate.convertAndSend(channel, ProtoStuffUtils.serialize(msg));
     }
 }

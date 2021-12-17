@@ -1,6 +1,6 @@
 package com.li.gamegateway.modules.chat.vo;
 
-import com.li.gameremote.modules.account.vo.AccountVo;
+import com.li.protocol.game.account.vo.AccountVo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

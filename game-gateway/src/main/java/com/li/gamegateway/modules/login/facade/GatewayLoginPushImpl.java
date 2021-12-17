@@ -1,7 +1,7 @@
 package com.li.gamegateway.modules.login.facade;
 
-import com.li.gameremote.modules.login.gateway.facade.GatewayLoginPush;
-import com.li.gamesocket.service.session.SessionManager;
+import com.li.protocol.gateway.login.protocol.GatewayLoginPush;
+import com.li.engine.service.session.SessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

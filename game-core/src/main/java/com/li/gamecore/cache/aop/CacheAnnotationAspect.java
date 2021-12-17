@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 
 /**
- * @author li-yuanwen
  * 基于注解@CachedRemove的aop
+ * @author li-yuanwen
  */
 @Aspect
 @Component
@@ -148,13 +148,14 @@ public class CacheAnnotationAspect {
             key = getSpElValue(keySpEl, evaluationContext);
         }
 
-        Class<?> returnType = targetMethod.getReturnType();
+        Cache cache = cacheManager.getCache(cachedable.type(), cacheName);
+        if (cache == null) {
+            cache = cacheManager.createCache(cachedable.type(), cacheName, cachedable.maximum(), cachedable.expire());
+        }
 
         Object result = null;
-        Cache cache = cacheManager.getCache(cachedable.type(), cacheName);
-        if (cache == null || (result = cache.get(key, returnType)) == null) {
-            cache = cacheManager.createCache(cachedable.type(), cacheName, cachedable.maximum(), cachedable.expire());
-
+        Class<?> returnType = targetMethod.getReturnType();
+        if ((result = cache.get(key, returnType)) == null) {
             try {
                 result = joinPoint.proceed();
                 if (cachedable.nullCache() || result != null) {
@@ -165,6 +166,7 @@ public class CacheAnnotationAspect {
                 log.error("执行方法[{}],方法参数[{}]出现未知异常", targetMethod.getName(), joinPoint.getArgs(), throwable);
             }
         }
+
         return result;
     }
 

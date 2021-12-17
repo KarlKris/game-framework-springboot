@@ -1,14 +1,14 @@
 package com.li.gameserver.modules.chat.service.impl;
 
-import com.li.gameremote.modules.chat.facade.ChatPush;
-import com.li.gameremote.modules.chat.vo.ChatContent;
+import com.li.engine.anno.InnerPushInject;
+import com.li.engine.service.session.SessionManager;
 import com.li.gameserver.modules.chat.service.ChatService;
-import com.li.gamesocket.anno.InnerPushInject;
-import com.li.gamesocket.service.session.SessionManager;
+import com.li.protocol.game.chat.protocol.ChatPush;
+import com.li.protocol.game.chat.vo.ChatContent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 
 /**
@@ -18,7 +18,7 @@ import java.util.Collection;
 @Service
 public class ChatServiceImpl implements ChatService {
 
-    @Autowired
+    @Resource
     private SessionManager sessionManager;
 
     @InnerPushInject

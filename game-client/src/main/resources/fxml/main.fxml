@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="531.0" prefWidth="885.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.li.client.controller.MainController">
+   <children>
+      <FlowPane layoutX="231.0" prefHeight="531.0" prefWidth="654.0">
+         <children>
+            <fx:include fx:id="protocolPane" source="protocol.fxml" />
+            <fx:include fx:id="chatroomPane" source="chatroom.fxml" />
+            <fx:include fx:id="messagePane" source="message.fxml" />
+            <fx:include fx:id="statPane" source="stat.fxml" />
+         </children>
+      </FlowPane>
+      <VBox prefHeight="531.0" prefWidth="229.0">
+         <FlowPane fx:id="leftPane" prefHeight="525.0" prefWidth="229.0">
+            <children>
+               <fx:include fx:id="loginPane" source="login.fxml" />
+               <fx:include fx:id="indexPane" source="index.fxml" />
+            </children>
+         </FlowPane>
+      </VBox>
+   </children>
+</AnchorPane>

@@ -1,6 +1,6 @@
 package com.li.gamegateway.modules.account.service;
 
-import com.li.gameremote.modules.account.vo.AccountVo;
+import com.li.protocol.game.account.vo.AccountVo;
 
 /**
  * @author li-yuanwen

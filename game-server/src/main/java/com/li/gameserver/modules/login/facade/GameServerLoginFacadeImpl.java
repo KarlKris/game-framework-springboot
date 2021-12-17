@@ -1,21 +1,22 @@
 package com.li.gameserver.modules.login.facade;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.gameremote.modules.login.game.facade.GameServerLoginFacade;
-import com.li.gameremote.modules.login.game.facade.GameServerLoginResultCode;
-import com.li.gameremote.modules.login.gateway.facade.GatewayLoginPush;
+import com.li.engine.anno.InnerPushInject;
+import com.li.engine.service.session.SessionManager;
+import com.li.gamecommon.exception.BadRequestException;
 import com.li.gameserver.common.GameServerSystemConfig;
 import com.li.gameserver.modules.account.service.AccountService;
-import com.li.gamesocket.anno.InnerPushInject;
-import com.li.gamesocket.protocol.Response;
-import com.li.gamesocket.service.session.ISession;
-import com.li.gamesocket.service.session.ServerSession;
-import com.li.gamesocket.service.session.Session;
-import com.li.gamesocket.service.session.SessionManager;
+import com.li.network.session.ISession;
+import com.li.network.session.ServerSession;
+import com.li.protocol.game.login.dto.ReqGameCreateAccount;
+import com.li.protocol.game.login.dto.ReqGameLoginAccount;
+import com.li.protocol.game.login.protocol.GameServerLoginFacade;
+import com.li.protocol.game.login.protocol.GameServerLoginResultCode;
+import com.li.protocol.gateway.login.protocol.GatewayLoginPush;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -26,33 +27,34 @@ import java.util.Objects;
 @Slf4j
 public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
 
-    @Autowired
+    @Resource
     private GameServerSystemConfig gameServerSystemConfig;
-    @Autowired
+    @Resource
     private SessionManager sessionManager;
-    @Autowired
+    @Resource
     private AccountService accountService;
 
     @InnerPushInject
     private GatewayLoginPush gatewayLoginPush;
 
     @Override
-    public Response<Long> create(ServerSession session, String account, int channel) {
-        if (!checkChannel(channel)) {
-            return Response.ERROR(GameServerLoginResultCode.REJECT);
+    public Long create(ServerSession session, ReqGameCreateAccount reqGameCreateAccount) {
+        if (!checkChannel(reqGameCreateAccount.getChannel())) {
+            throw new BadRequestException(GameServerLoginResultCode.REJECT);
+
         }
-        String accountName = account + "." + channel;
-        long nextId = accountService.createAccount(accountName, channel);
+        String accountName = reqGameCreateAccount.getAccount() + "." + reqGameCreateAccount.getChannel();
+        long nextId = accountService.createAccount(accountName, reqGameCreateAccount.getChannel());
         sessionManager.bindIdentity(session, nextId);
-        return Response.SUCCESS(nextId);
+        return nextId;
     }
 
     @Override
-    public Response<Long> login(ServerSession session, String account, int channel) {
-        if (!checkChannel(channel)) {
-            return Response.ERROR(GameServerLoginResultCode.REJECT);
+    public Long login(ServerSession session, ReqGameLoginAccount reqGameLoginAccount) {
+        if (!checkChannel(reqGameLoginAccount.getChannel())) {
+            throw new BadRequestException(GameServerLoginResultCode.REJECT);
         }
-        String accountName = account + "." + channel;
+        String accountName = reqGameLoginAccount.getAccount() + "." + reqGameLoginAccount.getChannel();
         long identity = accountService.login(accountName);
         // 先判断玩家是否在线
         ISession oldSession = sessionManager.getIdentitySession(identity);
@@ -62,7 +64,7 @@ public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
             gatewayLoginPush.kickOut(Collections.singleton(identity));
         }
         sessionManager.bindIdentity(session, identity);
-        return Response.SUCCESS(identity);
+        return identity;
     }
 
     private boolean checkChannel(int channel) {

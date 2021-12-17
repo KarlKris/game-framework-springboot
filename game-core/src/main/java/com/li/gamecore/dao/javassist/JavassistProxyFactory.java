@@ -1,6 +1,7 @@
 package com.li.gamecore.dao.javassist;
 
 import com.li.gamecommon.exception.EnhanceException;
+import com.li.gamecommon.utils.ObjectUtil;
 import com.li.gamecore.dao.IEntity;
 import com.li.gamecore.dao.anno.Enhance;
 import com.li.gamecore.dao.core.DataBasePersister;
@@ -17,9 +18,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.li.gamecore.dao.javassist.JavassistConstants.*;
@@ -36,8 +34,6 @@ public class JavassistProxyFactory {
     private final ClassPool classPool = ClassPool.getDefault();
     /** 构造器缓存 **/
     private static final ConcurrentHashMap<String, Constructor<? extends IEntity>> constructorHolder = new ConcurrentHashMap<>();
-    /** Object方法 **/
-    private static final Set<Method> objectMethods = new HashSet<>(Arrays.asList(Object.class.getDeclaredMethods()));
 
     @Autowired
     private DataBasePersister persistor;
@@ -109,7 +105,7 @@ public class JavassistProxyFactory {
             }
 
         }, method -> {
-            if (objectMethods.contains(method)) {
+            if (ObjectUtil.OBJECT_METHODS.contains(method)) {
                 return false;
             }
             if (Modifier.isFinal(method.getModifiers()) || Modifier.isStatic(method.getModifiers())

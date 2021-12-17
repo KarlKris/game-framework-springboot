@@ -47,11 +47,11 @@ public abstract class AbstractCache implements Cache {
      */
     protected abstract <T> T get0(String key, Class<T> tClass);
 
-    protected void incrementQuery() {
+    private void incrementQuery() {
         this.cacheStat.incrementQuery();
     }
 
-    protected void incrementHit() {
+    private void incrementHit() {
         this.cacheStat.incrementHit();
     }
 

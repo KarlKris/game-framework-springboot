@@ -180,6 +180,11 @@ public interface DistributedCacheManager {
 
     // ----------- Pub/Sub ------------------
 
+    /**
+     * 发布消息
+     * @param channel the channel to publish to, must not be null
+     * @param msg 消息
+     */
     void publish(String channel, Object msg);
 
 }

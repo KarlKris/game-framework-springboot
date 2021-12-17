@@ -1,7 +1,7 @@
 package com.li.gamegateway.modules.chat.facade;
 
 import com.li.gamegateway.modules.chat.vo.GatewayChatContent;
-import com.li.gamesocket.anno.*;
+import com.li.network.anno.*;
 
 import java.util.Collection;
 

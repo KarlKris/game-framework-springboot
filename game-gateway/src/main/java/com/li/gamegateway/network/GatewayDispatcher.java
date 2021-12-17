@@ -2,26 +2,22 @@
 
 import com.li.gamecommon.rpc.RemoteServerSeekService;
 import com.li.gamecommon.rpc.model.Address;
-import com.li.gamesocket.client.NioNettyClient;
-import com.li.gamesocket.client.NioNettyClientFactory;
-import com.li.gamesocket.protocol.InnerMessage;
-import com.li.gamesocket.protocol.MessageFactory;
-import com.li.gamesocket.protocol.OuterMessage;
-import com.li.gamesocket.protocol.Response;
-import com.li.gamesocket.protocol.serialize.Serializer;
-import com.li.gamesocket.service.handler.AbstractDispatcher;
-import com.li.gamesocket.service.handler.ThreadSessionIdentityHolder;
-import com.li.gamesocket.service.protocol.MethodCtx;
-import com.li.gamesocket.service.protocol.MethodInvokeCtx;
-import com.li.gamesocket.service.protocol.MethodParameter;
-import com.li.gamesocket.service.protocol.impl.IdentityMethodParameter;
-import com.li.gamesocket.service.protocol.impl.SessionMethodParameter;
-import com.li.gamesocket.service.rpc.SocketFutureManager;
-import com.li.gamesocket.service.rpc.future.ForwardSocketFuture;
-import com.li.gamesocket.service.session.PlayerSession;
+import com.li.network.modules.ErrorCodeModule;
+import com.li.engine.client.NioNettyClient;
+import com.li.engine.client.NioNettyClientFactory;
+import com.li.network.message.InnerMessage;
+import com.li.engine.protocol.MessageFactory;
+import com.li.network.message.OuterMessage;
+import com.li.network.message.ProtocolConstant;
+import com.li.engine.service.handler.AbstractDispatcher;
+import com.li.engine.service.handler.ThreadSessionIdentityHolder;
+import com.li.network.message.SocketProtocol;
+import com.li.engine.service.rpc.SocketFutureManager;
+import com.li.engine.service.rpc.future.ForwardSocketFuture;
+import com.li.network.session.PlayerSession;
+import com.li.engine.service.session.SessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 
@@ -45,26 +41,12 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     private MessageFactory messageFactory;
 
     @Override
-    public void dispatch(OuterMessage message, PlayerSession session) {
-        if (!message.isRequest()) {
-            if (log.isDebugEnabled()) {
-                log.debug("服务器收到响应消息,忽略");
-            }
-            return;
-        }
-        // 交付给线程池执行
-        execute(session, () -> dispatch0(session, message));
-    }
-
-    @Override
-    public void execute(PlayerSession session, Runnable runnable) {
+    protected long getIdBySessionAndMessage(PlayerSession session, OuterMessage message) {
         long id = session.getSessionId();
         if (session.isIdentity()) {
             id = session.getIdentity();
         }
-
-        // 提交任务
-        submit(id, runnable);
+        return id;
     }
 
     @Override
@@ -111,41 +93,25 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     }
 
     @Override
-    protected Object invokeMethod(PlayerSession session, OuterMessage message, MethodInvokeCtx methodInvokeCtx) {
-        if (methodInvokeCtx.isIdentity() && !session.isIdentity()) {
-            return Response.NO_IDENTITY;
-        }
-
-        Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
-
-        MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
-        MethodParameter[] params = methodCtx.getParams();
-        Object[] args = new Object[params.length];
-        for (int i = 0; i < params.length; i++) {
-            MethodParameter parameters = params[i];
-            if (parameters instanceof SessionMethodParameter) {
-                args[i] = session;
-                continue;
-            }
-
-            if (parameters instanceof IdentityMethodParameter) {
-                args[i] = session.getIdentity();
-                continue;
-            }
-
-            args[i] = serializer.deserialize(message.getBody(), parameters.getParameterClass());
-        }
-
-        return ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
+    protected long getProtocolIdentity(PlayerSession session, OuterMessage message) {
+        return session.getIdentity();
     }
 
     @Override
-    protected void response(PlayerSession session, OuterMessage message, boolean zip, byte serializeType, byte[] responseBody) {
+    protected void response(PlayerSession session, OuterMessage message, SocketProtocol protocol, byte[] responseBody) {
+        OuterMessage outerMessage = messageFactory.toOuterMessage(message.getSn()
+                , ProtocolConstant.transformResponse(message.getMessageType())
+                , protocol
+                , message.getSerializeType()
+                , responseBody);
 
+        SessionManager.writeAndFlush(session, outerMessage);
     }
 
     @Override
-    protected Object createErrorCodeBody(int errorCode) {
-        return null;
+    protected SocketProtocol errorSocketProtocol() {
+        return errorProtocol;
     }
+
+    private final SocketProtocol errorProtocol = new SocketProtocol(ErrorCodeModule.MODULE, ErrorCodeModule.ERROR_CODE);
 }

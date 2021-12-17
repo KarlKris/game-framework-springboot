@@ -8,7 +8,6 @@
         <version>1.0</version>
     </parent>
 
-    <groupId>com.li</groupId>
     <artifactId>game-manager</artifactId>
     <version>1.0</version>
     <name>game-manager</name>

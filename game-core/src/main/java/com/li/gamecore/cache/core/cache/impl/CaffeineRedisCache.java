@@ -1,13 +1,11 @@
 package com.li.gamecore.cache.core.cache.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamecore.cache.core.DistributedCacheManager;
 import com.li.gamecore.cache.redis.pubsub.CacheOfPubSubMessage;
 import com.li.gamecore.cache.redis.pubsub.PubSubConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -56,8 +54,7 @@ public class CaffeineRedisCache extends AbstractCache {
             value = this.distributedCacheManager.get(toRedisKey(key));
             // 添加至一级缓存
             if (value != null) {
-                ObjectMapper objectMapper = ApplicationContextHolder.getBean(ObjectMapper.class);
-                T t = objectMapper.convertValue(value, tClass);
+                T t = (T) value;
                 this.cache.put(key, t);
                 return t;
             }

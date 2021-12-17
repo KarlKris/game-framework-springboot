@@ -3,10 +3,10 @@ package com.li.gamegateway.modules.account.service.impl;
 import com.li.gamecore.cache.anno.Cachedable;
 import com.li.gamecore.cache.config.CachedType;
 import com.li.gamegateway.modules.account.service.GatewayAccountService;
-import com.li.gameremote.common.cache.CacheNameConstants;
-import com.li.gameremote.modules.account.facade.ServerAccountFacade;
-import com.li.gameremote.modules.account.vo.AccountVo;
-import com.li.gamesocket.service.rpc.RpcService;
+import com.li.protocol.common.cache.CacheNameConstants;
+import com.li.protocol.game.account.protocol.ServerAccountFacade;
+import com.li.protocol.game.account.vo.AccountVo;
+import com.li.engine.service.rpc.IRpcService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,14 +20,13 @@ import org.springframework.stereotype.Service;
 public class GatewayAccountServiceImpl implements GatewayAccountService {
 
     @Autowired
-    private RpcService rpcService;
+    private IRpcService IRpcService;
 
     @Override
     @Cachedable(type = CachedType.REMOTE
             , name = CacheNameConstants.IDENTITY_TO_ACCOUNT_VO, key = "#identity")
     public AccountVo transformById(long identity) {
-        return rpcService.getSendProxy(ServerAccountFacade.class, identity)
-                .getShowVo(identity)
-                .getContent();
+        return IRpcService.getSendProxy(ServerAccountFacade.class, identity)
+                .getShowVo(identity);
     }
 }

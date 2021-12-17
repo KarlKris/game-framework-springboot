@@ -17,15 +17,16 @@
     <description>基于SpringBoot2.x的游戏服务器框架</description>
 
     <modules>
-        <module>game-socket</module>
+        <module>game-engine</module>
         <module>game-common</module>
         <module>game-cluster</module>
         <module>game-gateway</module>
-        <module>game-remote</module>
+        <module>game-protocol</module>
         <module>game-server</module>
         <module>game-core</module>
         <module>game-manager</module>
         <module>game-client</module>
+        <module>game-network</module>
     </modules>
 
     <properties>

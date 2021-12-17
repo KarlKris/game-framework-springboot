@@ -2,10 +2,10 @@ package com.li.gamegateway.modules.chat.facade;
 
 import com.li.gamegateway.modules.account.service.GatewayAccountService;
 import com.li.gamegateway.modules.chat.vo.GatewayChatContent;
-import com.li.gameremote.modules.account.vo.AccountVo;
-import com.li.gameremote.modules.chat.facade.ChatPush;
-import com.li.gameremote.modules.chat.vo.ChatContent;
-import com.li.gamesocket.anno.OuterPushInject;
+import com.li.protocol.game.account.vo.AccountVo;
+import com.li.protocol.game.chat.protocol.ChatPush;
+import com.li.protocol.game.chat.vo.ChatContent;
+import com.li.engine.anno.OuterPushInject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

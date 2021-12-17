@@ -1,15 +1,16 @@
 package com.li.gamegateway.modules.login.service;
 
-import com.li.gameremote.modules.login.game.facade.GameServerLoginFacade;
-import com.li.gamesocket.protocol.Response;
-import com.li.gamesocket.service.rpc.RpcService;
-import com.li.gamesocket.service.session.ISession;
-import com.li.gamesocket.service.session.PlayerSession;
-import com.li.gamesocket.service.session.SessionManager;
+import com.li.engine.service.rpc.IRpcService;
+import com.li.engine.service.session.SessionManager;
+import com.li.network.session.ISession;
+import com.li.network.session.PlayerSession;
+import com.li.protocol.game.login.dto.ReqGameCreateAccount;
+import com.li.protocol.game.login.dto.ReqGameLoginAccount;
+import com.li.protocol.game.login.protocol.GameServerLoginFacade;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Objects;
 
 /**
@@ -19,29 +20,29 @@ import java.util.Objects;
 @Slf4j
 public class GatewayLoginServiceImpl implements GatewayLoginService {
 
-    @Autowired
-    private RpcService rpcService;
-    @Autowired
+    @Resource
+    private IRpcService rpcService;
+    @Resource
     private SessionManager sessionManager;
 
     @Override
-    public void create(PlayerSession session, String account, int channel, int serverId) {
+    public Long create(PlayerSession session, String account, int channel, int serverId) {
         GameServerLoginFacade sendProxy = rpcService.getSendProxy(GameServerLoginFacade.class, String.valueOf(serverId));
-        Response<Long> response = sendProxy.create(null, account, channel);
-        Long identity = response.getContent();
+        Long identity = sendProxy.create(null, new ReqGameCreateAccount(account, channel));
         // 绑定身份
         sessionManager.bindIdentity(session, identity);
 
         if (log.isDebugEnabled()) {
             log.debug("网关服请求游戏服[{}]创建账号成功,绑定session[{},{}]", serverId, session.getSessionId(), identity);
         }
+
+        return identity;
     }
 
     @Override
-    public void login(PlayerSession session, String account, int channel, int serverId) {
+    public Long login(PlayerSession session, String account, int channel, int serverId) {
         GameServerLoginFacade sendProxy = rpcService.getSendProxy(GameServerLoginFacade.class, String.valueOf(serverId));
-        Response<Long> response = sendProxy.login(null, account, channel);
-        Long identity = response.getContent();
+        Long identity = sendProxy.login(null, new ReqGameLoginAccount(account, channel));
         ISession oldSession = sessionManager.bindIdentity(session, identity);
         if (oldSession != null && !Objects.equals(oldSession.getSessionId(), session.getSessionId())) {
             // 断开先前连接
@@ -51,5 +52,7 @@ public class GatewayLoginServiceImpl implements GatewayLoginService {
         if (log.isDebugEnabled()) {
             log.debug("网关服请求游戏服[{}]登录账号成功,绑定session[{},{}]", serverId, session.getSessionId(), identity);
         }
+
+        return identity;
     }
 }

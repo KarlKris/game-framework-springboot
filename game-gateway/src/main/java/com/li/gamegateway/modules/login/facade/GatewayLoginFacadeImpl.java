@@ -1,14 +1,17 @@
 package com.li.gamegateway.modules.login.facade;
 
 import cn.hutool.crypto.SecureUtil;
+import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamegateway.commom.GatewaySystemConfig;
 import com.li.gamegateway.modules.login.service.GatewayLoginService;
-import com.li.gameremote.modules.login.gateway.facade.GatewayLoginFacade;
-import com.li.gamesocket.protocol.Response;
-import com.li.gamesocket.service.session.PlayerSession;
+import com.li.network.session.PlayerSession;
+import com.li.protocol.gateway.login.dto.ReqGatewayCreateAccount;
+import com.li.protocol.gateway.login.dto.ReqGatewayLoginAccount;
+import com.li.protocol.gateway.login.protocol.GatewayLoginFacade;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author li-yuanwen
@@ -17,33 +20,39 @@ import org.springframework.stereotype.Component;
 @Component
 public class GatewayLoginFacadeImpl implements GatewayLoginFacade {
 
-    @Autowired
+    @Resource
     private GatewaySystemConfig gatewaySystemConfig;
-    @Autowired
+    @Resource
     private GatewayLoginService gatewayLoginService;
 
     @Override
-    public Response<Object> create(PlayerSession session, String account, int channel, int serverId, int timestamp, String sign) {
-        if (StringUtils.isBlank(account)) {
-            return Response.ERROR(GatewayLoginResultCode.ACCOUNT_INVALID);
+    public Long create(PlayerSession session, ReqGatewayCreateAccount reqGatewayCreateAccount) {
+        if (StringUtils.isBlank(reqGatewayCreateAccount.getAccount())) {
+            throw new BadRequestException(GatewayLoginResultCode.ACCOUNT_INVALID);
         }
-        if (!checkSign(account, timestamp, sign)) {
-            return Response.ERROR(GatewayLoginResultCode.SIGN_ERROR);
+        if (!checkSign(reqGatewayCreateAccount.getAccount()
+                , reqGatewayCreateAccount.getTimestamp(), reqGatewayCreateAccount.getSign())) {
+            throw new BadRequestException(GatewayLoginResultCode.SIGN_ERROR);
         }
-        gatewayLoginService.create(session, account, channel, serverId);
-        return Response.DEFAULT_SUCCESS;
+        return gatewayLoginService.create(session
+                , reqGatewayCreateAccount.getAccount()
+                , reqGatewayCreateAccount.getChannel()
+                , reqGatewayCreateAccount.getServerId());
     }
 
     @Override
-    public Response<Object> login(PlayerSession session, String account, int channel, int serverId, int timestamp, String sign) {
-        if (StringUtils.isBlank(account)) {
-            return Response.ERROR(GatewayLoginResultCode.ACCOUNT_INVALID);
+    public Long login(PlayerSession session, ReqGatewayLoginAccount reqGatewayLoginAccount) {
+        if (StringUtils.isBlank(reqGatewayLoginAccount.getAccount())) {
+            throw new BadRequestException(GatewayLoginResultCode.ACCOUNT_INVALID);
         }
-        if (!checkSign(account, timestamp, sign)) {
-            return Response.ERROR(GatewayLoginResultCode.SIGN_ERROR);
+        if (!checkSign(reqGatewayLoginAccount.getAccount()
+                , reqGatewayLoginAccount.getTimestamp()
+                , reqGatewayLoginAccount.getSign())) {
+            throw new BadRequestException(GatewayLoginResultCode.SIGN_ERROR);
         }
-        gatewayLoginService.login(session, account, channel, serverId);
-        return Response.DEFAULT_SUCCESS;
+        return gatewayLoginService.login(session, reqGatewayLoginAccount.getAccount()
+                , reqGatewayLoginAccount.getChannel()
+                , reqGatewayLoginAccount.getServerId());
     }
 
     /** 验签 **/

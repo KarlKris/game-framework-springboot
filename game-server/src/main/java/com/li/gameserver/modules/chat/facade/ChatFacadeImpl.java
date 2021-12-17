@@ -1,8 +1,10 @@
 package com.li.gameserver.modules.chat.facade;
 
 import com.li.gameserver.modules.chat.service.ChatService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.li.protocol.game.chat.protocol.ChatFacade;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author li-yuanwen
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChatFacadeImpl implements ChatFacade {
 
-    @Autowired
+    @Resource
     private ChatService chatService;
 
     @Override

@@ -8,7 +8,6 @@
         <version>1.0</version>
     </parent>
 
-    <groupId>com.li</groupId>
     <artifactId>game-gateway</artifactId>
     <version>1.0</version>
     <name>game-gateway</name>
@@ -21,7 +20,17 @@
     <dependencies>
         <dependency>
             <groupId>com.li</groupId>
-            <artifactId>game-remote</artifactId>
+            <artifactId>game-engine</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.li</groupId>
+            <artifactId>game-cluster</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.li</groupId>
+            <artifactId>game-protocol</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>

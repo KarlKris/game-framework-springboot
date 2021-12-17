@@ -29,7 +29,7 @@
         <!-- https://mvnrepository.com/artifact/org.apache.curator/curator-framework -->
         <dependency>
             <groupId>org.apache.curator</groupId>
-                <artifactId>curator-framework</artifactId>
+            <artifactId>curator-framework</artifactId>
             <version>${curator-version}</version>
 
             <exclusions>
