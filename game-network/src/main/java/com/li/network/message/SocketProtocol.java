@@ -1,4 +1,4 @@
-﻿package com.li.network.message;
+package com.li.network.message;
 
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;

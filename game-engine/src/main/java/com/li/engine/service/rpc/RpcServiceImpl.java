@@ -1,4 +1,4 @@
-﻿package com.li.engine.service.rpc;
+package com.li.engine.service.rpc;
 
 import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamecommon.exception.code.ServerErrorCode;

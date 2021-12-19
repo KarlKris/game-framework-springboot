@@ -1,4 +1,4 @@
-﻿package com.li.gameserver.network;
+package com.li.gameserver.network;
 
 import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;

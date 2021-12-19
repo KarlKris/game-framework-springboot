@@ -14,8 +14,8 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -53,7 +53,7 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
                     try {
                         synchronized (module2Type) {
                             for (short module : objectMapper.readValue(bytes
-                                    , new TypeReference<List<Short>>() {})) {
+                                    , new TypeReference<Set<Short>>() {})) {
                                 ServerType old1 = module2Type.putIfAbsent(module, type);
                                 if (old1 != null) {
                                     log.warn("出现相同模块号[{}],不同服务[{},{}]"

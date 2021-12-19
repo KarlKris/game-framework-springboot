@@ -1,4 +1,4 @@
-﻿package com.li.network.session;
+package com.li.network.session;
 
 import com.li.gamecommon.utils.IpUtils;
 import com.li.network.message.IMessage;

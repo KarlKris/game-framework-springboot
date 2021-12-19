@@ -1,4 +1,4 @@
-﻿package com.li.engine.service.handler;
+package com.li.engine.service.handler;
 
 /**
  * 线程中执行玩家身份标识ThreadLocal

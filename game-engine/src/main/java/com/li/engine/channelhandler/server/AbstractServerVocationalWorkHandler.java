@@ -1,4 +1,4 @@
-﻿package com.li.engine.channelhandler.server;
+package com.li.engine.channelhandler.server;
 
 import com.li.network.message.IMessage;
 import com.li.engine.service.handler.Dispatcher;

@@ -29,10 +29,9 @@ public class ServiceDiscoveryNode {
 
     /** 服务名称 **/
     @Getter
-    private ServerType type;
+    private final ServerType type;
 
     /** 连接状态 **/
-    @Getter
     private boolean connected;
 
     /** 客户端 **/

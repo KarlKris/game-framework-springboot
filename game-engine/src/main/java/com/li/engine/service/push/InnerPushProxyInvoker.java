@@ -2,7 +2,7 @@ package com.li.engine.service.push;
 
 import com.li.engine.service.session.SessionManager;
 import com.li.gamecommon.ApplicationContextHolder;
-import com.li.gamecommon.utils.ObjectUtil;
+import com.li.gamecommon.utils.ObjectsUtil;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.InBodyMethodParameter;
 import com.li.network.protocol.MethodCtx;
@@ -40,7 +40,7 @@ public class InnerPushProxyInvoker implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (ObjectUtil.OBJECT_METHODS.contains(method)) {
+        if (ObjectsUtil.OBJECT_METHODS.contains(method)) {
             return method.invoke(proxy, args);
         }
 

@@ -1,4 +1,4 @@
-﻿package com.li.engine.service.rpc.future;
+package com.li.engine.service.rpc.future;
 
 import com.li.gamecommon.ApplicationContextHolder;
 import com.li.gamecommon.exception.SocketException;

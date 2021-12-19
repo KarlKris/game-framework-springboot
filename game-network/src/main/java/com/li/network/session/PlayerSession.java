@@ -1,4 +1,4 @@
-﻿package com.li.network.session;
+package com.li.network.session;
 
 import io.netty.channel.Channel;
 

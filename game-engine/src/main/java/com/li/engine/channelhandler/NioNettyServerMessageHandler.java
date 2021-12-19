@@ -1,11 +1,9 @@
 package com.li.engine.channelhandler;
 
-import com.li.gamecommon.ApplicationContextHolder;
 import com.li.engine.channelhandler.common.NioNettyFilter;
 import com.li.engine.channelhandler.common.impl.ProtocolSelectorHandler;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
-import com.li.network.message.IMessage;
-import com.li.network.session.ISession;
+import com.li.gamecommon.ApplicationContextHolder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -36,7 +34,7 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
     @Resource
     private List<NioNettyFilter> filters;
     @Resource
-    private AbstractServerVocationalWorkHandler<IMessage, ISession> vocationalWorkHandler;
+    private AbstractServerVocationalWorkHandler vocationalWorkHandler;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {

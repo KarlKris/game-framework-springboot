@@ -1,4 +1,4 @@
-﻿package com.li.network.utils;
+package com.li.network.utils;
 
 import com.li.network.anno.*;
 import com.li.network.message.SocketProtocol;
@@ -95,6 +95,11 @@ public class ProtocolUtil {
                     // @InBody注解
                     if (annotation instanceof InBody) {
                         params[i] = new InBodyMethodParameter(clazz);
+                        break;
+                    }
+                    // @PushIds注解
+                    if (annotation instanceof PushIds) {
+                        params[i] = PushIdsMethodParameter.PUSH_IDS_PARAMETER;
                         break;
                     }
 

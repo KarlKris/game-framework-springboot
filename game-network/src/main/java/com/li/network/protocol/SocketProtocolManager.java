@@ -1,4 +1,4 @@
-﻿package com.li.network.protocol;
+package com.li.network.protocol;
 
 import com.li.network.anno.SocketController;
 import com.li.network.anno.SocketPush;
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -96,8 +97,13 @@ public class SocketProtocolManager extends InstantiationAwareBeanPostProcessorAd
      * 获取服务器负责的模块号集
      * @return 服务器能用的模块号集
      */
-    public List<Short> getProtocolModules() {
-        return invokeCtxHolder.keySet().stream().map(SocketProtocol::getModule).collect(Collectors.toList());
+    public Set<Short> getProtocolModules() {
+        // 过滤掉推送模块
+        return invokeCtxHolder.keySet()
+                .stream()
+                .filter(socketProtocol -> !socketProtocol.isPushProtocol())
+                .map(SocketProtocol::getModule)
+                .collect(Collectors.toSet());
     }
 
     /**

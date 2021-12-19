@@ -1,4 +1,4 @@
-﻿package com.li.protocol.game.login.dto;
+package com.li.protocol.game.login.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

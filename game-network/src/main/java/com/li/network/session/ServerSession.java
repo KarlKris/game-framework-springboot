@@ -1,4 +1,4 @@
-﻿package com.li.network.session;
+package com.li.network.session;
 
 import io.netty.channel.Channel;
 
@@ -14,7 +14,7 @@ import java.util.Set;
 public class ServerSession extends AbstractSession {
 
     /** 依附于该Session的PlayerSession#identity **/
-    private Set<Long> identities;
+    private final Set<Long> identities;
 
     public ServerSession(long sessionId, Channel channel) {
         super(sessionId, channel);

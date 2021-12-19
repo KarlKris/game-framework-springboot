@@ -1,4 +1,4 @@
-﻿package com.li.gamegateway.network;
+package com.li.gamegateway.network;
 
 import com.li.gamecommon.rpc.RemoteServerSeekService;
 import com.li.gamecommon.rpc.model.Address;

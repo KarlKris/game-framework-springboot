@@ -1,4 +1,4 @@
-﻿package com.li.protocol.gateway.login.dto;
+package com.li.protocol.gateway.login.dto;
 
 import lombok.Getter;
 

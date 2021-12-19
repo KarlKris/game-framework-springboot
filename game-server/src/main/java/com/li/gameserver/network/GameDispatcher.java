@@ -1,4 +1,4 @@
-﻿package com.li.gameserver.network;
+package com.li.gameserver.network;
 
 import com.li.network.modules.ErrorCodeModule;
 import com.li.network.message.InnerMessage;

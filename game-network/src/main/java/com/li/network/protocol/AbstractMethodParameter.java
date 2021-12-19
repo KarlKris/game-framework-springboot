@@ -1,4 +1,4 @@
-﻿package com.li.network.protocol;
+package com.li.network.protocol;
 
 /**
  * 方法参数基类

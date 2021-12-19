@@ -16,10 +16,9 @@ import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * @author li-yuanwen
@@ -28,19 +27,19 @@ import javax.annotation.PostConstruct;
  **/
 @Service
 @Slf4j
-public class ZkRegisterService implements ServerInfoUpdateService, ApplicationRunner {
+public class ZkRegisterServiceImpl implements ServerInfoUpdateService, ApplicationRunner {
 
     /** 服务接口 **/
     @Autowired(required = false)
     private LocalServerService localServerService;
 
     /** zookeeper客户端 **/
-    @Autowired
+    @Resource
     private CuratorFramework curatorFramework;
-    @Autowired
+    @Resource
     private CuratorFrameworkConfiguration config;
 
-    @Autowired
+    @Resource
     private ObjectMapper objectMapper;
 
     /** zookeeper curator #ServiceDisCorvery **/

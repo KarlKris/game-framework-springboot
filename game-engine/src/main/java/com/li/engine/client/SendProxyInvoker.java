@@ -10,7 +10,7 @@ import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamecommon.exception.SocketException;
 import com.li.gamecommon.exception.code.ServerErrorCode;
 import com.li.gamecommon.utils.IpUtils;
-import com.li.gamecommon.utils.ObjectUtil;
+import com.li.gamecommon.utils.ObjectsUtil;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.ProtocolConstant;
 import com.li.network.protocol.InBodyMethodParameter;
@@ -56,7 +56,7 @@ public class SendProxyInvoker implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (ObjectUtil.OBJECT_METHODS.contains(method)) {
+        if (ObjectsUtil.OBJECT_METHODS.contains(method)) {
             return method.invoke(proxy, args);
         }
 

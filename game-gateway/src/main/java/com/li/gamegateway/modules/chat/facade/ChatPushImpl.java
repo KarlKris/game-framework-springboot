@@ -1,14 +1,14 @@
 package com.li.gamegateway.modules.chat.facade;
 
+import com.li.engine.anno.OuterPushInject;
 import com.li.gamegateway.modules.account.service.GatewayAccountService;
 import com.li.gamegateway.modules.chat.vo.GatewayChatContent;
 import com.li.protocol.game.account.vo.AccountVo;
 import com.li.protocol.game.chat.protocol.ChatPush;
 import com.li.protocol.game.chat.vo.ChatContent;
-import com.li.engine.anno.OuterPushInject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 
 /**
@@ -19,7 +19,7 @@ import java.util.Collection;
 @Component
 public class ChatPushImpl implements ChatPush {
 
-    @Autowired
+    @Resource
     private GatewayAccountService gatewayAccountService;
 
     @OuterPushInject

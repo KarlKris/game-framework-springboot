@@ -1,4 +1,4 @@
-﻿package com.li.engine.service.handler;
+package com.li.engine.service.handler;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 import cn.hutool.core.util.RandomUtil;

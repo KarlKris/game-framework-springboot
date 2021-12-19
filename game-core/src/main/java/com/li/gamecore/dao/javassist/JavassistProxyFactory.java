@@ -1,7 +1,7 @@
 package com.li.gamecore.dao.javassist;
 
 import com.li.gamecommon.exception.EnhanceException;
-import com.li.gamecommon.utils.ObjectUtil;
+import com.li.gamecommon.utils.ObjectsUtil;
 import com.li.gamecore.dao.IEntity;
 import com.li.gamecore.dao.anno.Enhance;
 import com.li.gamecore.dao.core.DataBasePersister;
@@ -105,7 +105,7 @@ public class JavassistProxyFactory {
             }
 
         }, method -> {
-            if (ObjectUtil.OBJECT_METHODS.contains(method)) {
+            if (ObjectsUtil.OBJECT_METHODS.contains(method)) {
                 return false;
             }
             if (Modifier.isFinal(method.getModifiers()) || Modifier.isStatic(method.getModifiers())

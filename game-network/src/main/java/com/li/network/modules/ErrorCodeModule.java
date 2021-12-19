@@ -1,4 +1,4 @@
-﻿package com.li.network.modules;
+package com.li.network.modules;
 
 /**
  * 错误码模块

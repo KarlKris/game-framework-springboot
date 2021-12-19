@@ -1,4 +1,4 @@
-﻿package com.li.engine.service.rpc;
+package com.li.engine.service.rpc;
 
 import com.li.engine.service.rpc.future.SocketFuture;
 import org.springframework.stereotype.Component;
