@@ -102,7 +102,21 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
      */
     protected abstract long getIdBySessionAndMessage(S session, M message);
 
+    /**
+     * 消息分发前处理,用于判断一下信息
+     * @param session session
+     * @param message message
+     * @return true 可以处理
+     */
+    protected boolean beforeDispatch(S session, M message) {
+        return true;
+    }
+
     protected void dispatch0(S session, M message) {
+        if (!beforeDispatch(session, message)) {
+            return;
+        }
+
         // 查询序列化/反序列化方式
         byte serializeType = message.getSerializeType();
         Serializer serializer = serializerHolder.getSerializer(serializeType);

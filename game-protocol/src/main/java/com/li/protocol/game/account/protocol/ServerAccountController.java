@@ -12,7 +12,7 @@ import com.li.network.anno.SocketMethod;
  * 账号模块接口
  **/
 @SocketController(module = ServerAccountModule.MODULE)
-public interface ServerAccountFacade {
+public interface ServerAccountController {
 
 
     /**

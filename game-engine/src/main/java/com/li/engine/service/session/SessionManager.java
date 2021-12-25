@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -93,20 +92,9 @@ public class SessionManager {
             log.debug("session[{}]绑定某个身份[{}]", session.getSessionId(), identity);
         }
 
-        if (session instanceof PlayerSession) {
-            ((PlayerSession) session).bindIdentity(identity);
-        }
+        session.bindIdentity(identity);
 
-        ISession oldSession = this.identities.put(identity, session);
-        if (oldSession != null && !Objects.equals(session.getSessionId(), oldSession.getSessionId())) {
-            if (log.isDebugEnabled()) {
-                log.debug("玩家[{}]被顶号", identity);
-            }
-
-            return oldSession;
-        }
-
-        return null;
+        return this.identities.put(identity, session);
 
     }
 
@@ -121,6 +109,11 @@ public class SessionManager {
         if (session != null) {
             session.close();
         }
+    }
+
+    /** 登出 **/
+    public void logout(long identity) {
+        identities.remove(identity);
     }
 
     /** 获取指定Session **/

@@ -21,8 +21,13 @@ public class ServerSession extends AbstractSession {
         this.identities = new HashSet<>();
     }
 
+    @Override
     public void bindIdentity(long identity) {
         this.identities.add(identity);
+    }
+
+    public void logout(long identity) {
+        this.identities.remove(identity);
     }
 
     public Set<Long> getIdentities() {

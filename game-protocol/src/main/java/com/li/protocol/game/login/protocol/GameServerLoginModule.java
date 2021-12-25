@@ -14,4 +14,7 @@ public interface GameServerLoginModule {
 
     /** 登录 **/
     byte LOGIN = 2;
+
+    /** 登出 **/
+    byte LOGOUT = 3;
 }

@@ -1,7 +1,7 @@
 package com.li.gameserver.modules.chat.facade;
 
 import com.li.gameserver.modules.chat.service.ChatService;
-import com.li.protocol.game.chat.protocol.ChatFacade;
+import com.li.protocol.game.chat.protocol.ChatController;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -10,7 +10,7 @@ import javax.annotation.Resource;
  * @author li-yuanwen
  */
 @Component
-public class ChatFacadeImpl implements ChatFacade {
+public class ChatControllerImpl implements ChatController {
 
     @Resource
     private ChatService chatService;

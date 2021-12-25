@@ -1,6 +1,7 @@
 package com.li.protocol.game.login.protocol;
 
 
+import com.li.network.anno.Identity;
 import com.li.network.anno.InBody;
 import com.li.network.anno.SocketController;
 import com.li.network.anno.SocketMethod;
@@ -13,7 +14,7 @@ import com.li.protocol.game.login.dto.ReqGameLoginAccount;
  * 游戏登录模块
  */
 @SocketController(module = GameServerLoginModule.MODULE)
-public interface GameServerLoginFacade {
+public interface GameServerLoginController {
 
 
     /**
@@ -36,4 +37,14 @@ public interface GameServerLoginFacade {
     @SocketMethod(id = GameServerLoginModule.LOGIN)
     Long login(ServerSession session
             , @InBody ReqGameLoginAccount reqGameLoginAccount);
+
+
+    /**
+     * 账号登出
+     * @param session session
+     * @param identity 玩家标识
+     */
+    @SocketMethod(id = GameServerLoginModule.LOGOUT)
+    void logout(ServerSession session, @Identity long identity);
+
 }

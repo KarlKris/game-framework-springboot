@@ -1,14 +1,19 @@
 package com.li.gameserver.network;
 
-import com.li.network.modules.ErrorCodeModule;
-import com.li.network.message.InnerMessage;
-import com.li.network.message.ProtocolConstant;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.handler.ThreadSessionIdentityHolder;
-import com.li.network.message.SocketProtocol;
-import com.li.network.session.ServerSession;
 import com.li.engine.service.session.SessionManager;
+import com.li.network.message.InnerMessage;
+import com.li.network.message.ProtocolConstant;
+import com.li.network.message.SocketProtocol;
+import com.li.network.modules.ErrorCodeModule;
+import com.li.network.session.ISession;
+import com.li.network.session.ServerSession;
+import com.li.protocol.game.login.protocol.GameServerLoginModule;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * 游戏服消息分发处理器
@@ -17,6 +22,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSession> {
+
+    @Resource
+    private SessionManager sessionManager;
 
     @Override
     protected void setIdentityToThreadLocal(ServerSession session, InnerMessage message) {
@@ -55,5 +63,24 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
             id = message.getIdentity();
         }
         return id;
+    }
+
+    @Override
+    protected boolean beforeDispatch(ServerSession session, InnerMessage message) {
+        // 放行登陆协议,登陆逻辑需实现挤人功能
+        SocketProtocol protocol = message.getProtocol();
+        if (protocol.getModule() == GameServerLoginModule.MODULE
+                && protocol.getMethodId() == GameServerLoginModule.LOGIN) {
+            return true;
+        }
+
+        ISession identitySession = sessionManager.getIdentitySession(message.getIdentity());
+        // 重新绑定,处理网关服与游戏服重连的情况下,玩家Session信息丢失后重新绑定
+        if (identitySession == null) {
+            sessionManager.bindIdentity(session, message.getIdentity());
+            return true;
+        }
+
+        return Objects.equals(session.getSessionId(), identitySession.getSessionId());
     }
 }

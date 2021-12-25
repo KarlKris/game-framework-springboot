@@ -48,6 +48,7 @@ public class InnerPushProxyInvoker implements InvocationHandler {
         if (pushMethodCtx == null) {
             throw new RuntimeException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
         }
+
         MethodCtx methodCtx = pushMethodCtx.getMethodCtx();
         MethodParameter[] params = methodCtx.getParams();
         byte[] content = null;

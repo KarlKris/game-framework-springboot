@@ -10,7 +10,7 @@ import com.li.network.session.ISession;
 import com.li.network.session.ServerSession;
 import com.li.protocol.game.login.dto.ReqGameCreateAccount;
 import com.li.protocol.game.login.dto.ReqGameLoginAccount;
-import com.li.protocol.game.login.protocol.GameServerLoginFacade;
+import com.li.protocol.game.login.protocol.GameServerLoginController;
 import com.li.protocol.game.login.protocol.GameServerLoginResultCode;
 import com.li.protocol.gateway.login.protocol.GatewayLoginPush;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
+public class GameServerLoginControllerImpl implements GameServerLoginController {
 
     @Resource
     private GameServerSystemConfig gameServerSystemConfig;
@@ -58,13 +58,22 @@ public class GameServerLoginFacadeImpl implements GameServerLoginFacade {
         long identity = accountService.login(accountName);
         // 先判断玩家是否在线
         ISession oldSession = sessionManager.getIdentitySession(identity);
-        if (oldSession != null
-                && !Objects.equals(session.getSessionId(), oldSession.getSessionId())) {
-            // 推送给网关服,使其断开连接
+        if (oldSession != null && !Objects.equals(oldSession.getSessionId(), session.getSessionId())) {
+            // 先推送给网关服,使其断开连接
             gatewayLoginPush.kickOut(Collections.singleton(identity));
         }
+        // 绑定账号
         sessionManager.bindIdentity(session, identity);
+
         return identity;
+    }
+
+
+    @Override
+    public void logout(ServerSession session, long identity) {
+        session.logout(identity);
+        sessionManager.logout(identity);
+        accountService.logout(identity);
     }
 
     private boolean checkChannel(int channel) {

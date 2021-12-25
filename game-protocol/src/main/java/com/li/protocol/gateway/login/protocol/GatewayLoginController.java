@@ -13,7 +13,7 @@ import com.li.protocol.gateway.login.dto.ReqGatewayLoginAccount;
  * 网关服登录
  */
 @SocketController(module = GatewayLoginModule.MODULE)
-public interface GatewayLoginFacade {
+public interface GatewayLoginController {
 
 
     /**

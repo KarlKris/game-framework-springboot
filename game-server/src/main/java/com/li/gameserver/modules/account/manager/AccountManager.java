@@ -5,9 +5,9 @@ import com.li.gamecore.cache.anno.Cachedable;
 import com.li.gamecore.dao.core.DataBaseQuerier;
 import com.li.gamecore.dao.service.EntityService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 
 /**
@@ -17,11 +17,11 @@ import java.util.Collection;
 @Slf4j
 public class AccountManager {
 
-    @Autowired
+    @Resource
     private EntityService entityService;
-    @Autowired
+    @Resource
     private DataBaseQuerier dataBaseQuerier;
-    @Autowired
+    @Resource
     private MultiServerIdGenerator idGenerator;
 
     public Collection<String> getAllRegisterAccounts() {
@@ -36,9 +36,16 @@ public class AccountManager {
         return entityService.load(id, Account.class);
     }
 
-
     public void levelUp(Account account) {
         account.levelUp();
+    }
+
+    public void login(Account account) {
+        account.login();
+    }
+
+    public void logout(Account account) {
+        account.logout();
     }
 
 

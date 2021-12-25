@@ -34,7 +34,6 @@ public interface ISession {
      */
     void close();
 
-
     /**
      * 设置最近的传输的序列化方式
      * @param serializeType 序列化方式
@@ -47,5 +46,11 @@ public interface ISession {
      * @return 序列化方式 or null
      */
     Byte getSerializeType();
+
+    /**
+     * 绑定身份标识
+     * @param identity 身份标识
+     */
+    void bindIdentity(long identity);
 
 }

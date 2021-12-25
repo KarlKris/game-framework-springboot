@@ -16,10 +16,7 @@ public class PlayerSession extends AbstractSession {
         super(sessionId, channel);
     }
 
-    /**
-     * 绑定连接身份标识
-     * @param identity 身份标识
-     */
+    @Override
     public void bindIdentity(long identity) {
         this.identity = identity;
     }

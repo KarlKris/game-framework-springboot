@@ -31,6 +31,8 @@ public class LoginController {
     /** 服务器地址 **/
     @FXML
     public Button loginBtn;
+    @FXML
+    public Button createBtn;
 
 
     @Resource
@@ -50,6 +52,22 @@ public class LoginController {
 
         try {
             networkService.login(address, Convert.toInt(port), account);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void create() {
+        String address = addressText.getText();
+        String port = portText.getText();
+        String account = accountText.getText();
+
+        if (StrUtil.isBlank(address) || StrUtil.isBlank(port) || StrUtil.isBlank(account)) {
+            return;
+        }
+
+        try {
+            networkService.create(address, Convert.toInt(port), account);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

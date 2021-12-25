@@ -1,5 +1,6 @@
 package com.li.gamegateway.modules.login.facade;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamegateway.commom.GatewaySystemConfig;
@@ -7,7 +8,7 @@ import com.li.gamegateway.modules.login.service.GatewayLoginService;
 import com.li.network.session.PlayerSession;
 import com.li.protocol.gateway.login.dto.ReqGatewayCreateAccount;
 import com.li.protocol.gateway.login.dto.ReqGatewayLoginAccount;
-import com.li.protocol.gateway.login.protocol.GatewayLoginFacade;
+import com.li.protocol.gateway.login.protocol.GatewayLoginController;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ import javax.annotation.Resource;
  * 网关服登录Facade
  */
 @Component
-public class GatewayLoginFacadeImpl implements GatewayLoginFacade {
+public class GatewayLoginControllerImpl implements GatewayLoginController {
 
     @Resource
     private GatewaySystemConfig gatewaySystemConfig;
@@ -61,7 +62,7 @@ public class GatewayLoginFacadeImpl implements GatewayLoginFacade {
         int validTime = gatewaySystemConfig.getValidTime();
         // 校验签名有效时长
         if (validTime >= 0) {
-            int now = (int) (System.currentTimeMillis() / 1000);
+            int now = DateUtil.thisSecond();
 
             if (timestamp > now) {
                 return false;

@@ -2,22 +2,22 @@ package com.li.gameserver.modules.account.service.impl;
 
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
+import com.li.engine.channelhandler.common.FirewallService;
 import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamecore.cache.anno.CachedRemove;
 import com.li.gamecore.cache.config.CachedType;
+import com.li.gameserver.modules.account.manager.Account;
+import com.li.gameserver.modules.account.manager.AccountManager;
+import com.li.gameserver.modules.account.service.AccountService;
 import com.li.protocol.common.cache.CacheNameConstants;
 import com.li.protocol.game.account.protocol.ServerAccountResultCode;
 import com.li.protocol.game.account.vo.AccountVo;
 import com.li.protocol.game.login.protocol.GameServerLoginResultCode;
-import com.li.gameserver.modules.account.manager.Account;
-import com.li.gameserver.modules.account.manager.AccountManager;
-import com.li.gameserver.modules.account.service.AccountService;
-import com.li.engine.channelhandler.common.FirewallService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -28,9 +28,9 @@ import java.nio.charset.StandardCharsets;
 public class AccountServiceImpl implements AccountService {
 
 
-    @Autowired
+    @Resource
     private FirewallService firewallService;
-    @Autowired
+    @Resource
     private AccountManager accountManager;
 
     /** 账号检测使用布隆过滤器 **/
@@ -78,6 +78,11 @@ public class AccountServiceImpl implements AccountService {
         accountManager.levelUp(account);
     }
 
+    @Override
+    public void logout(long identity) {
+        Account account = accountManager.load(identity);
+        accountManager.logout(account);
+    }
 
     private Account checkAccountAndThrow(long identity) {
         Account account = accountManager.load(identity);

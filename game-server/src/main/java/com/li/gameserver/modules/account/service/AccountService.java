@@ -38,4 +38,10 @@ public interface AccountService {
      */
     void levelUp(long identity);
 
+    /**
+     * 账号登出
+     * @param identity 身份标识
+     */
+    void logout(long identity);
+
 }

@@ -1,12 +1,12 @@
 package com.li.gamegateway.modules.login.facade;
 
-import com.li.protocol.gateway.login.protocol.GatewayLoginPush;
 import com.li.engine.service.session.SessionManager;
+import com.li.protocol.gateway.login.protocol.GatewayLoginPush;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 
 /**
@@ -16,7 +16,7 @@ import java.util.Collection;
 @Component
 public class GatewayLoginPushImpl implements GatewayLoginPush {
 
-    @Autowired
+    @Resource
     private SessionManager sessionManager;
 
     @Override

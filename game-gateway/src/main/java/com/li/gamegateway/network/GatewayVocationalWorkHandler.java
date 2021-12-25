@@ -1,10 +1,13 @@
 package com.li.gamegateway.network;
 
-import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
-import com.li.network.message.OuterMessage;
 import com.li.engine.service.handler.DispatcherExecutorService;
+import com.li.engine.service.handler.ThreadSessionIdentityHolder;
+import com.li.engine.service.rpc.IRpcService;
+import com.li.network.message.OuterMessage;
+import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.network.session.PlayerSession;
+import com.li.protocol.game.login.protocol.GameServerLoginController;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,8 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
 
     @Resource
     private DispatcherExecutorService dispatcherExecutorService;
+    @Resource
+    private IRpcService rpcService;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, OuterMessage outerMessage) throws Exception {
@@ -51,15 +56,15 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
             log.debug("与客户端[{}]断开连接,注册PlayerSession[{}]", playerSession.getIp(), playerSession.getSessionId());
         }
 
-        if (playerSession != null) {
-            long id = playerSession.getSessionId();
-            if (playerSession.isIdentity()) {
-                id = playerSession.getIdentity();
-            }
-            dispatcherExecutorService.execute(id, new Runnable() {
-                @Override
-                public void run() {
-                    // todo 网关服需要考虑通知游戏服更新玩家断开链接
+        if (playerSession != null && playerSession.isIdentity()) {
+            long id = playerSession.getIdentity();
+            dispatcherExecutorService.execute(id, () -> {
+                ThreadSessionIdentityHolder.setIdentity(id);
+                try {
+                    // 网关服需要考虑通知游戏服更新玩家断开链接
+                    rpcService.getSendProxy(GameServerLoginController.class, id).logout(null, 0L);
+                } finally {
+                    ThreadSessionIdentityHolder.remove();
                 }
             });
         }

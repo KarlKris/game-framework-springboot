@@ -1,6 +1,8 @@
 package com.li.protocol.gateway.login.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 网关层创建账号参数
@@ -8,6 +10,8 @@ import lombok.Getter;
  * @date 2021/12/16
  */
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReqGatewayCreateAccount {
 
     /** 账号 **/

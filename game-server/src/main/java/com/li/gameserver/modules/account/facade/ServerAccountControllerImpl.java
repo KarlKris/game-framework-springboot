@@ -1,6 +1,6 @@
 package com.li.gameserver.modules.account.facade;
 
-import com.li.protocol.game.account.protocol.ServerAccountFacade;
+import com.li.protocol.game.account.protocol.ServerAccountController;
 import com.li.protocol.game.account.vo.AccountVo;
 import com.li.gameserver.modules.account.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @date 2021/9/2 21:52
  **/
 @Component
-public class ServerAccountFacadeImpl implements ServerAccountFacade {
+public class ServerAccountControllerImpl implements ServerAccountController {
 
     @Autowired
     private AccountService accountService;

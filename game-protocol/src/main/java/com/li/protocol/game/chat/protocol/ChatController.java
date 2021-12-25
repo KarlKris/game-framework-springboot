@@ -9,7 +9,7 @@ import com.li.network.anno.SocketMethod;
  * @author li-yuanwen
  */
 @SocketController(module = ChatModule.MODULE)
-public interface ChatFacade {
+public interface ChatController {
 
 
     /**
