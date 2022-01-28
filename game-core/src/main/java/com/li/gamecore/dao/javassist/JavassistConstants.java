@@ -10,7 +10,7 @@ public interface JavassistConstants {
     String ENHANCE_SUFFIX = "$EnhanceByJavassist";
 
     /** 增强类数据库回写服务域名 **/
-    String PERSISTER_FIELD = "persister";
+    String PERSISTER_FIELD = "persistor";
 
     /** 增强类实际对象域名 **/
     String ENTITY_FIELD = "entity";

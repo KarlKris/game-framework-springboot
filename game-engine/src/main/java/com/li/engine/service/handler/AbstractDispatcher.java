@@ -9,6 +9,7 @@ import com.li.gamecommon.exception.code.ServerErrorCode;
 import com.li.gamecommon.thread.MonitoredThreadPoolExecutor;
 import com.li.network.message.IMessage;
 import com.li.network.message.SocketProtocol;
+import com.li.network.modules.ErrorCodeModule;
 import com.li.network.protocol.*;
 import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
@@ -176,7 +177,9 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             protocol = errorSocketProtocol();
             responseBody = serializer.serialize(createErrorCodeBody(ServerErrorCode.UNKNOWN));
         } finally {
-            response(session, message, protocol, responseBody);
+            if (responseBody != null) {
+                response(session, message, protocol, responseBody);
+            }
             // 线程执行完成移除ThreadLocal,防止内存溢出
             ThreadSessionIdentityHolder.remove();
         }
@@ -281,11 +284,11 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
     protected abstract void response(S session, M message, SocketProtocol protocol, byte[] responseBody);
 
 
-    /**
-     * 返回错误码协议号
-     * @return 错误码协议号
-     */
-    protected abstract SocketProtocol errorSocketProtocol();
+    private final SocketProtocol errorProtocol = new SocketProtocol(ErrorCodeModule.MODULE, ErrorCodeModule.ERROR_CODE);
+
+    private SocketProtocol errorSocketProtocol() {
+        return errorProtocol;
+    }
 
 
     /**

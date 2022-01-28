@@ -41,5 +41,5 @@ public @interface Cachedable {
     short maximum() default CacheConstants.DEFAULT_MAXIMUM;
 
     /** 失效时间(分钟) **/
-    short expire() default CacheConstants.DEFAULT_EXPIRE;
+    short expire() default CacheConstants.DEFAULT_EXPIRE_SECOND;
 }

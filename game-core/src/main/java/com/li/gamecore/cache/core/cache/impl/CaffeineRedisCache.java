@@ -1,17 +1,16 @@
 package com.li.gamecore.cache.core.cache.impl;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.li.gamecommon.ApplicationContextHolder;
-import com.li.gamecore.cache.core.DistributedCacheManager;
-import com.li.gamecore.cache.redis.pubsub.CacheOfPubSubMessage;
-import com.li.gamecore.cache.redis.pubsub.PubSubConstants;
+import com.li.gamecore.redis.DistributedCacheManager;
+import com.li.gamecore.cache.core.pubsub.CacheOfPubSubMessage;
+import com.li.gamecore.redis.pubsub.PubSubConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 基于Caffeine+Redis的两级缓存
  * @author li-yuanwen
- * 基于Caffeine+Redis的两级缓存(无锁竞争)
  */
 @Slf4j
 public class CaffeineRedisCache extends AbstractCache {
@@ -21,21 +20,22 @@ public class CaffeineRedisCache extends AbstractCache {
     /** 分布式时效时间(秒) **/
     private final int expire;
     /** 二级缓存 **/
-    private final DistributedCacheManager distributedCacheManager;
+    private DistributedCacheManager distributedCacheManager;
 
 
     public CaffeineRedisCache(String cacheName, short maximum, short expire) {
         super(cacheName);
-        // 二级缓存时效 5倍于一级缓存(一级缓存时效应短些)
-        this.expire = expire * 60 * 5;
+        // 二级缓存时效 2倍于一级缓存(一级缓存时效应短些)
+        this.expire = expire << 1;
         // 一级缓存
         this.cache = Caffeine.newBuilder()
                 .maximumSize(maximum)
-                .expireAfterAccess(expire, TimeUnit.MINUTES)
+                .expireAfterAccess(expire, TimeUnit.SECONDS)
                 .build();
+    }
 
-        // 二级缓存
-        this.distributedCacheManager = ApplicationContextHolder.getBean(DistributedCacheManager.class);
+    public void setDistributedCacheManager(DistributedCacheManager distributedCacheManager) {
+        this.distributedCacheManager = distributedCacheManager;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class CaffeineRedisCache extends AbstractCache {
                 log.debug("尝试从Redis中获取key[{}]", toRedisKey(key));
             }
             // 尝试从Redis中获取
-            value = this.distributedCacheManager.get(toRedisKey(key));
+            value = this.distributedCacheManager.get(toRedisKey(key), tClass);
             // 添加至一级缓存
             if (value != null) {
                 T t = (T) value;
@@ -91,7 +91,7 @@ public class CaffeineRedisCache extends AbstractCache {
 
     /** 通知其他进程移除指定key缓存 **/
     private void notifyOtherToRemove(String key) {
-        this.distributedCacheManager.publish(PubSubConstants.CACHE_CHANNEL
+        this.distributedCacheManager.publish(PubSubConstants.CACHE_EXPIRE_CHANNEL
                 , new CacheOfPubSubMessage(getCacheName(), key));
     }
 

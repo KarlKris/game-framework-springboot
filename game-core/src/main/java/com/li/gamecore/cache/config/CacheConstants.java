@@ -17,10 +17,10 @@ public interface CacheConstants {
 
     // 缓存失效时间常量
 
-    /** 10分钟 **/
-    short DEFAULT_EXPIRE = 10;
+    /** 5分钟 **/
+    short DEFAULT_EXPIRE_SECOND = 300;
 
-    /** 20分钟 **/
-    short DOUBLE_DEFAULT_EXPIRE = 20;
+    /** 10分钟 **/
+    short DOUBLE_DEFAULT_EXPIRE_SECOND = 600;
 
 }

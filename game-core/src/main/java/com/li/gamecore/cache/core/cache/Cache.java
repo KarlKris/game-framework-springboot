@@ -3,8 +3,8 @@ package com.li.gamecore.cache.core.cache;
 import com.li.gamecore.cache.core.cache.impl.CacheStat;
 
 /**
- * @author li-yuanwen
  * 缓存抽象
+ * @author li-yuanwen
  */
 public interface Cache {
 
@@ -32,6 +32,7 @@ public interface Cache {
     /**
      * 查询缓存
      * @param key 缓存key
+     * @param tClass /
      * @return 缓存内容
      */
     <T> T get(String key, Class<T> tClass);
@@ -47,5 +48,6 @@ public interface Cache {
      * @return 缓存统计数据
      */
     CacheStat getCacheStat();
+
 
 }

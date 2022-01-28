@@ -1,10 +1,10 @@
 package com.li.gamecore.dao.core.impl;
 
+import com.li.gamecore.dao.AbstractEntity;
 import com.li.gamecore.dao.IEntity;
-import com.li.gamecore.dao.core.DataBaseAccessor;
-import com.li.gamecore.dao.core.DataBaseQuerier;
+import com.li.gamecore.dao.core.DataAccessor;
+import com.li.gamecore.dao.core.DataQuerier;
 import org.hibernate.query.Query;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateTemplate;
@@ -12,20 +12,19 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * @author li-yuanwen
  * 基于Hibernate的数据库访问接口实现
+ * @author li-yuanwen
  */
 @Repository
 @ConditionalOnProperty(value = "spring.datasource.url")
-public class HibernateAccessorImpl implements DataBaseAccessor, DataBaseQuerier {
+public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
 
-
-
-    @Autowired
+    @Resource
     private HibernateTemplate hibernateTemplate;
 
 
@@ -40,19 +39,19 @@ public class HibernateAccessorImpl implements DataBaseAccessor, DataBaseQuerier 
 
     @Override
     @Transactional
-    public <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> void remove(T entity) {
+    public void remove(AbstractEntity<?> entity) {
         hibernateTemplate.delete(entity);
     }
 
     @Override
     @Transactional
-    public <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> void update(T entity) {
+    public void update(AbstractEntity<?> entity) {
         hibernateTemplate.update(entity);
     }
 
     @Override
     @Transactional
-    public <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> void create(T entity) {
+    public void create(AbstractEntity<?> entity) {
         hibernateTemplate.save(entity);
     }
 

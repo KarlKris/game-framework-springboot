@@ -3,9 +3,9 @@ package com.li.gamecommon.exception;
 import lombok.Getter;
 
 /**
+ * 服务器逻辑异常基础类
  * @author li-yuanwen
  * @date 2021/8/4 22:24
- * 服务器逻辑异常基础类
  **/
 @Getter
 public class SocketException extends RuntimeException {
@@ -13,7 +13,7 @@ public class SocketException extends RuntimeException {
     /**
      * 错误码
      **/
-    private int errorCode;
+    private final int errorCode;
 
     public SocketException(int errorCode) {
         super();

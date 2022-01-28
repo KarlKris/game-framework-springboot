@@ -1,7 +1,6 @@
 package com.li.gamecore.cache.core.cache.impl;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.li.gamecore.cache.core.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
@@ -21,7 +20,7 @@ public class CaffeineCache extends AbstractCache {
         super(cacheName);
         this.cache = Caffeine.newBuilder()
                 .maximumSize(maximum)
-                .expireAfterAccess(expire, TimeUnit.MINUTES)
+                .expireAfterAccess(expire, TimeUnit.SECONDS)
                 .build();
     }
 

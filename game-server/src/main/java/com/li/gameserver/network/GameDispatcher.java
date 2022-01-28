@@ -6,7 +6,6 @@ import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.ProtocolConstant;
 import com.li.network.message.SocketProtocol;
-import com.li.network.modules.ErrorCodeModule;
 import com.li.network.session.ISession;
 import com.li.network.session.ServerSession;
 import com.li.protocol.game.login.protocol.GameServerLoginModule;
@@ -49,12 +48,6 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
         SessionManager.writeAndFlush(session, innerMessage);
     }
 
-    @Override
-    protected SocketProtocol errorSocketProtocol() {
-        return errorProtocol;
-    }
-
-    private final SocketProtocol errorProtocol = new SocketProtocol(ErrorCodeModule.MODULE, ErrorCodeModule.ERROR_CODE);
 
     @Override
     protected long getIdBySessionAndMessage(ServerSession session, InnerMessage message) {

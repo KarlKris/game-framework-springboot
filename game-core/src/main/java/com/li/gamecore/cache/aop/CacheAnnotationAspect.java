@@ -13,7 +13,6 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.EvaluationContext;
@@ -24,10 +23,11 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Method;
 
 /**
- * 基于注解@CachedRemove的aop
+ * 缓存注解AOP
  * @author li-yuanwen
  */
 @Aspect
@@ -41,9 +41,9 @@ public class CacheAnnotationAspect {
     private final TemplateParserContext parserContext = new TemplateParserContext();
     private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
-    @Autowired
+    @Resource
     private CacheManager cacheManager;
-    @Autowired
+    @Resource
     private ObjectMapper objectMapper;
 
     /** 缓存移除 **/

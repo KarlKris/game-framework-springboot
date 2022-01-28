@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadFactory;
 public class MonitoredScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
 
 
-    private ConcurrentHashMap<String, Long> startTimes;
+    private final ConcurrentHashMap<String, Long> startTimes;
     private int maxNum;
     private int maxTime;
 

@@ -52,4 +52,5 @@ public abstract class AbstractSession implements ISession {
     public Byte getSerializeType() {
         return this.channel.attr(ChannelAttributeKeys.LAST_SERIALIZE_TYPE).get();
     }
+
 }

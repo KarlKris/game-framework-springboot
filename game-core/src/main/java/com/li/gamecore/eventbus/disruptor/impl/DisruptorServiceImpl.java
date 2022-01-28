@@ -11,13 +11,13 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +33,7 @@ public class DisruptorServiceImpl implements DisruptorService, ApplicationListen
     private Disruptor<DisruptorEvent<?>> disruptor;
     private DisruptorEventProducer disruptorEventProducer;
 
-    @Autowired
+    @Resource
     private ApplicationContext applicationContext;
 
     private Map<String, DisruptorEventHandler<?>> handlers;

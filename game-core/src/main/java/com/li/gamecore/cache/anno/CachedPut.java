@@ -9,8 +9,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author li-yuanwen
  * 用于某个方法，每次被调用，此方法都执行，并把结果更新到PutCache配置的地方，一般用于缓存更新
+ * @author li-yuanwen
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -34,7 +34,7 @@ public @interface CachedPut {
     /** 缓存大小 **/
     short maximum() default CacheConstants.DEFAULT_MAXIMUM;
 
-    /** 失效时间(分钟)  **/
-    short expire() default CacheConstants.DEFAULT_EXPIRE;
+    /** 失效时间(秒)  **/
+    short expire() default CacheConstants.DEFAULT_EXPIRE_SECOND;
 
 }

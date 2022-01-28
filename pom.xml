@@ -27,12 +27,14 @@
         <module>game-manager</module>
         <module>game-client</module>
         <module>game-network</module>
+        <module>game-battle</module>
     </modules>
 
     <properties>
         <java.version>1.8</java.version>
         <hutool.version>5.7.6</hutool.version>
         <jmh.version>1.19</jmh.version>
+        <apache.commons.version>4.0</apache.commons.version>
     </properties>
 
     <dependencies>
@@ -76,6 +78,13 @@
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>${jmh.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${apache.commons.version}</version>
         </dependency>
 
     </dependencies>

@@ -3,11 +3,12 @@ package com.li.engine.service.push;
 import com.li.engine.anno.InnerPushInject;
 import com.li.engine.anno.OuterPushInject;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
+
+import javax.annotation.Resource;
 
 /**
  * @author li-yuanwen
@@ -18,7 +19,7 @@ import org.springframework.util.ReflectionUtils;
 @Order
 public class PushInjectProcessor extends InstantiationAwareBeanPostProcessorAdapter {
 
-    @Autowired
+    @Resource
     private PushManager pushManager;
 
     @Override

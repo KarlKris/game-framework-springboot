@@ -13,24 +13,25 @@ import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.zookeeper.CreateMode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 /**
+ * zk 服务注册Service
  * @author li-yuanwen
  * @date 2021/8/7 16:14
- * zk 服务注册Service
  **/
-@Service
 @Slf4j
+@Service
+@ConditionalOnBean(LocalServerService.class)
 public class ZkRegisterServiceImpl implements ServerInfoUpdateService, ApplicationRunner {
 
     /** 服务接口 **/
-    @Autowired(required = false)
+    @Resource
     private LocalServerService localServerService;
 
     /** zookeeper客户端 **/

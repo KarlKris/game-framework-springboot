@@ -1,13 +1,13 @@
 package com.li.gamecore.dao.service;
 
+import com.li.gamecore.dao.AbstractEntity;
 import com.li.gamecore.dao.EntityBuilder;
-import com.li.gamecore.dao.IEntity;
 
 import java.io.Serializable;
 
 /**
+ * 数据库（Redis除外）实体对外接口
  * @author li-yuanwen
- * 数据库实体对外接口
  */
 public interface EntityService {
 
@@ -20,7 +20,7 @@ public interface EntityService {
      * @param <T> 实体类型
      * @return 数据库实体
      */
-    <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> T load(PK id, Class<T> tClass);
+    <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T load(PK id, Class<T> tClass);
 
 
     /**
@@ -32,7 +32,7 @@ public interface EntityService {
      * @param <T> 实体类型
      * @return 数据库实体
      */
-    <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> T loadOrCreate(PK id, Class<T> tClass
+    <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T loadOrCreate(PK id, Class<T> tClass
             , EntityBuilder<PK, T> entityBuilder);
 
 
@@ -43,7 +43,15 @@ public interface EntityService {
      * @param <T> 实体类型
      * @return 数据库实体
      */
-    <PK extends Comparable<PK> & Serializable, T extends IEntity<PK>> T  create(T entity);
+    <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T create(T entity);
+
+    /**
+     * 删除数据库一行数据
+     * @param entity 实体
+     * @param <PK> /
+     * @param <T> /
+     */
+    <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> void remove(T entity);
 
 
 }

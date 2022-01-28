@@ -1,15 +1,14 @@
 package com.li.gameserver.modules.account.manager;
 
 import cn.hutool.core.date.DateUtil;
-import com.li.gamecore.dao.IEntity;
-import com.li.gamecore.dao.anno.Enhance;
+import com.li.gamecore.dao.AbstractEntity;
+import com.li.gamecore.dao.anno.Commit;
 import lombok.Getter;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.util.Date;
 
 /**
@@ -23,14 +22,10 @@ import java.util.Date;
 })
 
 @Getter
-public class Account implements IEntity<Long> {
+public class Account extends AbstractEntity<Long> {
 
     public static final String ALL_ACCOUNT_NAME = "ALL_ACCOUNT_NAME";
     public static final String GET_ID_BY_ACCOUNT_NAME = "GET_ID_BY_ACCOUNT_NAME";
-
-    /** 玩家id **/
-    @Id
-    private long id;
 
     /** 账号名 **/
     private String accountName;
@@ -53,22 +48,17 @@ public class Account implements IEntity<Long> {
     /** 账号在线总时长(毫秒) **/
     private long totalOnlineTime;
 
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Enhance
+    @Commit
     void levelUp() {
         this.level++;
     }
 
-    @Enhance
+    @Commit
     void login() {
         this.loginTime = System.currentTimeMillis();
     }
 
-    @Enhance
+    @Commit
     void logout() {
         this.logoutTime = System.currentTimeMillis();
 
@@ -80,9 +70,16 @@ public class Account implements IEntity<Long> {
         }
     }
 
+    public Account() {
+        super();
+    }
+
+    public Account(Long id) {
+        super(id);
+    }
+
     public static Account of(long id, int channel, String accountName) {
-        Account account = new Account();
-        account.id = id;
+        Account account = new Account(id);
         account.channel = channel;
         account.accountName = accountName;
         return account;

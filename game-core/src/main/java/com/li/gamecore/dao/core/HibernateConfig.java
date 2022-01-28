@@ -18,7 +18,7 @@ import javax.persistence.EntityManagerFactory;
  */
 @Configuration
 @ConditionalOnProperty(value = "spring.datasource.url")
-public class HibernateConfig implements CostomSessionFactory {
+public class HibernateConfig implements CustomSessionFactory {
 
 
     @Resource

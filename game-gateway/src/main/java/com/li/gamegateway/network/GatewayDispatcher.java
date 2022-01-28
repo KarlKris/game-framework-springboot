@@ -1,21 +1,20 @@
 package com.li.gamegateway.network;
 
-import com.li.gamecommon.rpc.RemoteServerSeekService;
-import com.li.gamecommon.rpc.model.Address;
-import com.li.network.modules.ErrorCodeModule;
 import com.li.engine.client.NioNettyClient;
 import com.li.engine.client.NioNettyClientFactory;
-import com.li.network.message.InnerMessage;
 import com.li.engine.protocol.MessageFactory;
-import com.li.network.message.OuterMessage;
-import com.li.network.message.ProtocolConstant;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.handler.ThreadSessionIdentityHolder;
-import com.li.network.message.SocketProtocol;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.engine.service.rpc.future.ForwardSocketFuture;
-import com.li.network.session.PlayerSession;
 import com.li.engine.service.session.SessionManager;
+import com.li.gamecommon.rpc.RemoteServerSeekService;
+import com.li.gamecommon.rpc.model.Address;
+import com.li.network.message.InnerMessage;
+import com.li.network.message.OuterMessage;
+import com.li.network.message.ProtocolConstant;
+import com.li.network.message.SocketProtocol;
+import com.li.network.session.PlayerSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -107,11 +106,4 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
 
         SessionManager.writeAndFlush(session, outerMessage);
     }
-
-    @Override
-    protected SocketProtocol errorSocketProtocol() {
-        return errorProtocol;
-    }
-
-    private final SocketProtocol errorProtocol = new SocketProtocol(ErrorCodeModule.MODULE, ErrorCodeModule.ERROR_CODE);
 }

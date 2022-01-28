@@ -5,11 +5,11 @@ import com.li.gamecore.cache.core.cache.Cache;
 import com.li.gamecore.cache.core.manager.CacheManager;
 import com.li.gamecore.cache.core.processor.CacheProcessor;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 @Component
 public class CacheManagerImpl implements CacheManager {
 
-    @Autowired
+    @Resource
     private ApplicationContext applicationContext;
 
     private Map<CachedType, CacheProcessor> processorHolder;

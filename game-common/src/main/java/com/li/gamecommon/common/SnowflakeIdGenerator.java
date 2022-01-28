@@ -1,7 +1,6 @@
 package com.li.gamecommon.common;
 
 /**
- * @author li-yuanwen
  * 分布式id之雪花算法
  * 64位具体分布
  * 1位用作最高位保留
@@ -9,6 +8,7 @@ package com.li.gamecommon.common;
  * 2位作为时间回拨位 同一毫秒支持4次回拨
  * 10位作为机器位 10位的长度最多支持部署1024个节点
  * 10位作为毫秒内序号位  10位的计数顺序号支持每个节点每毫秒产生1024个ID序号
+ * @author li-yuanwen
  **/
 public class SnowflakeIdGenerator {
 
@@ -57,7 +57,7 @@ public class SnowflakeIdGenerator {
     /** 时间回拨 **/
     private long timeBackId = 0L;
     /** 工作机器ID(0~31) **/
-    private long workerId;
+    private final long workerId;
     /** 毫秒内序列(0~4095) **/
     private long sequence = 0L;
 

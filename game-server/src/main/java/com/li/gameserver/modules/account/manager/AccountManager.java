@@ -2,7 +2,7 @@ package com.li.gameserver.modules.account.manager;
 
 import com.li.gamecommon.common.MultiServerIdGenerator;
 import com.li.gamecore.cache.anno.Cachedable;
-import com.li.gamecore.dao.core.DataBaseQuerier;
+import com.li.gamecore.dao.core.DataQuerier;
 import com.li.gamecore.dao.service.EntityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,12 +20,12 @@ public class AccountManager {
     @Resource
     private EntityService entityService;
     @Resource
-    private DataBaseQuerier dataBaseQuerier;
+    private DataQuerier dataQuerier;
     @Resource
     private MultiServerIdGenerator idGenerator;
 
     public Collection<String> getAllRegisterAccounts() {
-        return dataBaseQuerier.query(Account.class, String.class, Account.ALL_ACCOUNT_NAME);
+        return dataQuerier.query(Account.class, String.class, Account.ALL_ACCOUNT_NAME);
     }
 
     public Account create(String accountName, int channel) {
@@ -51,7 +51,7 @@ public class AccountManager {
 
     @Cachedable(name = "AccountName2Id", key = "#accountName")
     public Long getIdByAccountName(String accountName) {
-        return dataBaseQuerier.uniqueQuery(Account.class, Long.TYPE, Account.GET_ID_BY_ACCOUNT_NAME, accountName);
+        return dataQuerier.uniqueQuery(Account.class, Long.TYPE, Account.GET_ID_BY_ACCOUNT_NAME, accountName);
     }
 
 }

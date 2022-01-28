@@ -1,6 +1,6 @@
 package com.li.gamecluster.zookeeper.model;
 
-import com.li.gamecluster.zookeeper.selector.ServiceSelector;
+import com.li.gamecluster.zookeeper.selector.ServerSelector;
 
 /**
  * @author li-yuanwen
@@ -10,22 +10,22 @@ import com.li.gamecluster.zookeeper.selector.ServiceSelector;
 public enum ServerType {
 
     /** 网关服 **/
-    GATEWAY(ServiceSelector.BALANCE_SELECTOR),
+    GATEWAY(ServerSelector.BALANCE_SELECTOR),
 
     /** 游戏服 **/
-    GAME_SERVER(ServiceSelector.IDENTITY_SELECTOR),
+    GAME_SERVER(ServerSelector.IDENTITY_SELECTOR),
 
     ;
 
     /** 选择器 **/
-    private ServiceSelector selector;
+    private final ServerSelector selector;
 
-    ServerType(ServiceSelector selector){
+    ServerType(ServerSelector selector){
         this.selector = selector;
     }
 
 
-    public ServiceSelector getSelector() {
+    public ServerSelector getSelector() {
         return selector;
     }
 

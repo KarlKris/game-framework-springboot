@@ -1,10 +1,11 @@
 package com.li.engine.service.rpc;
 
+import com.li.engine.client.NioNettyClientFactory;
 import com.li.gamecommon.exception.BadRequestException;
 import com.li.gamecommon.exception.code.ServerErrorCode;
 import com.li.gamecommon.rpc.RemoteServerSeekService;
 import com.li.gamecommon.rpc.model.Address;
-import com.li.engine.client.NioNettyClientFactory;
+import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.utils.ProtocolUtil;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,8 @@ public class RpcServiceImpl implements IRpcService {
     private RemoteServerSeekService remoteServerSeekService;
     @Resource
     private NioNettyClientFactory clientFactory;
+    @Resource
+    private SocketProtocolManager protocolManager;
 
 
     @Override
@@ -30,6 +33,10 @@ public class RpcServiceImpl implements IRpcService {
         checkAndThrowRemoteService();
 
         short module = ProtocolUtil.getProtocolModuleByClass(tClass);
+        if (protocolManager.getProtocolModules().contains(module)) {
+            throw new RuntimeException("不允许同类型进程间互连");
+        }
+
         Address address = remoteServerSeekService.seekApplicationAddressByModule(module
                 , identity);
         if (address == null) {
@@ -44,6 +51,10 @@ public class RpcServiceImpl implements IRpcService {
         checkAndThrowRemoteService();
 
         short module = ProtocolUtil.getProtocolModuleByClass(tClass);
+        if (protocolManager.getProtocolModules().contains(module)) {
+            throw new RuntimeException("不允许同类型进程间互连");
+        }
+
         Address address = this.remoteServerSeekService.seekApplicationAddressById(module
                 , serverId);
         if (address == null) {
