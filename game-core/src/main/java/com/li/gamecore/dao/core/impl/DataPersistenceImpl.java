@@ -49,7 +49,7 @@ public class DataPersistenceImpl implements DataPersistence, ApplicationListener
         }
     }
 
-    /** 销毁队列 **/
+    /** 消费队列 **/
     private void consume() {
         int size = this.queue.size();
         for (int i = 0; i < size; i++) {

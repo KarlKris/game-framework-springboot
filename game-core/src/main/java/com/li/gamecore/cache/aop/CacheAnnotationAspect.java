@@ -75,7 +75,6 @@ public class CacheAnnotationAspect {
             cacheName = getSpElValue(cacheName, evaluationContext);
         }
 
-
         // 移除缓存
         Cache cache = cacheManager.getCache(cachedRemove.type(), cacheName);
         if (cache != null) {

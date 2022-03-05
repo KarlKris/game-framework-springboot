@@ -1,12 +1,10 @@
 package com.li.engine.service.handler;
 
-import cn.hutool.core.thread.NamedThreadFactory;
-import cn.hutool.core.util.RandomUtil;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.VocationalWorkConfig;
 import com.li.gamecommon.exception.SocketException;
 import com.li.gamecommon.exception.code.ServerErrorCode;
-import com.li.gamecommon.thread.MonitoredThreadPoolExecutor;
+import com.li.gamecommon.thread.SerializedExecutorService;
 import com.li.network.message.IMessage;
 import com.li.network.message.SocketProtocol;
 import com.li.network.modules.ErrorCodeModule;
@@ -19,11 +17,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.util.ReflectionUtils;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 消息分发器基类
@@ -32,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public abstract class AbstractDispatcher<M extends IMessage, S extends ISession> implements Dispatcher<M, S>
-        , DispatcherExecutorService, ApplicationListener<ContextClosedEvent> {
+        , ApplicationListener<ContextClosedEvent> {
 
 
     @Resource
@@ -43,45 +37,8 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
     private VocationalWorkConfig config;
     @Resource
     private SocketProtocolManager socketProtocolManager;
-
-    /** 业务线程池 **/
-    private ExecutorService[] executorServices;
-
-    @PostConstruct
-    private void init() {
-        // 保证线程池数量是2的N次幂
-        int i = (Runtime.getRuntime().availableProcessors() >> 1) << 2;
-        this.executorServices = new ExecutorService[i];
-        for (int j = 0; j < i; j++) {
-            // 单线程池,减少加锁频率
-            this.executorServices[j] = new MonitoredThreadPoolExecutor(1, 1,
-                    0, TimeUnit.SECONDS
-                    , new ArrayBlockingQueue<>(config.getMaxQueueLength())
-                    , new NamedThreadFactory("消息分发线程池", false));
-        }
-    }
-
-    @Override
-    public void execute(Runnable runnable) {
-        this.executorServices[RandomUtil.randomInt(this.executorServices.length)].submit(runnable);
-    }
-
-    /**
-     * 根据id值来hash线程池,并提交任务
-     * @param id id
-     * @param runnable 任务
-     */
-    @Override
-    public void execute(long id, Runnable runnable) {
-        this.executorServices[calExecutorServiceArrayIndex(id)].submit(runnable);
-    }
-
-
-    /** 根据hash找到对应的线程池下标,仿HashMap **/
-    private int calExecutorServiceArrayIndex(Long id) {
-        int length = this.executorServices.length;
-        return (length - 1) & hash(id);
-    }
+    @Resource
+    private SerializedExecutorService executorService;
 
     @Override
     public void dispatch(M message, S session) {
@@ -92,7 +49,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             return;
         }
         // 交付给线程池执行
-        execute(getIdBySessionAndMessage(session, message), () -> dispatch0(session, message));
+        executorService.submit(getIdBySessionAndMessage(session, message), () -> dispatch0(session, message));
     }
 
     /**
@@ -192,9 +149,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             log.warn("关闭消息分发线程池数组");
         }
 
-        for (ExecutorService executorService : this.executorServices) {
-            executorService.shutdown();
-        }
+        executorService.shutdown();
     }
 
 

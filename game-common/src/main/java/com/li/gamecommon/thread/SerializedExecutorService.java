@@ -25,4 +25,15 @@ public interface SerializedExecutorService {
      */
     Future<?> submit(Runnable task);
 
+    /**
+     * 销毁某个id
+     * @param id
+     */
+    void destroy(long id);
+
+    /**
+     * 销毁线程池
+     */
+    void shutdown();
+
 }

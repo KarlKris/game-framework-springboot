@@ -38,19 +38,19 @@ public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void remove(AbstractEntity<?> entity) {
         hibernateTemplate.delete(entity);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void update(AbstractEntity<?> entity) {
         hibernateTemplate.update(entity);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void create(AbstractEntity<?> entity) {
         hibernateTemplate.save(entity);
     }
@@ -67,7 +67,7 @@ public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
     @Transactional(readOnly = true)
     public <E, T> List<T> query(Class<E> entity, Class<T> returnClass, String queryName, Object... params) {
         return hibernateTemplate.execute((HibernateCallback<List<T>>) session -> {
-            Query query = session.getNamedQuery(queryName);
+            Query<T> query = session.getNamedQuery(queryName);
             if (params != null) {
                 int length = params.length;
                 for (int i = 0; i < length; i++) {
@@ -83,7 +83,7 @@ public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
     @Transactional(readOnly = true)
     public <E, T> T uniqueQuery(Class<E> entityClass, Class<T> returnClass, String queryName, Object... params) {
         return hibernateTemplate.execute(session -> {
-            Query query = session.getNamedQuery(queryName);
+            Query<T> query = session.getNamedQuery(queryName);
             if (params != null) {
                 int length = params.length;
                 for (int i = 0; i < length; i++) {
@@ -91,11 +91,11 @@ public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
                 }
             }
 
-            List list = query.getResultList();
+            List<T> list = query.getResultList();
             if (CollectionUtils.isEmpty(list)) {
                 return null;
             }
-            return (T) list.get(0);
+            return list.get(0);
         });
     }
 }

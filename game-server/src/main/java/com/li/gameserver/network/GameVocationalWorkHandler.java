@@ -2,6 +2,7 @@ package com.li.gameserver.network;
 
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.engine.service.session.SessionManager;
+import com.li.gamecommon.thread.SerializedExecutorService;
 import com.li.network.message.InnerMessage;
 import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.network.session.ServerSession;
@@ -24,6 +25,8 @@ public class GameVocationalWorkHandler extends AbstractServerVocationalWorkHandl
 
     @Resource
     private SessionManager sessionManager;
+    @Resource
+    private SerializedExecutorService executorService;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, InnerMessage innerMessage) throws Exception {
@@ -49,7 +52,12 @@ public class GameVocationalWorkHandler extends AbstractServerVocationalWorkHandl
             log.debug("与客户端[{}]断开连接,注册PlayerSession[{}]", serverSession.getIp(), serverSession.getSessionId());
         }
 
-        serverSession.getIdentities().forEach(sessionManager::logout);
+        for (long id : serverSession.getIdentities()) {
+            sessionManager.logout(id);
+            executorService.destroy(id);
+        }
+
+        executorService.destroy(serverSession.getSessionId());
 
         super.channelInactive(ctx);
     }

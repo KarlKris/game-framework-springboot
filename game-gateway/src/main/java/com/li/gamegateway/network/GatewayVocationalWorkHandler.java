@@ -1,9 +1,9 @@
 package com.li.gamegateway.network;
 
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
-import com.li.engine.service.handler.DispatcherExecutorService;
 import com.li.engine.service.handler.ThreadSessionIdentityHolder;
 import com.li.engine.service.rpc.IRpcService;
+import com.li.gamecommon.thread.SerializedExecutorService;
 import com.li.network.message.OuterMessage;
 import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.network.session.PlayerSession;
@@ -27,7 +27,7 @@ import javax.annotation.Resource;
 public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHandler<OuterMessage, PlayerSession> {
 
     @Resource
-    private DispatcherExecutorService dispatcherExecutorService;
+    private SerializedExecutorService executorService;
     @Resource
     private IRpcService rpcService;
 
@@ -56,18 +56,24 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
             log.debug("与客户端[{}]断开连接,注册PlayerSession[{}]", playerSession.getIp(), playerSession.getSessionId());
         }
 
-        if (playerSession != null && playerSession.isIdentity()) {
-            long id = playerSession.getIdentity();
-            dispatcherExecutorService.execute(id, () -> {
-                ThreadSessionIdentityHolder.setIdentity(id);
-                try {
-                    // 网关服需要考虑通知游戏服更新玩家断开链接
-                    rpcService.getSendProxy(GameServerLoginController.class, id).logout(null, 0L);
-                } finally {
-                    ThreadSessionIdentityHolder.remove();
-                }
-            });
+        if (playerSession != null ) {
+            if (playerSession.isIdentity()) {
+                long id = playerSession.getIdentity();
+                executorService.submit(id, () -> {
+                    ThreadSessionIdentityHolder.setIdentity(id);
+                    try {
+                        // 网关服需要考虑通知游戏服更新玩家断开链接
+                        rpcService.getSendProxy(GameServerLoginController.class, id).logout(null, 0L);
+                    } finally {
+                        ThreadSessionIdentityHolder.remove();
+                    }
+                });
+                executorService.destroy(id);
+            }
+
+            executorService.destroy(playerSession.getSessionId());
         }
+
 
         super.channelInactive(ctx);
     }

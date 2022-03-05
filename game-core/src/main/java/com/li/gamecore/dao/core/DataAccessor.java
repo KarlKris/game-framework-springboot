@@ -36,8 +36,6 @@ public interface DataAccessor {
     /**
      * 创建数据库表数据
      * @param entity 新创建的实体
-     * @param <PK> 主键
-     * @param <T> 实体
      */
     void create(AbstractEntity<?> entity);
 }
