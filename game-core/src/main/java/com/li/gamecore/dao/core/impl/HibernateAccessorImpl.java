@@ -2,11 +2,10 @@ package com.li.gamecore.dao.core.impl;
 
 import com.li.gamecore.dao.AbstractEntity;
 import com.li.gamecore.dao.IEntity;
-import com.li.gamecore.dao.core.DataAccessor;
-import com.li.gamecore.dao.core.DataQuerier;
+import com.li.gamecore.dao.core.IDataAccessor;
+import com.li.gamecore.dao.core.DataFinder;
 import org.hibernate.query.Query;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,7 @@ import java.util.List;
  */
 @Repository
 @ConditionalOnProperty(value = "spring.datasource.url")
-public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
+public class HibernateAccessorImpl implements IDataAccessor, DataFinder {
 
     @Resource
     private HibernateTemplate hibernateTemplate;
@@ -66,8 +65,8 @@ public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
     @Override
     @Transactional(readOnly = true)
     public <E, T> List<T> query(Class<E> entity, Class<T> returnClass, String queryName, Object... params) {
-        return hibernateTemplate.execute((HibernateCallback<List<T>>) session -> {
-            Query<T> query = session.getNamedQuery(queryName);
+        return hibernateTemplate.execute(session -> {
+            Query<T> query = (Query<T>) session.getNamedQuery(queryName);
             if (params != null) {
                 int length = params.length;
                 for (int i = 0; i < length; i++) {
@@ -98,4 +97,13 @@ public class HibernateAccessorImpl implements DataAccessor, DataQuerier {
             return list.get(0);
         });
     }
+
+    @Override
+    public <T> List<T> query(final String hqlQuery, final Class<T> returnClass) {
+        return hibernateTemplate.execute(session -> {
+            Query<T> query = session.createQuery(hqlQuery, returnClass);
+            return query.getResultList();
+        });
+    }
+
 }

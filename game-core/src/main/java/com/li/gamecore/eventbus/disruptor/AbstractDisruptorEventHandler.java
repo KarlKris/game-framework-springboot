@@ -1,17 +1,30 @@
 package com.li.gamecore.eventbus.disruptor;
 
 
+import com.li.gamecommon.thread.SerializedExecutorService;
 import com.li.gamecore.eventbus.event.DisruptorEvent;
+import com.li.gamecore.eventbus.event.IdentityEvent;
+
+import javax.annotation.Resource;
 
 /**
  * @author li-yuanwen
  */
 public abstract class AbstractDisruptorEventHandler<B> implements DisruptorEventHandler<B> {
 
+    @Resource
+    private SerializedExecutorService executorService;
 
     @Override
     public void handleEvent(DisruptorEvent<B> event) {
-        doHandlerEvent(event.getBody());
+        final B body = event.getBody();
+        if (body instanceof IdentityEvent) {
+            // 回到业务线程池执行逻辑,减少并发
+            executorService.submit(((IdentityEvent) body).getIdentity()
+                    , () -> doHandlerEvent(body));
+        } else {
+            doHandlerEvent(body);
+        }
     }
 
 

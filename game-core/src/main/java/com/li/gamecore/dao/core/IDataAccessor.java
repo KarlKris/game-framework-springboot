@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 数据库访问接口
  * @author li-yuanwen
  */
-public interface DataAccessor {
+public interface IDataAccessor {
 
     /**
      * 读取数据库表数据

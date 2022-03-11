@@ -15,7 +15,7 @@ import java.util.List;
 public abstract class AbstractComposite extends AbstractBehaviour implements Composite {
 
     /** 子节点 **/
-    private List<Behaviour> children = new LinkedList<>();
+    private final List<Behaviour> children = new LinkedList<>();
 
     @Override
     public void addChild(Behaviour behaviour) {

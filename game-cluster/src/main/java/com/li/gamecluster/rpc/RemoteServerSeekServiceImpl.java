@@ -6,19 +6,20 @@ import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import com.li.gamecommon.rpc.RemoteServerSeekService;
 import com.li.gamecommon.rpc.model.Address;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
+ * 远程服务查询接口
  * @author li-yuanwen
  * @date 2021/8/8 16:19
- * 远程服务查询接口
  **/
 @Service
 @Slf4j
 public class RemoteServerSeekServiceImpl implements RemoteServerSeekService {
 
-    @Autowired
+    @Resource
     private ZkDiscoveryService service;
 
 

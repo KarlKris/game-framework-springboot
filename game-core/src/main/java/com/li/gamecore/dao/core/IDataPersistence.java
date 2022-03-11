@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author li-yuanwen
  * @date 2022/1/25
  */
-public interface DataPersistence {
+public interface IDataPersistence {
 
 
     /**

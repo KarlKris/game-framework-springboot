@@ -99,12 +99,10 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
 
         // 方法调用上下文
         MethodInvokeCtx methodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(protocol);
-        if (methodInvokeCtx == null) {
+        if (methodInvokeCtx == null && !forwardMessage(session, message)) {
             // RPC
-            if (!forwardMessage(session, message)) {
-                response(session, message, errorSocketProtocol()
-                        , serializer.serialize(createErrorCodeBody(ServerErrorCode.INVALID_OP)));
-            }
+            response(session, message, errorSocketProtocol()
+                    , serializer.serialize(createErrorCodeBody(ServerErrorCode.INVALID_OP)));
             return;
         }
 

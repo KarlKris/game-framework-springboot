@@ -3,10 +3,10 @@ package com.li.gamecore.dao.core;
 import java.util.List;
 
 /**
- * @author li-yuanwen
  * 数据库SQL查询器接口
+ * @author li-yuanwen
  */
-public interface DataQuerier {
+public interface DataFinder {
 
 
     /**
@@ -41,5 +41,15 @@ public interface DataQuerier {
      * @return 某个字段
      */
     <E, T> T uniqueQuery(Class<E> entityClass, Class<T> returnClass, String queryName, Object... params);
+
+
+    /**
+     * 根据给定的查询语句去查询实体数据
+     * @param returnClass 返回对象类型
+     * @param hqlQuery hql查询语句
+     * @param <T> 返回对象类型
+     * @return 查询结果集
+     */
+    <T> List<T> query(final String hqlQuery, final Class<T> returnClass);
 
 }

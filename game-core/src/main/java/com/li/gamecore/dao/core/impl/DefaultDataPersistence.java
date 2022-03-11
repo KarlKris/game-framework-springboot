@@ -4,8 +4,8 @@ import cn.hutool.core.thread.NamedThreadFactory;
 import com.li.gamecommon.event.DataBaseCloseEvent;
 import com.li.gamecommon.thread.MonitoredScheduledThreadPoolExecutor;
 import com.li.gamecore.dao.AbstractEntity;
-import com.li.gamecore.dao.core.DataAccessor;
-import com.li.gamecore.dao.core.DataPersistence;
+import com.li.gamecore.dao.core.IDataAccessor;
+import com.li.gamecore.dao.core.IDataPersistence;
 import com.li.gamecore.dao.model.DataStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +25,17 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-@ConditionalOnBean(DataAccessor.class)
-public class DataPersistenceImpl implements DataPersistence, ApplicationListener<DataBaseCloseEvent> {
+@ConditionalOnBean(IDataAccessor.class)
+public class DefaultDataPersistence implements IDataPersistence, ApplicationListener<DataBaseCloseEvent> {
 
     /** 待回写队列 **/
     private final LinkedBlockingQueue<AbstractEntity<?>> queue = new LinkedBlockingQueue<>();
     /** 回写线程池 **/
     private final ScheduledFuture<?> scheduledFuture;
     /** 数据库访问 **/
-    private final DataAccessor dataAccessor;
+    private final IDataAccessor dataAccessor;
 
-    public DataPersistenceImpl(@Autowired DataAccessor dataAccessor) {
+    public DefaultDataPersistence(@Autowired IDataAccessor dataAccessor) {
         this.dataAccessor = dataAccessor;
         this.scheduledFuture = new MonitoredScheduledThreadPoolExecutor(1
                 , new NamedThreadFactory("数据库回写线程", false))
@@ -72,4 +72,5 @@ public class DataPersistenceImpl implements DataPersistence, ApplicationListener
         consume();
         log.warn("数据库回写线程停止");
     }
+
 }

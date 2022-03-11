@@ -4,7 +4,7 @@ import com.li.gamecommon.exception.EnhanceException;
 import com.li.gamecommon.utils.ObjectsUtil;
 import com.li.gamecore.dao.AbstractEntity;
 import com.li.gamecore.dao.anno.Commit;
-import com.li.gamecore.dao.core.DataPersistence;
+import com.li.gamecore.dao.core.IDataPersistence;
 import javassist.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,7 +36,7 @@ public class JavassistProxyFactory {
     private final ConcurrentHashMap<String, Constructor<? extends AbstractEntity>> constructorHolder = new ConcurrentHashMap<>();
 
     @Resource
-    private DataPersistence persistence;
+    private IDataPersistence persistence;
 
     /**
      * 创建实体增强对象
@@ -45,7 +45,7 @@ public class JavassistProxyFactory {
         Class<? extends AbstractEntity> entityClass = entity.getClass();
         Constructor<? extends AbstractEntity> constructor = constructorHolder.computeIfAbsent(entityClass.getName(), k -> {
             try {
-                return buildEnhanceClass(entityClass).getConstructor(entityClass, DataPersistence.class);
+                return buildEnhanceClass(entityClass).getConstructor(entityClass, IDataPersistence.class);
             } catch (NotFoundException | CannotCompileException | NoSuchMethodException | ClassNotFoundException e) {
                 log.error("增强类[{}]出现未知异常", entityClass.getSimpleName(), e);
                 throw new EnhanceException(entity, e);
@@ -68,7 +68,7 @@ public class JavassistProxyFactory {
         ctClass.setSuperclass(superClass);
 
         // 增加持久化Field
-        CtField persistField = new CtField(classPool.get(DataPersistence.class.getName()), PERSISTER_FIELD, ctClass);
+        CtField persistField = new CtField(classPool.get(IDataPersistence.class.getName()), PERSISTER_FIELD, ctClass);
         persistField.setModifiers(Modifier.PRIVATE + Modifier.FINAL);
         ctClass.addField(persistField);
         // 增加实际实体
@@ -77,7 +77,7 @@ public class JavassistProxyFactory {
         ctClass.addField(entityField);
 
         // 增加构造器
-        CtConstructor ctConstructor = new CtConstructor(toCtClassArray(tClass, DataPersistence.class), ctClass);
+        CtConstructor ctConstructor = new CtConstructor(toCtClassArray(tClass, IDataPersistence.class), ctClass);
 
         String constructorBody = "{ this." + ENTITY_FIELD + "=$1;" +
                 "this." + PERSISTER_FIELD + "=$2;}";

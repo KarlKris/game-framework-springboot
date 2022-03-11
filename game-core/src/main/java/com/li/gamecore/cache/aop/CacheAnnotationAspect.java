@@ -3,8 +3,9 @@ package com.li.gamecore.cache.aop;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.li.gamecommon.utils.ObjectsUtil;
 import com.li.gamecore.cache.anno.CachedPut;
-import com.li.gamecore.cache.anno.CachedRemove;
+import com.li.gamecore.cache.anno.CachedEvict;
 import com.li.gamecore.cache.anno.Cachedable;
 import com.li.gamecore.cache.core.cache.Cache;
 import com.li.gamecore.cache.core.manager.CacheManager;
@@ -47,7 +48,7 @@ public class CacheAnnotationAspect {
     private ObjectMapper objectMapper;
 
     /** 缓存移除 **/
-    @Pointcut(value = "@annotation(com.li.gamecore.cache.anno.CachedRemove)")
+    @Pointcut(value = "@annotation(com.li.gamecore.cache.anno.CachedEvict)")
     public void cachedRemovePointcut() {
     }
 
@@ -62,12 +63,12 @@ public class CacheAnnotationAspect {
     }
 
     /** 缓存移除 **/
-    @After("cachedRemovePointcut()")
-    public void afterRemoveInvoke(JoinPoint jp) throws NoSuchMethodException, JsonProcessingException {
+    @Before("cachedRemovePointcut()")
+    public void beforeRemoveInvoke(JoinPoint jp) throws NoSuchMethodException, JsonProcessingException {
         Method targetMethod = getTargetMethod(jp);
-        CachedRemove cachedRemove = AnnotationUtils.findAnnotation(targetMethod, CachedRemove.class);
+        CachedEvict cachedEvict = AnnotationUtils.findAnnotation(targetMethod, CachedEvict.class);
 
-        String cacheName = cachedRemove.name();
+        String cacheName = cachedEvict.name();
         EvaluationContext evaluationContext = null;
         if (cacheName.startsWith(SPEL_PREFIX)) {
             Object[] args = jp.getArgs();
@@ -76,9 +77,9 @@ public class CacheAnnotationAspect {
         }
 
         // 移除缓存
-        Cache cache = cacheManager.getCache(cachedRemove.type(), cacheName);
+        Cache cache = cacheManager.getCache(cachedEvict.type(), cacheName);
         if (cache != null) {
-            String keySpEl = cachedRemove.key();
+            String keySpEl = cachedEvict.key();
             String key = keySpEl;
             if (keySpEl.startsWith(SPEL_PREFIX)) {
                 if (evaluationContext == null) {
@@ -208,14 +209,8 @@ public class CacheAnnotationAspect {
 
 
     private String getSpElValue(String spEl, EvaluationContext evaluationContext) throws JsonProcessingException {
-        String key;
         Expression expression = parser.parseExpression(spEl);
         Object expressionValue = expression.getValue(evaluationContext);
-        if (expressionValue instanceof String) {
-            key = (String) expressionValue;
-        }else {
-            key = objectMapper.writeValueAsString(expressionValue);
-        }
-        return key;
+        return ObjectsUtil.toJsonStr(objectMapper, expressionValue);
     }
 }

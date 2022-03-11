@@ -4,7 +4,7 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.li.engine.channelhandler.common.FirewallService;
 import com.li.gamecommon.exception.BadRequestException;
-import com.li.gamecore.cache.anno.CachedRemove;
+import com.li.gamecore.cache.anno.CachedEvict;
 import com.li.gamecore.cache.config.CachedType;
 import com.li.gameserver.modules.account.manager.Account;
 import com.li.gameserver.modules.account.manager.AccountManager;
@@ -72,7 +72,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @CachedRemove(type = CachedType.REMOTE, name = CacheNameConstants.IDENTITY_TO_ACCOUNT_VO, key = "#identity")
+    @CachedEvict(type = CachedType.REMOTE, name = CacheNameConstants.IDENTITY_TO_ACCOUNT_VO, key = "#identity")
     public void levelUp(long identity) {
         Account account = checkAccountAndThrow(identity);
         accountManager.levelUp(account);

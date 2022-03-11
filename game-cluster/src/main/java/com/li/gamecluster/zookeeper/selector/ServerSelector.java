@@ -2,13 +2,14 @@ package com.li.gamecluster.zookeeper.selector;
 
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import com.li.gamecluster.zookeeper.selector.impl.BalanceServerSelector;
+import com.li.gamecluster.zookeeper.selector.impl.HashServerSelector;
 import com.li.gamecluster.zookeeper.selector.impl.IdentityServerSelector;
 import com.li.gamecommon.rpc.model.Address;
 
 /**
+ * 服务集群选择器
  * @author li-yuanwen
  * @date 2021/8/8 10:41
- * 服务集群选择器
  **/
 public interface ServerSelector {
 
@@ -16,6 +17,8 @@ public interface ServerSelector {
     ServerSelector BALANCE_SELECTOR = new BalanceServerSelector();
     /** 身份标识选择器 **/
     ServerSelector IDENTITY_SELECTOR = new IdentityServerSelector();
+    /** 标识哈希选择器 **/
+    ServerSelector HASH_SELECTOR = new HashServerSelector();
 
 
     /**

@@ -20,7 +20,6 @@ import java.util.Date;
         @NamedQuery(name = Account.ALL_ACCOUNT_NAME, query = "SELECT a.accountName FROM Account AS a"),
         @NamedQuery(name = Account.GET_ID_BY_ACCOUNT_NAME, query = "SELECT a.id FROM Account AS a WHERE a.accountName = ?0")
 })
-
 @Getter
 public class Account extends AbstractEntity<Long> {
 

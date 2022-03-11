@@ -8,12 +8,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 缓存移除
  * @author li-yuanwen
- * 调用有此注解的方法可以删除一个缓存
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CachedRemove {
+public @interface CachedEvict {
 
     /** 缓存类型 **/
     CachedType type() default CachedType.LOCAL;
