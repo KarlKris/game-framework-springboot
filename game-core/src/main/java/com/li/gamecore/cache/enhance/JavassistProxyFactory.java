@@ -1,15 +1,13 @@
-package com.li.gamecore.dao.javassist;
+package com.li.gamecore.cache.enhance;
 
 import com.li.gamecommon.exception.EnhanceException;
 import com.li.gamecommon.utils.ObjectsUtil;
 import com.li.gamecore.dao.AbstractEntity;
 import com.li.gamecore.dao.anno.Commit;
-import com.li.gamecore.dao.core.IDataPersistence;
+import com.li.gamecore.dao.service.IDataPersistence;
 import javassist.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
@@ -20,15 +18,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.li.gamecore.dao.javassist.JavassistConstants.*;
+import static com.li.gamecore.cache.enhance.EnhanceConstants.*;
 
 /**
  * 基于Javassist的代理工厂
  * @author li-yuanwen
  */
 @Slf4j
-@Component
-@ConditionalOnProperty(value = "spring.datasource.url")
+@Deprecated
 public class JavassistProxyFactory {
 
     private final ClassPool classPool = ClassPool.getDefault();
@@ -41,7 +38,7 @@ public class JavassistProxyFactory {
     /**
      * 创建实体增强对象
      **/
-    public <PK extends Serializable, T extends AbstractEntity<PK>> T transform(T entity) {
+    public <PK extends Serializable & Comparable<PK>, T extends AbstractEntity<PK>> T transform(T entity) {
         Class<? extends AbstractEntity> entityClass = entity.getClass();
         Constructor<? extends AbstractEntity> constructor = constructorHolder.computeIfAbsent(entityClass.getName(), k -> {
             try {
@@ -68,7 +65,7 @@ public class JavassistProxyFactory {
         ctClass.setSuperclass(superClass);
 
         // 增加持久化Field
-        CtField persistField = new CtField(classPool.get(IDataPersistence.class.getName()), PERSISTER_FIELD, ctClass);
+        CtField persistField = new CtField(classPool.get(IDataPersistence.class.getName()), PERSISTENCE_FIELD, ctClass);
         persistField.setModifiers(Modifier.PRIVATE + Modifier.FINAL);
         ctClass.addField(persistField);
         // 增加实际实体
@@ -80,7 +77,7 @@ public class JavassistProxyFactory {
         CtConstructor ctConstructor = new CtConstructor(toCtClassArray(tClass, IDataPersistence.class), ctClass);
 
         String constructorBody = "{ this." + ENTITY_FIELD + "=$1;" +
-                "this." + PERSISTER_FIELD + "=$2;}";
+                "this." + PERSISTENCE_FIELD + "=$2;}";
         ctConstructor.setBody(constructorBody);
         ctConstructor.setModifiers(Modifier.PUBLIC);
         ctClass.addConstructor(ctConstructor);
@@ -158,11 +155,11 @@ public class JavassistProxyFactory {
 
         if (returnType == void.class) {
             ctMethod.setBody("{" + ENTITY_FIELD + "." + methodName + "($$); " +
-                    "" + PERSISTER_FIELD +".commit(" + ENTITY_FIELD + ");}");
+                    "" + PERSISTENCE_FIELD +".commit(" + ENTITY_FIELD + ");}");
         } else {
             String returnClass = returnType.isArray() ? toArrayTypeDeclared(returnType) : returnType.getName();
             ctMethod.setBody("{" + returnClass + " ret = " + ENTITY_FIELD + "." + methodName + "($$); "
-                    + PERSISTER_FIELD +".commit(" + ENTITY_FIELD + ");"
+                    + PERSISTENCE_FIELD +".commit(" + ENTITY_FIELD + ");"
                     + "return ret;}");
         }
 

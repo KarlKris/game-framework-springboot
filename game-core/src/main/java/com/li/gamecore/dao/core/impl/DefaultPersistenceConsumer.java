@@ -1,4 +1,4 @@
-﻿package com.li.gamecore.dao.core.impl;
+package com.li.gamecore.dao.core.impl;
 
 import com.li.gamecore.dao.AbstractEntity;
 import com.li.gamecore.dao.core.IDataAccessor;
@@ -9,9 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,10 +29,16 @@ public class DefaultPersistenceConsumer implements IPersistenceConsumer {
     private final Queue<AbstractEntity<?>> queue;
     /** 持久化后的监听器 **/
     private final List<IPersistenceListener> listeners;
+    /** 线程 **/
+    private final ScheduledExecutorService executorService;
+    /** 间隔(秒) **/
+    private final int intervalSecond;
 
     /** 待持久化的数据 **/
     private final Map<Class<?>, Map<Object, AbstractEntity<?>>> class2EntityQueue;
 
+    /** 状态 **/
+    private volatile boolean running = true;
     /** 持久化成功次数 **/
     private int successCount = 0;
     /** 持久化失败次数 **/
@@ -42,16 +46,16 @@ public class DefaultPersistenceConsumer implements IPersistenceConsumer {
 
 
     public DefaultPersistenceConsumer(IDataAccessor dataAccessor, ScheduledExecutorService executorService
-            , List<IPersistenceListener> listeners, int intervalSecond) {
+            , int intervalSecond, List<IPersistenceListener> listeners) {
         this.dataAccessor = dataAccessor;
         this.listeners = listeners;
-
+        this.intervalSecond = intervalSecond;
         this.queue = new LinkedBlockingQueue<>();
         this.class2EntityQueue = new ConcurrentHashMap<>();
-
+        this.executorService = executorService;
 
         // 开始执行回写任务
-        executorService.scheduleWithFixedDelay(this, intervalSecond, intervalSecond, TimeUnit.SECONDS);
+        startScheduler();
 
     }
 
@@ -72,6 +76,44 @@ public class DefaultPersistenceConsumer implements IPersistenceConsumer {
             Map<Object, AbstractEntity<?>> map = this.class2EntityQueue.computeIfAbsent(entity.getClass()
                     , k -> new ConcurrentHashMap<>(64));
             map.put(entity.getId(), entity);
+        }
+    }
+
+    @Override
+    public <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> Map<PK, T> findAllByClass(Class<T> tClass) {
+        Map<Object, AbstractEntity<?>> map = class2EntityQueue.get(tClass);
+        if (CollectionUtils.isEmpty(map)) {
+            return Collections.emptyMap();
+        }
+        Map<PK, T> copyMap = new HashMap<>(map.size());
+        for (Map.Entry<Object, AbstractEntity<?>> entry : map.entrySet()) {
+            PK key = (PK) entry.getKey();
+            T value = (T) entry.getValue();
+            copyMap.put(key, value);
+        }
+        return copyMap;
+    }
+
+    @Override
+    public void stop() {
+        this.running = false;
+
+        log.warn("Class[{}] 持久化成功次数:{}, 失败次数:{}", this.getClass(), successCount, failureCount);
+    }
+
+    private void startScheduler() {
+        if (!running) {
+            return;
+        }
+        scheduleWithFixedDelay(this);
+    }
+
+
+    private void scheduleWithFixedDelay(Runnable runnable) {
+        try {
+            executorService.schedule(this, intervalSecond, TimeUnit.SECONDS);
+        } finally {
+            startScheduler();
         }
     }
 

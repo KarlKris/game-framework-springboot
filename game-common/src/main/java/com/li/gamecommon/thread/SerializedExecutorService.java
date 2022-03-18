@@ -1,4 +1,4 @@
-﻿package com.li.gamecommon.thread;
+package com.li.gamecommon.thread;
 
 import java.util.concurrent.Future;
 

@@ -1,4 +1,4 @@
-﻿package com.li.gameserver.config;
+package com.li.gameserver.config;
 
 import com.li.gamecommon.thread.GenericSerializedExecutorService;
 import com.li.gamecommon.thread.SerializedExecutorService;

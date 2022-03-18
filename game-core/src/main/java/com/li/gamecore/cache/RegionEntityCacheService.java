@@ -1,7 +1,6 @@
-﻿package com.li.gamecore.cache;
+package com.li.gamecore.cache;
 
 import com.li.gamecore.cache.anno.Cachedable;
-import com.li.gamecore.cache.model.RegionEntityContext;
 import com.li.gamecore.dao.AbstractRegionEntity;
 
 import java.io.Serializable;
@@ -41,7 +40,7 @@ public interface RegionEntityCacheService {
      */
     <PK extends Comparable<PK> & Serializable
             , FK extends Comparable<FK> & Serializable
-            , T extends AbstractRegionEntity<PK, FK>> void create(T entity);
+            , T extends AbstractRegionEntity<PK, FK>> void createRegionEntity(T entity);
 
 
     /**

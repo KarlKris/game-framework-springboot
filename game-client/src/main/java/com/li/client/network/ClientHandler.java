@@ -1,4 +1,4 @@
-﻿package com.li.client.network;
+package com.li.client.network;
 
 import com.li.network.message.OuterMessage;
 import io.netty.channel.ChannelHandler;

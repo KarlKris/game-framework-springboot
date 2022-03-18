@@ -99,6 +99,7 @@ public class HibernateAccessorImpl implements IDataAccessor, DataFinder {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public <T> List<T> query(final String hqlQuery, final Class<T> returnClass) {
         return hibernateTemplate.execute(session -> {
             Query<T> query = session.createQuery(hqlQuery, returnClass);

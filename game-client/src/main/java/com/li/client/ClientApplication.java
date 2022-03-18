@@ -1,7 +1,7 @@
-﻿package com.li.client;
+package com.li.client;
 
 import de.felixroske.jfxsupport.AbstractJavaFxApplicationSupport;
-import org.springframework.boot.SpringApplication;
+import javafx.application.Application;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -14,6 +14,6 @@ import org.springframework.context.annotation.ComponentScan;
 public class ClientApplication extends AbstractJavaFxApplicationSupport {
 
     public static void main(String[] args) {
-        SpringApplication.run(ClientApplication.class, args);
+        Application.launch(args);
     }
 }

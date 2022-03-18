@@ -33,7 +33,7 @@ public interface Cache {
      * 查询缓存
      * @param key 缓存key
      * @param tClass /
-     * @return 缓存内容
+     * @return 缓存内容 or null
      */
     <T> T get(String key, Class<T> tClass);
 

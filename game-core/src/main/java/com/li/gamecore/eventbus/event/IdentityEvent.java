@@ -1,4 +1,4 @@
-﻿package com.li.gamecore.eventbus.event;
+package com.li.gamecore.eventbus.event;
 
 /**
  * 玩家事件

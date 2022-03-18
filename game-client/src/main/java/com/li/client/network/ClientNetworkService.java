@@ -1,4 +1,4 @@
-﻿package com.li.client.network;
+package com.li.client.network;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;

@@ -1,9 +1,11 @@
-﻿package com.li.gamecore.dao;
+package com.li.gamecore.dao;
 
 import com.li.gamecore.dao.model.DataStatus;
 import org.springframework.data.annotation.Transient;
 
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -11,14 +13,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author li-yuanwen
  * @date 2022/1/25
  */
-public abstract class AbstractEntity<PK> implements IEntity<PK> {
+@MappedSuperclass
+public abstract class AbstractEntity<PK extends Comparable<PK> & Serializable> implements IEntity<PK> {
 
     /** 实体主键 **/
     @Id
-    private PK id;
+    protected PK id;
 
     @Transient
-    private final AtomicInteger status;
+    protected final AtomicInteger status;
 
     /** 从db加载数据时,会自动调用无参构造函数,不允许手动调用 **/
     public AbstractEntity() {
@@ -52,4 +55,7 @@ public abstract class AbstractEntity<PK> implements IEntity<PK> {
         return this.status.compareAndSet(oldStatus, newStatus);
     }
 
+    public void setDeleteStatus() {
+        this.status.set(DataStatus.DELETE.getCode());
+    }
 }

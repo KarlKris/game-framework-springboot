@@ -1,4 +1,4 @@
-package com.li.gamecore.dao.core;
+package com.li.gamecore.dao.service;
 
 import com.li.gamecore.dao.AbstractEntity;
 
@@ -6,11 +6,19 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * 持久化队列消费器
+ * 数据持久化接口
  * @author li-yuanwen
- * @date 2022/3/10
+ * @date 2022/1/25
  */
-public interface IPersistenceConsumer extends Runnable {
+public interface IDataPersistence {
+
+
+    /**
+     * 回写到数据库
+     * @param entity 回写内容
+     * @param <PK> /
+     */
+    <PK extends Comparable<PK> & Serializable> void commit(AbstractEntity<PK> entity);
 
 
     /**
@@ -19,17 +27,10 @@ public interface IPersistenceConsumer extends Runnable {
      * @param tClass 实体数据
      * @param <PK> 主键类型
      * @param <T> 实体数据实际类型
-     * @return null or　对应的实体数据
+     * @return null or　对应的实体数据(有可能是待删除的实体,通过entity.isDeleteStatus()判断)
      */
-    <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T findById(PK id, Class<T> tClass);
-
-
-    /**
-     * 向消费器提交需持久化的实体
-     * @param entity 实体数据
-     */
-    <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> void commit(T entity);
-
+    <PK extends Comparable<PK> & Serializable
+            , T extends AbstractEntity<PK>> T findById(PK id, Class<T> tClass);
 
     /**
      * 查询某个类型的持久化数据集
@@ -40,11 +41,5 @@ public interface IPersistenceConsumer extends Runnable {
      */
     <PK extends Comparable<PK> & Serializable
             , T extends AbstractEntity<PK>> Map<PK, T> findAllByClass(Class<T> tClass);
-
-
-    /**
-     * 停止持久化
-     */
-    void stop();
 
 }

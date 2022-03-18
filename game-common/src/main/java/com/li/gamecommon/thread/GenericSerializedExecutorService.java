@@ -1,4 +1,4 @@
-﻿package com.li.gamecommon.thread;
+package com.li.gamecommon.thread;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 

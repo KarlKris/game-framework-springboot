@@ -1,4 +1,4 @@
-﻿package com.li.client.controller;
+package com.li.client.controller;
 
 import com.li.client.network.ClientNetworkService;
 import de.felixroske.jfxsupport.FXMLController;

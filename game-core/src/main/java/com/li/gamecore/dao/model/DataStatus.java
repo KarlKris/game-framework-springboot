@@ -1,4 +1,4 @@
-﻿package com.li.gamecore.dao.model;
+package com.li.gamecore.dao.model;
 
 /**
  * 数据状态

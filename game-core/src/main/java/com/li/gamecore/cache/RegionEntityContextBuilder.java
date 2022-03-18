@@ -1,6 +1,5 @@
-﻿package com.li.gamecore.cache;
+package com.li.gamecore.cache;
 
-import com.li.gamecore.cache.model.RegionEntityContext;
 import com.li.gamecore.dao.AbstractRegionEntity;
 
 import java.io.Serializable;

@@ -1,7 +1,6 @@
 package com.li.gamecore.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.li.gamecore.cache.core.pubsub.CacheOfPubSubMessageListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -43,8 +42,7 @@ public class RedisConfig {
 
 
     @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory
-            , CacheOfPubSubMessageListener cacheOfPubSubMessageListener) {
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
         return container;

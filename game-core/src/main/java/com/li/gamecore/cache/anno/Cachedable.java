@@ -9,8 +9,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 用于某个方法，希望这个方法的返回值添加缓存，此方法被调用的时候，如果有缓存，此方法不执行
  * @author li-yuanwen
- * 用于某个方法，希望这个方法添加缓存，此方法被调用的时候，如果有缓存，此方法不执行
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -41,5 +41,5 @@ public @interface Cachedable {
     short maximum() default CacheConstants.DEFAULT_MAXIMUM;
 
     /** 失效时间(分钟) **/
-    short expire() default CacheConstants.DEFAULT_EXPIRE_SECOND;
+    short expire() default CacheConstants.DOUBLE_DEFAULT_EXPIRE_SECOND;
 }

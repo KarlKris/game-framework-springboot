@@ -1,4 +1,4 @@
-﻿package com.li.client.controller;
+package com.li.client.controller;
 
 import de.felixroske.jfxsupport.FXMLController;
 import lombok.extern.slf4j.Slf4j;

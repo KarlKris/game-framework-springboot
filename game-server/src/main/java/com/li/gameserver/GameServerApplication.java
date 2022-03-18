@@ -1,12 +1,12 @@
 package com.li.gameserver;
 
+import com.li.gamecommon.resource.anno.ResourceScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@SpringBootApplication
-@ComponentScan(basePackages = {"com.li"})
+@SpringBootApplication(scanBasePackages = {"com.li"})
+@ResourceScan(value = {"com.li.gameserver"}, rootPath = "")
 @EnableTransactionManagement
 public class GameServerApplication {
 

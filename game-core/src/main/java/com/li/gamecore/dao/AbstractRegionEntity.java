@@ -1,4 +1,4 @@
-﻿package com.li.gamecore.dao;
+package com.li.gamecore.dao;
 
 import java.io.Serializable;
 
@@ -7,7 +7,8 @@ import java.io.Serializable;
  * @author li-yuanwen
  * @date 2022/3/8
  */
-public abstract class AbstractRegionEntity<PK, FK extends Comparable<FK> & Serializable> extends AbstractEntity<PK> {
+public abstract class AbstractRegionEntity<PK extends Comparable<PK> & Serializable
+        , FK extends Comparable<FK> & Serializable> extends AbstractEntity<PK> {
 
     /** 外键 **/
     private FK owner;

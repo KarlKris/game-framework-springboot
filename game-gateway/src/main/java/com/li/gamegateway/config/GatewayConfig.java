@@ -1,4 +1,4 @@
-﻿package com.li.gamegateway.config;
+package com.li.gamegateway.config;
 
 import com.li.gamecommon.thread.GenericSerializedExecutorService;
 import com.li.gamecommon.thread.SerializedExecutorService;

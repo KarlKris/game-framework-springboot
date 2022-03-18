@@ -1,4 +1,4 @@
-﻿package com.li.client.controller;
+package com.li.client.controller;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;

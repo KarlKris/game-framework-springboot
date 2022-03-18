@@ -1,4 +1,4 @@
-﻿package com.li.client.network;
+package com.li.client.network;
 
 import com.li.network.handler.MessageEncoder;
 import io.netty.channel.ChannelInitializer;

@@ -1,4 +1,4 @@
-﻿package com.li.gamecluster.zookeeper.selector.impl;
+package com.li.gamecluster.zookeeper.selector.impl;
 
 import com.li.gamecluster.zookeeper.model.ServiceDiscoveryNode;
 import com.li.gamecluster.zookeeper.selector.ServerSelector;

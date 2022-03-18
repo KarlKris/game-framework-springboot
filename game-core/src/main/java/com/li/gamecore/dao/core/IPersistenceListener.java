@@ -1,4 +1,4 @@
-﻿package com.li.gamecore.dao.core;
+package com.li.gamecore.dao.core;
 
 import com.li.gamecore.dao.AbstractEntity;
 

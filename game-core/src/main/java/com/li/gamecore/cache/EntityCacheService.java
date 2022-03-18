@@ -1,6 +1,7 @@
-﻿package com.li.gamecore.cache;
+package com.li.gamecore.cache;
 
 import com.li.gamecore.cache.anno.CachedEvict;
+import com.li.gamecore.cache.anno.CachedPut;
 import com.li.gamecore.cache.anno.Cachedable;
 import com.li.gamecore.dao.AbstractEntity;
 import com.li.gamecore.dao.EntityBuilder;
@@ -38,6 +39,16 @@ public interface EntityCacheService {
     @Cachedable(name = "#tClass.getName()", key = "#id")
     <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T loadOrCreate(PK id, Class<T> tClass
             , EntityBuilder<PK, T> entityBuilder);
+
+    /**
+     * 创建实体并加入到缓存中
+     * @param entity 创建实体
+     * @param <PK> 标识类型
+     * @param <T> 实体类型
+     * @return 数据库实体
+     */
+    @CachedPut(name = "#entity.getClass().getName()", key = "#entity.getId()")
+    <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T createEntity(T entity);
 
     /**
      * 从缓存中移除实体,并异步数据库中的数据

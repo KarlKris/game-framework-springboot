@@ -35,6 +35,6 @@ public @interface CachedPut {
     short maximum() default CacheConstants.DEFAULT_MAXIMUM;
 
     /** 失效时间(秒)  **/
-    short expire() default CacheConstants.DEFAULT_EXPIRE_SECOND;
+    short expire() default CacheConstants.DOUBLE_DEFAULT_EXPIRE_SECOND;
 
 }

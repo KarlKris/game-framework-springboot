@@ -1,9 +1,9 @@
 package com.li.gameserver.modules.account.manager;
 
 import com.li.gamecommon.common.MultiServerIdGenerator;
+import com.li.gamecore.cache.EntityCacheService;
 import com.li.gamecore.cache.anno.Cachedable;
 import com.li.gamecore.dao.core.DataFinder;
-import com.li.gamecore.dao.service.EntityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import java.util.Collection;
 public class AccountManager {
 
     @Resource
-    private EntityService entityService;
+    private EntityCacheService cacheService;
     @Resource
     private DataFinder dataFinder;
     @Resource
@@ -29,11 +29,11 @@ public class AccountManager {
     }
 
     public Account create(String accountName, int channel) {
-        return entityService.create(Account.of(idGenerator.nextId(), channel, accountName));
+        return cacheService.createEntity(Account.of(idGenerator.nextId(), channel, accountName));
     }
 
     public Account load(long id) {
-        return entityService.load(id, Account.class);
+        return cacheService.loadEntity(id, Account.class);
     }
 
     public void levelUp(Account account) {

@@ -5,6 +5,7 @@ import com.li.engine.service.push.IPushExecutor;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.engine.service.rpc.future.SocketFuture;
 import com.li.gamecommon.exception.SerializeFailException;
+import com.li.gamecommon.thread.SerializedExecutorService;
 import com.li.network.message.IMessage;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.OuterMessage;
@@ -39,9 +40,9 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
     @Resource
     private SocketFutureManager socketFutureManager;
     @Resource
-    private IPushExecutor IPushExecutor;
+    private IPushExecutor pushExecutor;
     @Resource
-    private DispatcherExecutorService dispatcherExecutorService;
+    private SerializedExecutorService executorService;
 
 
     @Override
@@ -102,14 +103,14 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
     }
 
     private void handlePushMessage(IMessage message) {
-        dispatcherExecutorService.execute(() -> {
+        executorService.submit(() -> {
             MethodInvokeCtx methodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(message.getProtocol());
             if (methodInvokeCtx == null) {
                 // 无处理,即仅是中介,直接推送至外网
                 Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
                 PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
 
-                IPushExecutor.pushToOuter(pushResponse, message.getProtocol());
+                pushExecutor.pushToOuter(pushResponse, message.getProtocol());
                 return;
             }
 
