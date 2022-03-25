@@ -10,6 +10,6 @@ public interface StorageChangeListener {
     /**
      * 变更通知
      */
-    void notifyChange();
+    void notifyChange(ResourceStorage<?, ?> storage);
 
 }

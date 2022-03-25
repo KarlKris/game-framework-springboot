@@ -3,6 +3,7 @@ package com.li.gamecommon.resource.core;
 import cn.hutool.core.util.ArrayUtil;
 import com.li.gamecommon.resource.anno.ResourceObj;
 import com.li.gamecommon.resource.anno.ResourceScan;
+import com.li.gamecommon.resource.storage.StorageManagerFactoryBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.beans.BeansException;
@@ -11,11 +12,12 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.*;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.event.EventListenerFactory;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -23,7 +25,9 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -36,17 +40,24 @@ import java.util.Set;
  */
 @Slf4j
 @Component
-public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProcessor {
+public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
     private final Set<Integer> registriesPostProcessed = new HashSet<>();
 
     /** 默认资源匹配符 */
-    protected static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+    protected static final String DEFAULT_RESOURCE_PATTERN = "/**/*.class";
 
     /** 资源搜索分析器，由它来负责检索EAO接口 */
     private final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
     /** 类的元数据读取器，由它来负责读取类上的注释信息 */
     private final MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+
+    private Environment environment;
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
@@ -78,12 +89,37 @@ public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProces
         if (ArrayUtil.isEmpty(basePackages)) {
             return;
         }
-        // 文件路径
-        String rootPath = attributes.getString("rootPath");
+
+        ManagedList<ResourceDefinition> resourceDefinitions = new ManagedList<>();
+        // 文件路径,支持${}
+        String rootPath = attributes.getString("path");
         for (String basePackage : basePackages) {
-            Set<String> resources = getResources(basePackage);
+            for (String resourceClass : getResources(basePackage) ){
+                Class<?> clz = null;
+                try {
+                    clz = Class.forName(resourceClass);
+                } catch (ClassNotFoundException e) {
+                    log.error("资源对象{}未找到对应的Class文件", resourceClass, e);
+                }
+
+                if (clz == null) {
+                    continue;
+                }
+
+                ResourceDefinition resourceDefinition = parseResourceDefinition(clz, rootPath);
+                if (resourceDefinition != null) {
+                    resourceDefinitions.add(resourceDefinition);
+                }
+            }
         }
+
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(StorageManagerFactoryBean.class);
+        beanDefinitionBuilder.addPropertyValue("definitions", resourceDefinitions);
+
+        // 注册
+        registerBeanDefinition(registry, beanDefinitionBuilder.getBeanDefinition());
     }
+
 
     private AnnotationAttributes getResourceScanAnnotationAttributes(BeanDefinitionRegistry registry) {
         String[] beanDefinitionNames = registry.getBeanDefinitionNames();
@@ -159,6 +195,24 @@ public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProces
         } catch (Exception e) {
             throw new RuntimeException("读取资源类时发生未知异常", e);
         }
+    }
+
+    @Nullable
+    private ResourceDefinition parseResourceDefinition(Class<?> clz, String rootPath) {
+        ResourceObj obj = AnnotationUtils.findAnnotation(clz, ResourceObj.class);
+        if (obj == null) {
+            return null;
+        }
+        return new ResourceDefinition(clz, environment.resolvePlaceholders(rootPath));
+    }
+
+    private void registerBeanDefinition(BeanDefinitionRegistry registry, BeanDefinition beanDefinition) {
+        String beanClassName = beanDefinition.getBeanClassName();
+        if (beanClassName == null) {
+            throw new RuntimeException("注册BeanDefinition时beanClassName = null");
+        }
+        String beanName = StringUtils.uncapitalize(beanClassName.substring(beanClassName.lastIndexOf(".") + 1));
+        registry.registerBeanDefinition(beanName, beanDefinition);
     }
 
 }

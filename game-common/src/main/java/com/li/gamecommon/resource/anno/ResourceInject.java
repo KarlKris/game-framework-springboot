@@ -11,28 +11,28 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface StorageInject {
+public @interface ResourceInject {
 
     /**
-     * 标识值
+     * 标识值(当注入实例时使用)
      * @return 资源实例标识值
      */
     String key() default "";
 
     /**
-     * 资源类型
+     * 资源类型 (当注入实例时使用)
      * @return 资源类型
      */
     Class<?> type() default Void.class;
 
     /**
-     * 注入资源的属性名
+     * 注入资源的属性名 (当注入实例时使用)
      * @return 注入资源的属性名
      */
     String field() default "content";
 
     /**
-     * 注入值是否必须
+     * 注入值是否必须 (当注入实例时使用)
      * @return true 必须存在资源
      */
     boolean required() default true;

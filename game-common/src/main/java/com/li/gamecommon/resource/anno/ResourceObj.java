@@ -1,6 +1,7 @@
 package com.li.gamecommon.resource.anno;
 
 import com.li.gamecommon.resource.reader.ResourceReader;
+import com.li.gamecommon.resource.reader.XlsxReader;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -19,6 +20,6 @@ public @interface ResourceObj {
     String value() default "";
 
     /** 资源读取器 **/
-    Class<? extends ResourceReader> reader();
+    Class<? extends ResourceReader> reader() default XlsxReader.class;
 
 }

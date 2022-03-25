@@ -1,10 +1,12 @@
 package com.li.gamecommon.resource.storage;
 
+import com.li.gamecommon.resource.anno.ResourceObj;
 import com.li.gamecommon.resource.core.ResourceDefinition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class StorageManager implements ApplicationContextAware {
+
 
     private ApplicationContext applicationContext;
 
@@ -36,6 +39,10 @@ public class StorageManager implements ApplicationContextAware {
         initializeStorage(clz);
     }
 
+    public void validate(ResourceDefinition definition) {
+        getResourceStorage(definition.getClz()).validate();
+    }
+
 
     public ResourceStorage<?, ?> getResourceStorage(Class<?> clz) {
         ResourceStorage<?, ?> storage = storages.get(clz);
@@ -43,15 +50,22 @@ public class StorageManager implements ApplicationContextAware {
             return storage;
         }
 
-        ResourceDefinition definition = resourceDefinitions.get(clz);
-        if (definition != null) {
-            return initializeStorage(clz);
-        }
-
         throw new RuntimeException("资源[" + clz.getName() + "]ResourceStorage不存在");
     }
 
-    private ResourceStorage<?, ?> initializeStorage(Class<?> clz) {
-        return null;
+    private void initializeStorage(Class<?> clz) {
+        ResourceDefinition definition = this.resourceDefinitions.get(clz);
+        if (definition == null) {
+            throw new RuntimeException("资源类[" + clz.getName() + "]的ResourceDefinition不存在");
+        }
+        ResourceObj obj = AnnotationUtils.findAnnotation(clz, ResourceObj.class);
+        assert obj != null;
+        DefaultResourceStorage<?, ?> storage = applicationContext.getAutowireCapableBeanFactory().createBean(DefaultResourceStorage.class);
+        ResourceStorage<?, ?> prev = storages.putIfAbsent(clz, storage);
+        if (prev == null) {
+            storage.initialize(definition, applicationContext.getBean(obj.reader()));
+            return;
+        }
+        applicationContext.getAutowireCapableBeanFactory().destroyBean(storage);
     }
 }

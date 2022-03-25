@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication(scanBasePackages = {"com.li"})
-@ResourceScan(value = {"com.li.gameserver"}, rootPath = "")
+@ResourceScan(value = {"com/li/gameserver"}, path = "${resource.root.path}")
 @EnableTransactionManagement
 public class GameServerApplication {
 

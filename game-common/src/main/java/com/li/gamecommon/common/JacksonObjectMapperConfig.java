@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * @author li-yuanwen
@@ -33,5 +35,11 @@ public class JacksonObjectMapperConfig {
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
         return objectMapper;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(value = ConversionService.class)
+    public ConversionService conversionService() {
+        return new DefaultConversionService();
     }
 }

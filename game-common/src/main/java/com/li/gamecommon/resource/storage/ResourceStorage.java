@@ -2,6 +2,8 @@ package com.li.gamecommon.resource.storage;
 
 import org.springframework.lang.Nullable;
 
+import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -9,7 +11,10 @@ import java.util.List;
  * @author li-yuanwen
  * @date 2022/1/24
  */
-public interface ResourceStorage<K, V extends TableResource<K>> {
+public interface ResourceStorage<K, V> {
+
+    String FILE_SPLIT = ".";
+    String FILE_PATH = File.separator;
 
     /**
      * 获取配表资源
@@ -40,12 +45,17 @@ public interface ResourceStorage<K, V extends TableResource<K>> {
      * 获取所有资源
      * @return 所有资源
      */
-    List<V> getAll();
+    Collection<V> getAll();
 
     /**
-     * 初始化资源
+     * 加载资源(此时并不会覆盖原数据,需要调用#validate()来检验，通过后覆盖原数据)
      */
-    void initializeStorage();
+    void load();
+
+    /**
+     * 验证资源合法性,通过后覆盖原数据
+     */
+    void validate();
 
     /**
      * 添加变更监听器

@@ -6,21 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 资源扫描
+ * 资源表唯一标识注解，可用于属性上,也可以用于方法上返回String值表复合唯一标识
  * @author li-yuanwen
  */
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface ResourceScan {
-
-    /**
-     * @return 资源类路径
-     */
-    String[] value();
-
-    /**
-     * @return 资源表根路径 支持Spring ${}标签
-     */
-    String path();
-
+public @interface ResourceId {
 }
