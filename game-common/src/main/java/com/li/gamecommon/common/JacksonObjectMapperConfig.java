@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 
 /**
  * @author li-yuanwen
@@ -40,6 +40,7 @@ public class JacksonObjectMapperConfig {
     @Bean
     @ConditionalOnMissingBean(value = ConversionService.class)
     public ConversionService conversionService() {
-        return new DefaultConversionService();
+        // todo 要加入常规的转换器,参考DefaultConversionService
+        return new GenericConversionService();
     }
 }

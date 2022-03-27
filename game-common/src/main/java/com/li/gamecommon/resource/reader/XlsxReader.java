@@ -1,9 +1,13 @@
 package com.li.gamecommon.resource.reader;
 
-import cn.hutool.core.lang.Pair;
+import com.li.gamecommon.resource.anno.ResourceField;
+import com.li.gamecommon.resource.convertor.ConvertorType;
+import com.li.gamecommon.resource.convertor.StrConvertor;
+import com.li.gamecommon.resource.convertor.StrConvertorHolder;
 import com.li.gamecommon.resource.resolver.Resolver;
 import com.li.gamecommon.resource.resolver.ResolverFactory;
 import com.li.gamecommon.utils.ObjectsUtil;
+import com.li.gamecommon.utils.TypeDescriptorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
@@ -15,7 +19,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -34,12 +37,12 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * Todo excel文件读取器
+ * excel xlsx文件读取器
  * @author li-yuanwen
  * @date 2022/3/23
  */
@@ -80,7 +83,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
 
 
     @Resource
-    private ConversionService conversionService;
+    private StrConvertorHolder strConvertorHolder;
 
     @Override
     public String getFileSuffix() {
@@ -496,9 +499,6 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         }
     }
 
-    /** 单元格数据类型String **/
-    private final static TypeDescriptor sourceType = TypeDescriptor.valueOf(String.class);
-
     /** 属性持有对象 **/
     private final class FieldHolder {
 
@@ -508,74 +508,26 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         private final int index;
         /** 是否是map/collection **/
         private final TypeDescriptor descriptor;;
+        /** 转换器类型 **/
+        private final ConvertorType convertorType;
 
         FieldHolder(Class<?> clz, String fieldName, int index) throws NoSuchFieldException {
             this.field = clz.getDeclaredField(fieldName);
             this.index = index;
-            if (ObjectsUtil.isMap(field.getType())) {
-                Pair<TypeDescriptor, TypeDescriptor> pair = buildKeyValueTypeDescriptor(field);
-                this.descriptor = TypeDescriptor.map(field.getType(), pair.getKey(), pair.getValue());
-            } else if (ObjectsUtil.isCollection(field.getType())){
-                this.descriptor = TypeDescriptor.collection(field.getType(), buildCollectionNestedTypeDescriptor(field));
-            } else {
-                this.descriptor = new TypeDescriptor(field);
-            }
+            this.descriptor = TypeDescriptorUtil.newInstance(field);
             ReflectionUtils.makeAccessible(field);
-        }
-
-        private Pair<TypeDescriptor, TypeDescriptor> buildKeyValueTypeDescriptor(Field field) {
-            Type genericType = field.getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
-                Class<?> keyClz = null;
-                Class<?> valueClz = null;
-                if (actualTypeArguments[0] instanceof Class) {
-                    keyClz = (Class<?>) actualTypeArguments[0];
-
-                } else if (actualTypeArguments[0] instanceof ParameterizedType) {
-                    keyClz = (Class<?>)((ParameterizedType) actualTypeArguments[0]).getRawType();
-                }
-
-                if (actualTypeArguments[1] instanceof Class) {
-                    valueClz = (Class<?>) actualTypeArguments[1];
-
-                } else if (actualTypeArguments[1] instanceof ParameterizedType) {
-                    valueClz = (Class<?>)((ParameterizedType) actualTypeArguments[1]).getRawType();
-                }
-
-                if (keyClz != null && valueClz != null) {
-                    return new Pair<>(TypeDescriptor.valueOf(keyClz), TypeDescriptor.valueOf(valueClz));
-                }
+            ResourceField annotation = field.getAnnotation(ResourceField.class);
+            if (annotation != null) {
+                this.convertorType = annotation.convertorType();
+            } else {
+                this.convertorType = ConvertorType.SPRING;
             }
-
-            String message = MessageFormatter.format("属性[{}]不属于Map", field.getName()).getMessage();
-            throw new IllegalArgumentException(message);
-        }
-
-        private TypeDescriptor buildCollectionNestedTypeDescriptor(Field field) {
-            Type genericType = field.getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
-                Class<?> clz = null;
-                if (actualTypeArguments[0] instanceof Class) {
-                    clz = (Class<?>) actualTypeArguments[0];
-
-                } else if (actualTypeArguments[0] instanceof ParameterizedType) {
-                    clz = (Class<?>)((ParameterizedType) actualTypeArguments[0]).getRawType();
-                }
-
-                if (clz != null) {
-                    return TypeDescriptor.valueOf(clz);
-                }
-            }
-
-            String message = MessageFormatter.format("属性[{}]不属于Collection", field.getName()).getMessage();
-            throw new IllegalArgumentException(message);
         }
 
         private void inject(Object instance, String content) {
             try {
-                Object value = conversionService.convert(content, sourceType, descriptor);
+                StrConvertor convertor = strConvertorHolder.getStrConvertorByType(convertorType);
+                Object value = convertor.convert(content, descriptor);
                 field.set(instance, value);
             } catch (ConverterNotFoundException e) {
                 FormattingTuple message = MessageFormatter.format("静态资源[{}]属性[{}]的转换器不存在",

@@ -1,5 +1,8 @@
 package com.li.gamecommon.resource.reader;
 
+import cn.hutool.core.util.XmlUtil;
+import org.w3c.dom.Document;
+
 import java.io.InputStream;
 import java.util.List;
 
@@ -17,6 +20,7 @@ public class XmlReader implements ResourceReader {
 
     @Override
     public <E> List<E> read(InputStream in, Class<E> clz) {
+        Document document = XmlUtil.readXML(in);
         return null;
     }
 }
