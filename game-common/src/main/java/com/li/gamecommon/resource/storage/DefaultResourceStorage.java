@@ -87,6 +87,12 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
 
     @Override
     public Collection<V> getAll() {
+        if (data == null) {
+            if (temp == null) {
+                return Collections.emptyList();
+            }
+            return Collections.unmodifiableCollection(temp.values.values());
+        }
         return Collections.unmodifiableCollection(data.values.values());
     }
 

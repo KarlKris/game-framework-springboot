@@ -4,19 +4,21 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.li.gamecommon.resource.convertor.spring.StringToArrayConvertor;
+import com.li.gamecommon.resource.convertor.spring.StringToMapConvertor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * @author li-yuanwen
  * @date 2021/8/7 23:55
  **/
 @Configuration
-public class JacksonObjectMapperConfig {
+public class ConversionConfig {
 
     @Bean
     @Primary
@@ -38,9 +40,13 @@ public class JacksonObjectMapperConfig {
     }
 
     @Bean
+    @Primary
     @ConditionalOnMissingBean(value = ConversionService.class)
     public ConversionService conversionService() {
-        // todo 要加入常规的转换器,参考DefaultConversionService
-        return new GenericConversionService();
+        DefaultConversionService conversionService = new DefaultConversionService();
+        //  要加入自定义的的转换器
+        conversionService.addConverter(new StringToMapConvertor(conversionService));
+        conversionService.addConverter(new StringToArrayConvertor(conversionService));
+        return conversionService;
     }
 }

@@ -1,13 +1,9 @@
 package com.li.gamecommon.resource.reader;
 
-import com.li.gamecommon.resource.anno.ResourceField;
-import com.li.gamecommon.resource.convertor.ConvertorType;
-import com.li.gamecommon.resource.convertor.StrConvertor;
 import com.li.gamecommon.resource.convertor.StrConvertorHolder;
 import com.li.gamecommon.resource.resolver.Resolver;
 import com.li.gamecommon.resource.resolver.ResolverFactory;
 import com.li.gamecommon.utils.ObjectsUtil;
-import com.li.gamecommon.utils.TypeDescriptorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
@@ -17,12 +13,8 @@ import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
-import org.springframework.core.convert.ConverterNotFoundException;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -157,7 +149,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         /** 解析结果 **/
         private final List<E> results = new LinkedList<>();
         /** 属性信息 **/
-        private final List<FieldHolder> fieldHolders = new LinkedList<>();
+        private final List<XlsxFieldHolder> fieldHolders = new LinkedList<>();
         /** 同一行列信息 **/
         private final List<String> colValues = new ArrayList<>();
         /** 单个单元格内容 **/
@@ -415,14 +407,15 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         }
 
         private void buildFieldHolders() {
-            List<FieldHolder> list = new ArrayList<>();
+            List<XlsxFieldHolder> list = new ArrayList<>();
             for (int i = 1; i < colValues.size(); i++) {
                 String fieldName = colValues.get(i);
                 if (StringUtils.isEmpty(fieldName)) {
                     continue;
                 }
                 try {
-                    list.add(new FieldHolder(clz, fieldName, i));
+                    Field field = clz.getDeclaredField(fieldName);
+                    list.add(new XlsxFieldHolder(field, i));
                 } catch (NoSuchFieldException e) {
                     log.warn("资源类[{}]分页[{}]的声明属性[{}]不存在", clz, sheetName, fieldName);
                 } catch (Exception e) {
@@ -440,7 +433,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         private void parseRow0() {
             E instance = ObjectsUtil.newInstance(clz);
             int indexSize = colValues.size() - 1;
-            for (FieldHolder fieldHolder : fieldHolders) {
+            for (XlsxFieldHolder fieldHolder : fieldHolders) {
                 int index = fieldHolder.index;
                 if (index > indexSize) {
                     continue;
@@ -453,7 +446,8 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
             }
 
             if (identifier.resolve(instance) == null) {
-                String message = MessageFormatter.arrayFormat("数值表[{}]的[{}]分页第[{}]行的配置内容错误 - 主键列NULL", new Object[]{clz.getSimpleName(), sheetName, curRow}).getMessage();
+                String message = MessageFormatter.arrayFormat("数值表[{}]的[{}]分页第[{}]行的配置内容错误 - 主键列NULL"
+                        , new Object[]{clz.getSimpleName(), sheetName, curRow}).getMessage();
                 throw new IllegalArgumentException(message);
             }
 
@@ -500,45 +494,17 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
     }
 
     /** 属性持有对象 **/
-    private final class FieldHolder {
+    private final class XlsxFieldHolder extends AbstractFieldHolder {
 
-        /** 属性 **/
-        private final Field field;
         /** 列数 **/
         private final int index;
-        /** 是否是map/collection **/
-        private final TypeDescriptor descriptor;;
-        /** 转换器类型 **/
-        private final ConvertorType convertorType;
 
-        FieldHolder(Class<?> clz, String fieldName, int index) throws NoSuchFieldException {
-            this.field = clz.getDeclaredField(fieldName);
+        public XlsxFieldHolder(Field field, int index)  {
+            super(field, convertorType -> strConvertorHolder.getStrConvertorByType(convertorType));
             this.index = index;
-            this.descriptor = TypeDescriptorUtil.newInstance(field);
-            ReflectionUtils.makeAccessible(field);
-            ResourceField annotation = field.getAnnotation(ResourceField.class);
-            if (annotation != null) {
-                this.convertorType = annotation.convertorType();
-            } else {
-                this.convertorType = ConvertorType.SPRING;
-            }
         }
 
-        private void inject(Object instance, String content) {
-            try {
-                StrConvertor convertor = strConvertorHolder.getStrConvertorByType(convertorType);
-                Object value = convertor.convert(content, descriptor);
-                field.set(instance, value);
-            } catch (ConverterNotFoundException e) {
-                FormattingTuple message = MessageFormatter.format("静态资源[{}]属性[{}]的转换器不存在",
-                        instance.getClass().getSimpleName(), field.getName());
-                throw new IllegalStateException(message.getMessage(), e);
-            } catch (IllegalAccessException e) {
-                FormattingTuple message = MessageFormatter.format("静态资源[{}]属性[{}]注入失败", instance.getClass(), field);
-                throw new IllegalStateException(message.getMessage(), e);
-            }
 
-        }
     }
 
 }

@@ -23,6 +23,6 @@ public @interface ResourceIndex {
      * 是否是唯一索引
      * @return true 唯一索引
      */
-    boolean uniqueIndex();
+    boolean uniqueIndex() default false;
 
 }

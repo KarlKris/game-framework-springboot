@@ -18,7 +18,6 @@
         <aspectj.version>1.9.7</aspectj.version>
         <caffeine.version>2.9.0</caffeine.version>
         <javassist.version>3.27.0-GA</javassist.version>
-        <disruptor.version>3.4.2</disruptor.version>
         <redisson.starter.version>3.14.1</redisson.starter.version>
         <pool.version>2.6.2</pool.version>
     </properties>
@@ -93,13 +92,6 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>${javassist.version}</version>
-        </dependency>
-
-        <!-- disruptor高性能队列 -->
-        <dependency>
-            <groupId>com.lmax</groupId>
-            <artifactId>disruptor</artifactId>
-            <version>${disruptor.version}</version>
         </dependency>
 
     </dependencies>

@@ -1,26 +1,23 @@
 package com.li.gameserver.modules.account.facade;
 
-import com.li.gamecommon.resource.anno.ResourceInject;
-import com.li.gamecommon.resource.storage.ResourceStorage;
-import com.li.gameserver.config.DemoSetting;
+import com.li.gameserver.modules.account.service.AccountService;
 import com.li.protocol.game.account.protocol.ServerAccountController;
 import com.li.protocol.game.account.vo.AccountVo;
-import com.li.gameserver.modules.account.service.AccountService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author li-yuanwen
  * @date 2021/9/2 21:52
  **/
+@Slf4j
 @Component
 public class ServerAccountControllerImpl implements ServerAccountController {
 
-    @Autowired
+    @Resource
     private AccountService accountService;
-
-    @ResourceInject
-    private ResourceStorage<Integer, DemoSetting> storage;
 
     @Override
     public AccountVo getShowVo(long identity) {
