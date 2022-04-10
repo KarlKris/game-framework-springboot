@@ -1,6 +1,6 @@
-﻿package com.li.behaviortree.action;
+﻿package com.li.battle.ai.action;
 
-import com.li.behaviortree.behaviour.Behaviour;
+import com.li.battle.ai.behaviour.Behaviour;
 
 /**
  * 抽象动作的概念，尝试改变游戏状态的样子行为被称为动作。

@@ -1,4 +1,4 @@
-﻿package com.li.behaviortree.composite;
+﻿package com.li.battle.ai.composite;
 
 /**
  * 并行器执行策略

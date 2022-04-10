@@ -1,6 +1,6 @@
-﻿package com.li.behaviortree.composite;
+﻿package com.li.battle.ai.composite;
 
-import com.li.behaviortree.behaviour.Behaviour;
+import com.li.battle.ai.behaviour.Behaviour;
 
 import java.util.List;
 

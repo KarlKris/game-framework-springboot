@@ -1,4 +1,4 @@
-﻿package com.li.behaviortree.blackboard;
+﻿package com.li.battle.ai.blackboard;
 
 /**
  * 黑板

@@ -1,6 +1,6 @@
-﻿package com.li.behaviortree.behaviour;
+﻿package com.li.battle.ai.behaviour;
 
-import com.li.behaviortree.Status;
+import com.li.battle.ai.Status;
 
 /**
  * 基础节点对象,规定API调用契约

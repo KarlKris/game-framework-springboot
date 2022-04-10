@@ -1,6 +1,6 @@
-﻿package com.li.behaviortree.behaviour;
+﻿package com.li.battle.ai.behaviour;
 
-import com.li.behaviortree.Status;
+import com.li.battle.ai.Status;
 
 /**
  * 抽象行为的概念,行为树的基石。该接口可以被激活，运行和注销.

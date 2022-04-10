@@ -1,7 +1,7 @@
-﻿package com.li.behaviortree.decorator;
+﻿package com.li.battle.ai.decorator;
 
-import com.li.behaviortree.behaviour.AbstractBehaviour;
-import com.li.behaviortree.behaviour.Behaviour;
+import com.li.battle.ai.behaviour.AbstractBehaviour;
+import com.li.battle.ai.behaviour.Behaviour;
 
 /**
  * 抽象装饰器 控制节点
