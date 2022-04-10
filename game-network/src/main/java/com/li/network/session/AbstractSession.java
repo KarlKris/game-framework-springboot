@@ -1,6 +1,6 @@
 package com.li.network.session;
 
-import com.li.gamecommon.utils.IpUtils;
+import com.li.common.utils.IpUtils;
 import com.li.network.message.IMessage;
 import com.li.network.protocol.ChannelAttributeKeys;
 import io.netty.channel.Channel;

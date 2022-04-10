@@ -1,4 +1,4 @@
-﻿package com.li.battle.ai.behaviour;
+package com.li.battle.ai.behaviour;
 
 import com.li.battle.ai.Status;
 

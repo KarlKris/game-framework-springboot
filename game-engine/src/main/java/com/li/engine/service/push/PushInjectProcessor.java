@@ -3,7 +3,7 @@ package com.li.engine.service.push;
 import com.li.engine.anno.InnerPushInject;
 import com.li.engine.anno.OuterPushInject;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
@@ -17,7 +17,7 @@ import javax.annotation.Resource;
  **/
 @Component
 @Order
-public class PushInjectProcessor extends InstantiationAwareBeanPostProcessorAdapter {
+public class PushInjectProcessor implements SmartInstantiationAwareBeanPostProcessor {
 
     @Resource
     private PushManager pushManager;

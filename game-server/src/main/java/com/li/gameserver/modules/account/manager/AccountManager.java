@@ -1,9 +1,9 @@
 package com.li.gameserver.modules.account.manager;
 
-import com.li.gamecommon.common.MultiServerIdGenerator;
-import com.li.gamecore.cache.EntityCacheService;
-import com.li.gamecore.cache.anno.Cachedable;
-import com.li.gamecore.dao.core.DataFinder;
+import com.li.common.id.MultiServerIdGenerator;
+import com.li.core.cache.EntityCacheService;
+import com.li.core.cache.anno.Cachedable;
+import com.li.core.dao.core.DataFinder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

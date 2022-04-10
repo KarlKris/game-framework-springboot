@@ -1,7 +1,7 @@
 package com.li.engine.channelhandler.common.impl;
 
-import com.li.gamecommon.rpc.ServerInfoUpdateService;
-import com.li.gamecommon.utils.IpUtils;
+import com.li.common.rpc.ServerInfoUpdateService;
+import com.li.common.utils.IpUtils;
 import com.li.engine.channelhandler.common.FirewallService;
 import com.li.engine.channelhandler.common.NioNettyFilter;
 import io.netty.buffer.ByteBuf;
@@ -60,11 +60,11 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
     @PostConstruct
     private void init() {
         this.blackIps = new CopyOnWriteArraySet<>();
-        if (!StringUtils.isEmpty(this.blackIpStr)) {
+        if (StringUtils.hasLength(this.blackIpStr)) {
             this.blackIps.addAll(Arrays.asList(this.blackIpStr.split(",")));
         }
         this.whiteIps = new CopyOnWriteArraySet<>();
-        if (!StringUtils.isEmpty(this.whiteIpStr)) {
+        if (StringUtils.hasLength(this.whiteIpStr)) {
             this.whiteIps.addAll(Arrays.asList(this.whiteIpStr.split(",")));
         }
     }
@@ -78,7 +78,7 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         String ip = IpUtils.getIp(ctx.channel().remoteAddress());
-        if (StringUtils.isEmpty(ip)) {
+        if (!StringUtils.hasLength(ip)) {
             if (log.isDebugEnabled()) {
                 log.debug("客户端无IP地址,拒绝连接");
             }

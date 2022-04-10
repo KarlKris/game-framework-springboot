@@ -1,4 +1,4 @@
-﻿package com.li.battle.ai;
+package com.li.battle.ai;
 
 /**
  * 状态,每个行为在执行后都会传回一个状态

@@ -1,6 +1,6 @@
 package com.li.engine.client;
 
-import com.li.gamecommon.rpc.model.Address;
+import com.li.common.rpc.model.Address;
 import com.li.engine.client.impl.NioNettyClientImpl;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;

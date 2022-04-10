@@ -1,6 +1,6 @@
 package com.li.engine.channelhandler.common.impl;
 
-import com.li.gamecommon.ApplicationContextHolder;
+import com.li.common.ApplicationContextHolder;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.network.handler.MessageDecoder;
 import com.li.network.handler.MessageEncoder;

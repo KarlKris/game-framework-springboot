@@ -1,8 +1,8 @@
 package com.li.engine.service.push;
 
 import com.li.engine.service.session.SessionManager;
-import com.li.gamecommon.ApplicationContextHolder;
-import com.li.gamecommon.utils.ObjectsUtil;
+import com.li.common.ApplicationContextHolder;
+import com.li.common.utils.ObjectsUtil;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.InBodyMethodParameter;
 import com.li.network.protocol.MethodCtx;

@@ -1,7 +1,7 @@
 package com.li.engine.service.rpc.future;
 
-import com.li.gamecommon.ApplicationContextHolder;
-import com.li.gamecommon.exception.SocketException;
+import com.li.common.ApplicationContextHolder;
+import com.li.common.exception.SocketException;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.SocketProtocol;
 import com.li.network.modules.ErrorCodeModule;

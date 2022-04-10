@@ -1,6 +1,6 @@
 package com.li.engine.channelhandler;
 
-import com.li.gamecommon.ApplicationContextHolder;
+import com.li.common.ApplicationContextHolder;
 import com.li.engine.channelhandler.client.ClientVocationalWorkHandler;
 import com.li.engine.channelhandler.common.HeartBeatHandler;
 import com.li.network.handler.MessageDecoder;

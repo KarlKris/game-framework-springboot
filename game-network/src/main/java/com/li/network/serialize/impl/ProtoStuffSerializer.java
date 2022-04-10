@@ -1,7 +1,7 @@
 package com.li.network.serialize.impl;
 
-import com.li.gamecommon.exception.SerializeFailException;
-import com.li.gamecommon.utils.ProtoStuffUtils;
+import com.li.common.exception.SerializeFailException;
+import com.li.common.utils.ProtoStuffUtils;
 import com.li.network.serialize.SerializeType;
 import com.li.network.serialize.Serializer;
 import lombok.extern.slf4j.Slf4j;

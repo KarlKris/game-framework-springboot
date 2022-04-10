@@ -2,9 +2,9 @@ package com.li.engine.service.handler;
 
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.VocationalWorkConfig;
-import com.li.gamecommon.exception.SocketException;
-import com.li.gamecommon.exception.code.ServerErrorCode;
-import com.li.gamecommon.thread.SerializedExecutorService;
+import com.li.common.exception.SocketException;
+import com.li.common.exception.code.ServerErrorCode;
+import com.li.common.thread.SerializedExecutorService;
 import com.li.network.message.IMessage;
 import com.li.network.message.SocketProtocol;
 import com.li.network.modules.ErrorCodeModule;

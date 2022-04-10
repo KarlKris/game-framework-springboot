@@ -1,10 +1,10 @@
 package com.li.engine.service.rpc;
 
 import com.li.engine.client.NioNettyClientFactory;
-import com.li.gamecommon.exception.BadRequestException;
-import com.li.gamecommon.exception.code.ServerErrorCode;
-import com.li.gamecommon.rpc.RemoteServerSeekService;
-import com.li.gamecommon.rpc.model.Address;
+import com.li.common.exception.BadRequestException;
+import com.li.common.exception.code.ServerErrorCode;
+import com.li.common.rpc.RemoteServerSeekService;
+import com.li.common.rpc.model.Address;
 import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.utils.ProtocolUtil;
 import org.springframework.stereotype.Component;

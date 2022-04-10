@@ -1,6 +1,6 @@
 package com.li.network.serialize;
 
-import com.li.gamecommon.exception.SerializeFailException;
+import com.li.common.exception.SerializeFailException;
 
 /**
  * @author li-yuanwen

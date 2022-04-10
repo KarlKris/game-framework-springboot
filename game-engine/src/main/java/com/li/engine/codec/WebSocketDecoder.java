@@ -1,6 +1,6 @@
 package com.li.engine.codec;
 
-import com.li.gamecommon.ApplicationContextHolder;
+import com.li.common.ApplicationContextHolder;
 import com.li.network.handler.MessageDecoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;

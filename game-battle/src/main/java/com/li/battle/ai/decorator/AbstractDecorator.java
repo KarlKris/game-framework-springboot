@@ -1,4 +1,4 @@
-﻿package com.li.battle.ai.decorator;
+package com.li.battle.ai.decorator;
 
 import com.li.battle.ai.behaviour.AbstractBehaviour;
 import com.li.battle.ai.behaviour.Behaviour;

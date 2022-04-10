@@ -1,6 +1,6 @@
 package com.li.engine.service.rpc.future;
 
-import com.li.gamecommon.ApplicationContextHolder;
+import com.li.common.ApplicationContextHolder;
 import com.li.network.message.InnerMessage;
 import com.li.engine.protocol.MessageFactory;
 import com.li.network.message.OuterMessage;

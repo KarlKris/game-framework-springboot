@@ -3,7 +3,7 @@ package com.li.engine.channelhandler;
 import com.li.engine.channelhandler.common.NioNettyFilter;
 import com.li.engine.channelhandler.common.impl.ProtocolSelectorHandler;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
-import com.li.gamecommon.ApplicationContextHolder;
+import com.li.common.ApplicationContextHolder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;

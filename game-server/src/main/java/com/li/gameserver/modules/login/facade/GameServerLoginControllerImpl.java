@@ -3,7 +3,7 @@ package com.li.gameserver.modules.login.facade;
 import cn.hutool.core.util.ArrayUtil;
 import com.li.engine.anno.InnerPushInject;
 import com.li.engine.service.session.SessionManager;
-import com.li.gamecommon.exception.BadRequestException;
+import com.li.common.exception.BadRequestException;
 import com.li.gameserver.common.GameServerSystemConfig;
 import com.li.gameserver.modules.account.service.AccountService;
 import com.li.network.session.ISession;

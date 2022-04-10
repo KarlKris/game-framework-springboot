@@ -1,7 +1,7 @@
 package com.li.gameserver.config;
 
-import com.li.gamecommon.thread.GenericSerializedExecutorService;
-import com.li.gamecommon.thread.SerializedExecutorService;
+import com.li.common.thread.GenericSerializedExecutorService;
+import com.li.common.thread.SerializedExecutorService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

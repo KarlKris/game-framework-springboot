@@ -1,4 +1,4 @@
-﻿package com.li.battle.ai;
+package com.li.battle.ai;
 
 import com.li.battle.ai.behaviour.Behaviour;
 import com.li.battle.ai.composite.Composite;

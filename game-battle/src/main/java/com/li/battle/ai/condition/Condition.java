@@ -1,4 +1,4 @@
-﻿package com.li.battle.ai.condition;
+package com.li.battle.ai.condition;
 
 import com.li.battle.ai.behaviour.Behaviour;
 

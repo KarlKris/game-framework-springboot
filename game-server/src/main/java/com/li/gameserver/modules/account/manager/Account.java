@@ -1,8 +1,8 @@
 package com.li.gameserver.modules.account.manager;
 
 import cn.hutool.core.date.DateUtil;
-import com.li.gamecore.dao.AbstractEntity;
-import com.li.gamecore.dao.anno.Commit;
+import com.li.core.dao.AbstractEntity;
+import com.li.core.dao.anno.Commit;
 import lombok.Getter;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
@@ -18,7 +18,7 @@ import java.util.Date;
 @Proxy(lazy = false)
 @NamedQueries({
         @NamedQuery(name = Account.ALL_ACCOUNT_NAME, query = "SELECT a.accountName FROM Account AS a"),
-        @NamedQuery(name = Account.GET_ID_BY_ACCOUNT_NAME, query = "SELECT a.id FROM Account AS a WHERE a.accountName = ?0")
+        @NamedQuery(name = Account.GET_ID_BY_ACCOUNT_NAME, query = "SELECT a.id FROM Account AS a WHERE a.accountName = ?1")
 })
 @Getter
 public class Account extends AbstractEntity<Long> {

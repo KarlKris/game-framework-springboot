@@ -2,7 +2,7 @@ package com.li.network.serialize.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.li.gamecommon.exception.SerializeFailException;
+import com.li.common.exception.SerializeFailException;
 import com.li.network.serialize.SerializeType;
 import com.li.network.serialize.Serializer;
 import lombok.extern.slf4j.Slf4j;

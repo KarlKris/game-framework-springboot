@@ -1,8 +1,8 @@
 package com.li.engine.server;
 
-import com.li.gamecommon.rpc.LocalServerService;
-import com.li.gamecommon.rpc.model.ServerInfo;
-import com.li.gamecommon.utils.IpUtils;
+import com.li.common.rpc.LocalServerService;
+import com.li.common.rpc.model.ServerInfo;
+import com.li.common.utils.IpUtils;
 import com.li.network.protocol.SocketProtocolManager;
 import org.springframework.stereotype.Service;
 

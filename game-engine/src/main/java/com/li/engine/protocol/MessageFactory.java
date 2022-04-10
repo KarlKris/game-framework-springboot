@@ -87,7 +87,7 @@ public class MessageFactory {
             body = ZipUtil.gzip(body);
             zip = true;
         }
-        byte[] ipBytes = StringUtils.isEmpty(ip) ? null : ip.getBytes();
+        byte[] ipBytes = StringUtils.hasLength(ip) ? ip.getBytes() : null;
         InnerMessageHeader header = InnerMessageHeader.of(type, protocol, zip, serializeType, sn, identity, ipBytes);
         return InnerMessage.of(header, body);
     }

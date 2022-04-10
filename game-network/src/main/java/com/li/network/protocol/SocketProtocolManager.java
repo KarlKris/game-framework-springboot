@@ -9,7 +9,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class SocketProtocolManager extends InstantiationAwareBeanPostProcessorAdapter implements ResourceLoaderAware {
+public class SocketProtocolManager implements SmartInstantiationAwareBeanPostProcessor, ResourceLoaderAware {
 
     @Value("${server.protocol.package:classpath*:com/li/protocol/**/**/protocol/*.class}")
     private String protocolPackage;
