@@ -1,11 +1,11 @@
 package com.li.battle.core.unit.model;
 
 /**
- * 战斗单元状态
+ * 单元状态
  * @author li-yuanwen
  * @date 2021/10/16
  */
-public enum FightUnitState {
+public enum UnitState {
 
     /** 正常 **/
     NORMAL,

@@ -2,7 +2,7 @@ package com.li.battle.core.unit;
 
 import com.li.battle.core.unit.model.Attribute;
 import com.li.battle.core.unit.model.BattleSkill;
-import com.li.battle.core.unit.model.FightUnitState;
+import com.li.battle.core.unit.model.UnitState;
 import com.li.battle.core.unit.model.FightUnitType;
 
 import java.util.EnumMap;
@@ -21,7 +21,7 @@ public class FightUnitImpl implements FightUnit {
     /** 战斗单元类型 **/
     private final FightUnitType type;
     /** 战斗单元状态 **/
-    private FightUnitState state;
+    private UnitState state;
     /** 战斗单元属性 **/
     private final Map<Attribute, Long> attributes;
     /** 战斗技能 **/
@@ -30,7 +30,7 @@ public class FightUnitImpl implements FightUnit {
     public FightUnitImpl(long id, FightUnitType type, Map<Attribute, Long> attributes, List<BattleSkill> skills) {
         this.id = id;
         this.type = type;
-        this.state = FightUnitState.NORMAL;
+        this.state = UnitState.NORMAL;
         this.attributes = new EnumMap<Attribute, Long>(attributes);
         this.skills = skills;
     }
@@ -57,12 +57,12 @@ public class FightUnitImpl implements FightUnit {
     }
 
     @Override
-    public FightUnitState getState() {
+    public UnitState getState() {
         return state;
     }
 
     @Override
-    public void modifyState(FightUnitState state) {
+    public void modifyState(UnitState state) {
         this.state = state;
     }
 }
