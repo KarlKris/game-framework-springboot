@@ -5,7 +5,7 @@ package com.li.network.protocol;
  * @author li-yuanwen
  * @date 2021/12/10
  */
-public class AbstractMethodParameter implements MethodParameter {
+public abstract class AbstractMethodParameter implements MethodParameter {
 
     /** 参数类型 **/
     private final Class<?> clazz;

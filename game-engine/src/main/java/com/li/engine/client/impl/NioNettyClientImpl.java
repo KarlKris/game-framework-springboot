@@ -6,7 +6,7 @@ import com.li.engine.client.SendProxyInvoker;
 import com.li.common.ApplicationContextHolder;
 import com.li.common.rpc.model.Address;
 import com.li.network.message.IMessage;
-import com.li.network.protocol.MethodCtx;
+import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.utils.ProtocolUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -93,10 +93,10 @@ public class NioNettyClientImpl implements NioNettyClient {
                 return (T) target;
             }
 
-            List<MethodCtx> methodCtx = ProtocolUtil.getMethodCtxBySocketCommand(clasz);
+            List<ProtocolMethodCtx> protocolMethodCtxes = ProtocolUtil.getMethodCtxBySocketCommand(clasz);
             target = Proxy.newProxyInstance(clasz.getClassLoader()
                     , new Class[]{clasz}
-                    , new SendProxyInvoker(this, methodCtx));
+                    , new SendProxyInvoker(this, protocolMethodCtxes));
 
             this.proxy.put(name, target);
         }

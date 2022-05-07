@@ -39,7 +39,7 @@ public class ProtocolUtil {
      * @param targetClass 目标Class
      * @return /
      */
-    public static List<MethodCtx> getMethodCtxBySocketCommand(Class<?> targetClass) {
+    public static List<ProtocolMethodCtx> getMethodCtxBySocketCommand(Class<?> targetClass) {
 
         SocketController socketController = AnnotationUtils.findAnnotation(targetClass, SocketController.class);
         if (socketController == null) {
@@ -49,7 +49,7 @@ public class ProtocolUtil {
         // 模块号
         short module = socketController.module();
 
-        List<MethodCtx> ctx = new LinkedList<>();
+        List<ProtocolMethodCtx> ctx = new LinkedList<>();
 
         for (Method method : targetClass.getDeclaredMethods()) {
             Method annotationMethod = findAnnotationMethod(method, SocketMethod.class);
@@ -107,7 +107,7 @@ public class ProtocolUtil {
                 }
             }
 
-            ctx.add(new MethodCtx(new SocketProtocol(module, id), method, params));
+            ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params));
         }
 
         return ctx;
@@ -118,7 +118,7 @@ public class ProtocolUtil {
      * @param targetClass 目标Class
      * @return /
      */
-    public static List<MethodCtx> getMethodCtxBySocketPush(Class<?> targetClass) {
+    public static List<ProtocolMethodCtx> getMethodCtxBySocketPush(Class<?> targetClass) {
         // 非接口忽略
         if (!targetClass.isInterface()) {
             return Collections.emptyList();
@@ -137,7 +137,7 @@ public class ProtocolUtil {
         // 模块号
         short module = socketController.module();
 
-        List<MethodCtx> ctx = new LinkedList<>();
+        List<ProtocolMethodCtx> ctx = new LinkedList<>();
         for (Method method : targetClass.getDeclaredMethods()) {
             Method annotationMethod = findAnnotationMethod(method, SocketMethod.class);
             // 忽略常规方法
@@ -184,7 +184,7 @@ public class ProtocolUtil {
                 }
             }
 
-            ctx.add(new MethodCtx(new SocketProtocol(module, id), method, params));
+            ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params));
 
         }
 

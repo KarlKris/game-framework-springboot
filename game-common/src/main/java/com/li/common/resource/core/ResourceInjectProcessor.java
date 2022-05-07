@@ -9,6 +9,7 @@ import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import java.lang.reflect.Type;
  */
 @Slf4j
 @Component
+@ConditionalOnBean(StorageManager.class)
 public class ResourceInjectProcessor implements SmartInstantiationAwareBeanPostProcessor {
 
     private final StorageManager storageManager;

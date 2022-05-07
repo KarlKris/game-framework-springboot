@@ -2,29 +2,22 @@ package com.li.client.network;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.li.network.message.OuterMessage;
-import com.li.network.message.OuterMessageHeader;
-import com.li.network.message.ProtocolConstant;
-import com.li.network.message.SocketProtocol;
-import com.li.network.protocol.SocketProtocolManager;
-import com.li.network.serialize.SerializeType;
+import com.li.client.stat.EfficiencyStatistic;
+import com.li.network.message.*;
 import com.li.network.serialize.SerializerHolder;
 import com.li.protocol.gateway.login.dto.ReqGatewayCreateAccount;
 import com.li.protocol.gateway.login.dto.ReqGatewayLoginAccount;
 import com.li.protocol.gateway.login.protocol.GatewayLoginModule;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -33,12 +26,14 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Slf4j
 @Service
-public class ClientNetworkService {
+@ChannelHandler.Sharable
+public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> {
 
     @Resource
     private ClientInitializer clientInitializer;
     @Resource
-    private SocketProtocolManager socketProtocolManager;
+    private EfficiencyStatistic efficiencyStatistic;
+
 
     private static final String KEY = "GAME-FRAMEWORK-GATEWAY";
     private static final int CHANNEL = 1;
@@ -46,13 +41,37 @@ public class ClientNetworkService {
 
 
     private final AtomicLong snGenerator = new AtomicLong(0);
-    private final Map<Long, SocketProtocol> sendSns = new HashMap<>();
+    private final Set<Long> sendSns = new HashSet<>(16);
 
 
     /** 线程组 **/
     private final EventLoopGroup eventLoopGroup = new NioEventLoopGroup(1);
 
     private Channel channel;
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, IMessage msg) throws Exception {
+        // 理论上消息都是内部消息
+        if (msg instanceof InnerMessage) {
+            log.warn("客户端收到内部消息InnerMessage[{}],理论上消息都是外部消息,请检查逻辑", msg);
+            return;
+        }
+
+        OuterMessage message = (OuterMessage) msg;
+
+
+    }
+
+
+    private void send(SocketProtocol protocol, Object body) {
+        long sn = snGenerator.incrementAndGet();
+        sendSns.add(sn);
+        OuterMessageHeader header = OuterMessageHeader.of(sn, ProtocolConstant.VOCATIONAL_WORK_REQ, protocol, false
+                , SerializerHolder.DEFAULT_SERIALIZER.getSerializerType());
+        OuterMessage message = OuterMessage.of(header, SerializerHolder.DEFAULT_SERIALIZER.serialize(body));
+        channel.writeAndFlush(message);
+
+    }
 
     public void login(String address, int port, String account) throws InterruptedException {
         if (channel != null) {
@@ -61,20 +80,14 @@ public class ClientNetworkService {
 
         connect(address, port);
 
-        long sn = snGenerator.incrementAndGet();
         SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.GAME_SERVER_LOGIN);
-        sendSns.put(sn, protocol);
-
-        OuterMessageHeader header = OuterMessageHeader.of(sn, ProtocolConstant.VOCATIONAL_WORK_REQ, protocol, false
-                , SerializeType.PROTO_STUFF.getType());
 
         // body
         int now = DateUtil.thisSecond();
         String sign = SecureUtil.md5(account + now + KEY);
         ReqGatewayLoginAccount gatewayLoginAccount = new ReqGatewayLoginAccount(account, CHANNEL, SERVER_ID, now, sign);
 
-        OuterMessage message = OuterMessage.of(header, SerializerHolder.DEFAULT_SERIALIZER.serialize(gatewayLoginAccount));
-        channel.writeAndFlush(message);
+        send(protocol, gatewayLoginAccount);
     }
 
     public void create(String address, int port, String account) throws InterruptedException {
@@ -84,24 +97,14 @@ public class ClientNetworkService {
 
         connect(address, port);
 
-        long sn = snGenerator.incrementAndGet();
         SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.GAME_SERVER_CREATE);
-        sendSns.put(sn, protocol);
-
-        OuterMessageHeader header = OuterMessageHeader.of(sn, ProtocolConstant.VOCATIONAL_WORK_REQ, protocol, false
-                , SerializeType.PROTO_STUFF.getType());
 
         // body
         int now = DateUtil.thisSecond();
         String sign = SecureUtil.md5(account + now + KEY);
         ReqGatewayCreateAccount gatewayCreateAccount = new ReqGatewayCreateAccount(account, CHANNEL, SERVER_ID, now, sign);
 
-        OuterMessage message = OuterMessage.of(header, SerializerHolder.DEFAULT_SERIALIZER.serialize(gatewayCreateAccount));
-        channel.writeAndFlush(message);
-    }
-
-
-    public void handleResponse(SocketProtocol protocol, byte[] body) {
+        send(protocol, gatewayCreateAccount);
 
     }
 

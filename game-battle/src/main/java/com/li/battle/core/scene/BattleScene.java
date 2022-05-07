@@ -1,6 +1,9 @@
 package com.li.battle.core.scene;
 
 import com.li.battle.core.unit.FightUnit;
+import com.li.battle.core.unit.Unit;
+
+import java.util.Collection;
 
 /**
  * 战斗场景对外操作接口
@@ -33,6 +36,12 @@ public interface BattleScene {
      * @return true 进入场景成功
      */
     boolean enterScene(FightUnit unit);
+
+    /**
+     * 获取场景内所有单元
+     * @return 场景内所有单元
+     */
+    Collection<Unit> getUnits();
 
     /**
      * 离开场景

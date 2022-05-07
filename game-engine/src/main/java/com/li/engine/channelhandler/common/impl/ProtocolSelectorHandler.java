@@ -1,12 +1,12 @@
 package com.li.engine.channelhandler.common.impl;
 
 import com.li.common.ApplicationContextHolder;
+import com.li.network.handler.HeartBeatHandler;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
-import com.li.network.handler.MessageDecoder;
-import com.li.network.handler.MessageEncoder;
 import com.li.engine.codec.WebSocketDecoder;
 import com.li.engine.codec.WebSocketEncoder;
-import com.li.engine.channelhandler.common.HeartBeatHandler;
+import com.li.network.handler.MessageDecoder;
+import com.li.network.handler.MessageEncoder;
 import com.li.network.message.ProtocolConstant;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,11 +20,11 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -36,27 +36,27 @@ import java.util.List;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProtocolSelectorHandler extends ByteToMessageDecoder {
 
-    @Autowired
+    @Resource
     private HttpServerCodec httpServerCodec;
-    @Autowired
+    @Resource
     private HttpObjectAggregator httpObjectAggregator;
-    @Autowired
+    @Resource
     private ChunkedWriteHandler chunkedWriteHandler;
-    @Autowired
+    @Resource
     private WebSocketFrameAggregator webSocketFrameAggregator;
-    @Autowired
+    @Resource
     private WebSocketServerCompressionHandler webSocketServerCompressionHandler;
-    @Autowired
+    @Resource
     private WebSocketServerProtocolHandler webSocketServerProtocolHandler;
-    @Autowired
+    @Resource
     private WebSocketEncoder webSocketEncoder;
-    @Autowired
+    @Resource
     private WebSocketDecoder webSocketDecoder;
 
 
-    @Autowired
+    @Resource
     private MessageEncoder messageEncoder;
-    @Autowired
+    @Resource
     private HeartBeatHandler heartBeatHandler;
 
 

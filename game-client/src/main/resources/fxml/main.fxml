@@ -19,7 +19,6 @@
          <FlowPane fx:id="leftPane" prefHeight="525.0" prefWidth="229.0">
             <children>
                <fx:include fx:id="loginPane" source="login.fxml" />
-               <fx:include fx:id="indexPane" source="index.fxml" />
             </children>
          </FlowPane>
       </VBox>

@@ -5,7 +5,7 @@ import com.li.engine.service.push.IPushExecutor;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.*;
 import com.li.network.protocol.InBodyMethodParameter;
-import com.li.network.protocol.MethodCtx;
+import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.MethodParameter;
 import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.serialize.Serializer;
@@ -58,7 +58,7 @@ public class PushExecutorImpl implements IPushExecutor {
             byte[] body = serializeType2body.get(type);
             if (body == null) {
                 if (!Objects.equals(type, SerializerHolder.DEFAULT_SERIALIZER.getSerializerType())) {
-                    MethodCtx ctx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);
+                    ProtocolMethodCtx ctx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);
                     for (MethodParameter parameter : ctx.getParams()) {
                         if (parameter instanceof InBodyMethodParameter) {
                             Object obj = SerializerHolder.DEFAULT_SERIALIZER.deserialize(content, parameter.getParameterClass());

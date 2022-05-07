@@ -5,4 +5,13 @@ package com.li.battle.core.unit.model;
  * @author li-yuanwen
  */
 public enum Attribute {
+
+
+
+    ;
+
+
+
+
+
 }

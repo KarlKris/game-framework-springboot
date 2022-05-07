@@ -1,6 +1,6 @@
 package com.li.engine.service.push;
 
-import com.li.network.protocol.MethodCtx;
+import com.li.network.protocol.ProtocolMethodCtx;
 import lombok.Getter;
 
 /**
@@ -13,10 +13,10 @@ public class PushMethodCtx {
     /**
      * 方法上下文
      **/
-    private final MethodCtx methodCtx;
+    private final ProtocolMethodCtx protocolMethodCtx;
 
-    PushMethodCtx(MethodCtx methodCtx) {
-        this.methodCtx = methodCtx;
+    PushMethodCtx(ProtocolMethodCtx protocolMethodCtx) {
+        this.protocolMethodCtx = protocolMethodCtx;
     }
 
 }

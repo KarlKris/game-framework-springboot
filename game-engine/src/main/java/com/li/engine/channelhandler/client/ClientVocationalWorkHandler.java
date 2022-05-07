@@ -1,14 +1,13 @@
 package com.li.engine.channelhandler.client;
 
 import cn.hutool.core.convert.ConvertException;
+import com.li.common.exception.SerializeFailException;
+import com.li.common.thread.SerializedExecutorService;
 import com.li.engine.service.push.IPushExecutor;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.engine.service.rpc.future.SocketFuture;
-import com.li.common.exception.SerializeFailException;
-import com.li.common.thread.SerializedExecutorService;
 import com.li.network.message.IMessage;
 import com.li.network.message.InnerMessage;
-import com.li.network.message.OuterMessage;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.*;
 import com.li.network.serialize.Serializer;
@@ -47,12 +46,6 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
-        // 理论上消息都是内部消息
-        if (msg instanceof OuterMessage) {
-            log.warn("客户端收到外部消息OuterMessage[{}],理论上消息都是内部消息,请检查逻辑", msg);
-            return;
-        }
-
         // 处理从服务端收到的信息
         if (msg.isRequest()) {
             if (log.isDebugEnabled()) {
@@ -104,8 +97,8 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
 
     private void handlePushMessage(IMessage message) {
         executorService.submit(() -> {
-            MethodInvokeCtx methodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(message.getProtocol());
-            if (methodInvokeCtx == null) {
+            ProtocolMethodInvokeCtx protocolMethodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(message.getProtocol());
+            if (protocolMethodInvokeCtx == null) {
                 // 无处理,即仅是中介,直接推送至外网
                 Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
                 PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
@@ -127,8 +120,8 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             try {
                 // 推送中介逻辑处理
                 PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
-                MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
-                MethodParameter[] params = methodCtx.getParams();
+                ProtocolMethodCtx protocolMethodCtx = protocolMethodInvokeCtx.getProtocolMethodCtx();
+                MethodParameter[] params = protocolMethodCtx.getParams();
                 Object[] args = new Object[params.length];
                 for (int i = 0; i < params.length; i++) {
                     if (params[i] instanceof PushIdsMethodParameter) {
@@ -141,7 +134,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
                     }
                 }
 
-                ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
+                ReflectionUtils.invokeMethod(protocolMethodCtx.getMethod(), protocolMethodInvokeCtx.getTarget(), args);
             } catch (SerializeFailException e) {
                 log.error("发生序列化/反序列化异常", e);
             } catch (ConvertException e) {

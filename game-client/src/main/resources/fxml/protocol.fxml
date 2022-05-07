@@ -5,10 +5,10 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.Pane?>
 
-<Pane prefHeight="167.0" prefWidth="243.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+<Pane fx:id="protocolPane" prefHeight="167.0" prefWidth="243.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.li.client.controller.ProtocolController">
    <children>
-      <ComboBox layoutY="3.0" prefHeight="23.0" prefWidth="176.0" promptText="协议" />
+      <ComboBox fx:id="protocolComboBox" layoutY="3.0" prefHeight="23.0" prefWidth="176.0" promptText="协议" />
       <TextArea layoutY="40.0" prefHeight="136.0" prefWidth="243.0" />
       <Button layoutX="182.0" layoutY="3.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="58.0" text="发送" />
    </children>

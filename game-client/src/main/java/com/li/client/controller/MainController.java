@@ -1,22 +1,31 @@
 package com.li.client.controller;
 
 import com.li.client.network.ClientNetworkService;
+import com.li.client.ui.UiType;
+import de.felixroske.jfxsupport.AbstractFxmlView;
 import de.felixroske.jfxsupport.FXMLController;
+import de.felixroske.jfxsupport.FXMLView;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
 import javax.annotation.Resource;
+import java.net.URL;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 /**
  * @author li-yuanwen
  * @date 2021/12/15
  */
 @FXMLController
-public class MainController  {
+@FXMLView("/fxml/main.fxml")
+public class MainController extends AbstractFxmlView implements Initializable {
 
-    /** 协议视图 **/
-    @FXML
-    public Pane protocolPane;
+
     /** 聊天室视图 **/
     @FXML
     public Pane chatroomPane;
@@ -36,8 +45,31 @@ public class MainController  {
     @FXML
     public Pane indexPane;
 
+
+    private Map<UiType, Pane> paneMap;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        paneMap = new EnumMap<>(UiType.class);
+        paneMap.put(UiType.LOGIN, loginPane);
+        paneMap.put(UiType.PLAYER_DETAILS, indexPane);
+
+        switchUI(UiType.LOGIN);
+    }
+
     @Resource
     private ClientNetworkService networkService;
 
+
+
+    public void switchUI(UiType type) {
+        Pane pane = paneMap.get(type);
+        if (pane == null) {
+            return;
+        }
+        ObservableList<Node> children = leftPane.getChildren();
+        children.clear();
+        children.add(pane);
+    }
 
 }

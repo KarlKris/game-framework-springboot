@@ -4,7 +4,7 @@ import com.li.common.ApplicationContextHolder;
 import com.li.common.utils.ObjectsUtil;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.InBodyMethodParameter;
-import com.li.network.protocol.MethodCtx;
+import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.MethodParameter;
 import com.li.network.protocol.PushIdsMethodParameter;
 import com.li.network.serialize.SerializerHolder;
@@ -24,9 +24,9 @@ public class OuterPushProxyInvoker implements InvocationHandler {
     /** 推送执行器 **/
     private final IPushExecutor pushExecutor;
 
-    OuterPushProxyInvoker(List<MethodCtx> methodCtxes) {
-        this.methodCtxHolder = new HashMap<>(methodCtxes.size());
-        methodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
+    OuterPushProxyInvoker(List<ProtocolMethodCtx> protocolMethodCtxes) {
+        this.methodCtxHolder = new HashMap<>(protocolMethodCtxes.size());
+        protocolMethodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
         this.pushExecutor = ApplicationContextHolder.getBean(IPushExecutor.class);
     }
 
@@ -40,8 +40,8 @@ public class OuterPushProxyInvoker implements InvocationHandler {
         if (pushMethodCtx == null) {
             throw new IllegalArgumentException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
         }
-        MethodCtx methodCtx = pushMethodCtx.getMethodCtx();
-        MethodParameter[] params = methodCtx.getParams();
+        ProtocolMethodCtx protocolMethodCtx = pushMethodCtx.getProtocolMethodCtx();
+        MethodParameter[] params = protocolMethodCtx.getParams();
         byte[] content = null;
         Collection<Long> targets = Collections.emptyList();
         for (int i = 0; i < args.length; i++) {
@@ -54,7 +54,7 @@ public class OuterPushProxyInvoker implements InvocationHandler {
                 targets = (Collection<Long>) args[i];
             }
         }
-        pushExecutor.pushToOuter(new PushResponse(targets, content), methodCtx.getProtocol());
+        pushExecutor.pushToOuter(new PushResponse(targets, content), protocolMethodCtx.getProtocol());
 
         return null;
     }

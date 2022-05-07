@@ -2,7 +2,7 @@ package com.li.engine.channelhandler;
 
 import com.li.common.ApplicationContextHolder;
 import com.li.engine.channelhandler.client.ClientVocationalWorkHandler;
-import com.li.engine.channelhandler.common.HeartBeatHandler;
+import com.li.network.handler.HeartBeatHandler;
 import com.li.network.handler.MessageDecoder;
 import com.li.network.handler.MessageEncoder;
 import io.netty.channel.ChannelInitializer;

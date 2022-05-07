@@ -5,7 +5,7 @@ import com.li.common.ApplicationContextHolder;
 import com.li.common.utils.ObjectsUtil;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.InBodyMethodParameter;
-import com.li.network.protocol.MethodCtx;
+import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.MethodParameter;
 import com.li.network.protocol.PushIdsMethodParameter;
 import com.li.network.serialize.SerializerHolder;
@@ -31,9 +31,9 @@ public class InnerPushProxyInvoker implements InvocationHandler {
     /** 推送处理器 **/
     private final IPushExecutor pushExecutor;
 
-    InnerPushProxyInvoker(List<MethodCtx> methodCtxes) {
-        this.methodCtxHolder = new HashMap<>(methodCtxes.size());
-        methodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
+    InnerPushProxyInvoker(List<ProtocolMethodCtx> protocolMethodCtxes) {
+        this.methodCtxHolder = new HashMap<>(protocolMethodCtxes.size());
+        protocolMethodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
         this.sessionManager = ApplicationContextHolder.getBean(SessionManager.class);
         this.pushExecutor = ApplicationContextHolder.getBean(IPushExecutor.class);
     }
@@ -49,8 +49,8 @@ public class InnerPushProxyInvoker implements InvocationHandler {
             throw new RuntimeException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
         }
 
-        MethodCtx methodCtx = pushMethodCtx.getMethodCtx();
-        MethodParameter[] params = methodCtx.getParams();
+        ProtocolMethodCtx protocolMethodCtx = pushMethodCtx.getProtocolMethodCtx();
+        MethodParameter[] params = protocolMethodCtx.getParams();
         byte[] content = null;
         Collection<Long> targets = Collections.emptyList();
         for (int i = 0; i < args.length; i++) {
@@ -76,7 +76,7 @@ public class InnerPushProxyInvoker implements InvocationHandler {
 
         for (Map.Entry<ISession, Set<Long>> entry : session2Identities.entrySet()) {
             PushResponse response = new PushResponse(entry.getValue(), content);
-            pushExecutor.pushToInner(entry.getKey(), response, methodCtx.getProtocol());
+            pushExecutor.pushToInner(entry.getKey(), response, protocolMethodCtx.getProtocol());
         }
 
         return null;

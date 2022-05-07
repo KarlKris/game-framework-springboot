@@ -12,7 +12,7 @@ public abstract class SocketFuture {
     /** 消息序号 **/
     private final long sn;
 
-    SocketFuture(long sn) {
+    public SocketFuture(long sn) {
         this.sn = sn;
     }
 

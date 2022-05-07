@@ -98,16 +98,19 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         session.setSerializeType(serializeType);
 
         // 方法调用上下文
-        MethodInvokeCtx methodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(protocol);
-        if (methodInvokeCtx == null && !forwardMessage(session, message)) {
-            // RPC
-            response(session, message, errorSocketProtocol()
-                    , serializer.serialize(createErrorCodeBody(ServerErrorCode.INVALID_OP)));
+        ProtocolMethodInvokeCtx protocolMethodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(protocol);
+        if (protocolMethodInvokeCtx == null) {
+            if (!forwardMessage(session, message)) {
+                // RPC
+                response(session, message, errorSocketProtocol()
+                        , serializer.serialize(createErrorCodeBody(ServerErrorCode.INVALID_OP)));
+            }
+
             return;
         }
 
         // 检查身份标识
-        if (methodInvokeCtx.isIdentity() && getProtocolIdentity(session, message) <= 0) {
+        if (protocolMethodInvokeCtx.isIdentity() && getProtocolIdentity(session, message) <= 0) {
             response(session, message, errorSocketProtocol()
                     , serializer.serialize(createErrorCodeBody(ServerErrorCode.NO_IDENTITY)));
             return;
@@ -117,7 +120,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         setIdentityToThreadLocal(session, message);
         byte[] responseBody = null;
         try {
-            Object result = invokeMethod(session, message, methodInvokeCtx);
+            Object result = invokeMethod(session, message, protocolMethodInvokeCtx);
             if (result != null) {
                 responseBody = serializer.serialize(result);
             }
@@ -192,14 +195,14 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
      * 消息处理逻辑调用
      * @param session session
      * @param message message
-     * @param methodInvokeCtx 调用方法上下文
+     * @param protocolMethodInvokeCtx 调用方法上下文
      * @return method.invoke()
      */
-    private Object invokeMethod(S session, M message, MethodInvokeCtx methodInvokeCtx) {
+    private Object invokeMethod(S session, M message, ProtocolMethodInvokeCtx protocolMethodInvokeCtx) {
         Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
 
-        MethodCtx methodCtx = methodInvokeCtx.getMethodCtx();
-        MethodParameter[] params = methodCtx.getParams();
+        ProtocolMethodCtx protocolMethodCtx = protocolMethodInvokeCtx.getProtocolMethodCtx();
+        MethodParameter[] params = protocolMethodCtx.getParams();
         Object[] args = new Object[params.length];
         for (int i = 0; i < params.length; i++) {
             MethodParameter parameters = params[i];
@@ -224,7 +227,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
 
         }
 
-        return ReflectionUtils.invokeMethod(methodCtx.getMethod(), methodInvokeCtx.getTarget(), args);
+        return ReflectionUtils.invokeMethod(protocolMethodCtx.getMethod(), protocolMethodInvokeCtx.getTarget(), args);
     }
 
     /**

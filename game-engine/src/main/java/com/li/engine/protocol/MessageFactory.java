@@ -6,7 +6,7 @@ import com.li.engine.service.VocationalWorkConfig;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.network.message.*;
 import com.li.network.protocol.InBodyMethodParameter;
-import com.li.network.protocol.MethodCtx;
+import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.MethodParameter;
 import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.serialize.Serializer;
@@ -44,8 +44,8 @@ public class MessageFactory {
             Serializer originSerializer = serializerHolder.getSerializer(type);
             type = SerializerHolder.DEFAULT_SERIALIZER.getSerializerType();
 
-            MethodCtx methodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(outerMessage.getProtocol());
-            for (MethodParameter methodParameter : methodCtx.getParams()) {
+            ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(outerMessage.getProtocol());
+            for (MethodParameter methodParameter : protocolMethodCtx.getParams()) {
                 if (methodParameter instanceof InBodyMethodParameter) {
                     Object param = originSerializer.deserialize(body, methodParameter.getParameterClass());
                     body = SerializerHolder.DEFAULT_SERIALIZER.serialize(param);

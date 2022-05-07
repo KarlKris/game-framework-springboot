@@ -1,7 +1,7 @@
 package com.li.client;
 
+import com.li.client.controller.MainController;
 import de.felixroske.jfxsupport.AbstractJavaFxApplicationSupport;
-import javafx.application.Application;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -14,6 +14,6 @@ import org.springframework.context.annotation.ComponentScan;
 public class ClientApplication extends AbstractJavaFxApplicationSupport {
 
     public static void main(String[] args) {
-        Application.launch(args);
+        launch(ClientApplication.class, MainController.class, args);
     }
 }

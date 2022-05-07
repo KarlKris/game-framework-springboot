@@ -1,6 +1,6 @@
 package com.li.engine.service.push;
 
-import com.li.network.protocol.MethodCtx;
+import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.utils.ProtocolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -36,15 +36,15 @@ public class PushManager {
                 return (T) target;
             }
 
-            List<MethodCtx> methodCtx =
+            List<ProtocolMethodCtx> protocolMethodCtxes =
                     ProtocolUtil.getMethodCtxBySocketPush(clz);
-            if (methodCtx.isEmpty()) {
+            if (protocolMethodCtxes.isEmpty()) {
                 throw new RuntimeException("接口" + clz.getSimpleName() + "没有任何推送方法");
             }
 
             target = Proxy.newProxyInstance(clz.getClassLoader()
                     , new Class[]{clz}
-                    , new InnerPushProxyInvoker(methodCtx));
+                    , new InnerPushProxyInvoker(protocolMethodCtxes));
 
             this.innerProxy.put(name, target);
         }
@@ -64,15 +64,15 @@ public class PushManager {
                 return (T) target;
             }
 
-            List<MethodCtx> methodCtx =
+            List<ProtocolMethodCtx> protocolMethodCtxes =
                     ProtocolUtil.getMethodCtxBySocketPush(clz);
-            if (methodCtx.isEmpty()) {
+            if (protocolMethodCtxes.isEmpty()) {
                 throw new RuntimeException("接口" + clz.getSimpleName() + "没有任何推送方法");
             }
 
             target = Proxy.newProxyInstance(clz.getClassLoader()
                     , new Class[]{clz}
-                    , new OuterPushProxyInvoker(methodCtx));
+                    , new OuterPushProxyInvoker(protocolMethodCtxes));
 
             this.outerProxy.put(name, target);
         }

@@ -36,7 +36,7 @@ public class CacheOfPubSubMessageListener extends AbstractPubSubMessageDelegate<
                     , body.getCacheName(), body.getKey());
         }
 
-        ((CaffeineRedisCache)cacheManager.getCache(CachedType.REMOTE, body.getCacheName())).removeLocalKey(body.getKey());
+        ((CaffeineRedisCache) cacheManager.getCache(CachedType.REMOTE, body.getCacheName())).removeLocalKey(body.getKey());
     }
 
     @Override
