@@ -33,8 +33,8 @@ public class CuratorFrameworkConfiguration {
 
     @Bean
     public CuratorFramework curatorFramework() {
-        // 两次重连的等待的时间为60s 重连次数上限是3次
-        ExponentialBackoffRetry retry = new ExponentialBackoffRetry(5000, 3);
+        // 两次重连的等待的时间为60s 重连次数上限是10次
+        ExponentialBackoffRetry retry = new ExponentialBackoffRetry(6000, 10);
         CuratorFramework curatorFramework = CuratorFrameworkFactory
                 .builder()
                 .connectString(this.zookeeperUrl)

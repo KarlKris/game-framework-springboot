@@ -26,6 +26,7 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,11 +114,12 @@ public class SocketProtocolManager implements SmartInstantiationAwareBeanPostPro
             if (ctx.isSyncMethod()) {
                 Method method = ctx.getMethod();
                 Class<?> returnClz = method.getReturnType();
-                if (!CompletableFuture.class.isAssignableFrom(method.getReturnType())) {
-                    if (!entry.getValue().isAssignableFrom(method.getReturnType())) {
-                        throw new BeanInitializationException("协议号["
-                                + entry.getKey() + "]的返回对象类型注解非法");
-                    }
+                if (CompletableFuture.class.isAssignableFrom(method.getReturnType())) {
+                    returnClz = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+                }
+                if (!entry.getValue().isAssignableFrom(returnClz)) {
+                    throw new BeanInitializationException("协议号["
+                            + entry.getKey() + "]的返回对象类型注解非法");
                 }
 
             }

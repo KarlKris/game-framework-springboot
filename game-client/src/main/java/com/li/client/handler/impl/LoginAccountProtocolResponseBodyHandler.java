@@ -8,17 +8,17 @@ import com.li.client.handler.AbstractProtocolResponseBodyHandler;
 import com.li.client.ui.UiType;
 import com.li.network.message.SocketProtocol;
 import com.li.protocol.gateway.login.protocol.GatewayLoginModule;
-import com.li.protocol.gateway.login.vo.ResGatewayCreateAccount;
+import com.li.protocol.gateway.login.vo.ResGatewayLoginAccount;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
 /**
  * @author li-yuanwen
- * @date 2022/5/10
+ * @date 2022/5/11
  */
 @Component
-public class LoginProtocolResponseBodyHandler extends AbstractProtocolResponseBodyHandler<ResGatewayCreateAccount> {
+public class LoginAccountProtocolResponseBodyHandler extends AbstractProtocolResponseBodyHandler<ResGatewayLoginAccount> {
 
     @Resource
     private MessageController messageController;
@@ -28,7 +28,7 @@ public class LoginProtocolResponseBodyHandler extends AbstractProtocolResponseBo
     private ObjectMapper objectMapper;
 
     @Override
-    protected void handle0(ResGatewayCreateAccount responseBody) {
+    protected void handle0(ResGatewayLoginAccount responseBody) {
         try {
             messageController.addInfoMessage(objectMapper.writeValueAsString(responseBody));
         } catch (JsonProcessingException e) {
@@ -45,7 +45,6 @@ public class LoginProtocolResponseBodyHandler extends AbstractProtocolResponseBo
     @Override
     public SocketProtocol[] getSocketProtocol() {
         return new SocketProtocol[] {
-                new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.CREATE_ACCOUNT),
                 new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.LOGIN_ACCOUNT)
         };
     }

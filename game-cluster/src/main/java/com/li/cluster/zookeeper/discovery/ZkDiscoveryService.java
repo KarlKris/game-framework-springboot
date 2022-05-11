@@ -1,5 +1,6 @@
 package com.li.cluster.zookeeper.discovery;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.li.cluster.zookeeper.model.ServerType;
@@ -51,6 +52,9 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
                 this.discoveryNodeCache.put(type.name(), discoveryNode);
                 discoveryNode.start(this.curatorFramework, bytes -> {
                     try {
+                        if (ArrayUtil.isEmpty(bytes)) {
+                            return;
+                        }
                         synchronized (module2Type) {
                             for (short module : objectMapper.readValue(bytes
                                     , new TypeReference<Set<Short>>() {})) {

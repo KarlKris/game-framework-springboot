@@ -26,13 +26,6 @@
             <version>1.0</version>
         </dependency>
 
-        <!-- 框架核心包 -->
-        <dependency>
-            <groupId>com.li</groupId>
-            <artifactId>game-common</artifactId>
-            <version>1.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>

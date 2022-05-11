@@ -4,6 +4,7 @@ import com.li.client.ui.UiType;
 import de.felixroske.jfxsupport.AbstractFxmlView;
 import de.felixroske.jfxsupport.FXMLController;
 import de.felixroske.jfxsupport.FXMLView;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -60,9 +61,11 @@ public class MainController extends AbstractFxmlView implements Initializable {
         if (pane == null) {
             return;
         }
-        ObservableList<Node> children = leftPane.getChildren();
-        children.clear();
-        children.add(pane);
+        Platform.runLater(()->{
+            ObservableList<Node> children = leftPane.getChildren();
+            children.clear();
+            children.add(pane);
+        });
     }
 
 
