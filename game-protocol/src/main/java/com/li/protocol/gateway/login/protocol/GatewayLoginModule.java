@@ -12,10 +12,10 @@ public interface GatewayLoginModule {
     // 数据服 业务
 
     /** 创建账号 **/
-    byte GAME_SERVER_CREATE = 1;
+    byte CREATE_ACCOUNT = 1;
 
     /** 登录 **/
-    byte GAME_SERVER_LOGIN = 2;
+    byte LOGIN_ACCOUNT = 2;
 
     /** 强退 **/
     byte KICK_OUT = -1;

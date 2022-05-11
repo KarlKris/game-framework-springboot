@@ -3,8 +3,12 @@ package com.li.protocol.game.login.protocol;
 
 import com.li.network.anno.*;
 import com.li.network.session.ServerSession;
-import com.li.protocol.game.login.dto.ReqGameCreateAccount;
-import com.li.protocol.game.login.dto.ReqGameLoginAccount;
+import com.li.protocol.game.login.vo.ReqGameCreateAccount;
+import com.li.protocol.game.login.vo.ReqGameLoginAccount;
+import com.li.protocol.game.login.vo.ResGameCreateAccount;
+import com.li.protocol.game.login.vo.ResGameLoginAccount;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author li-yuanwen
@@ -21,7 +25,7 @@ public interface GameServerLoginController {
      * @return 玩家标识
      */
     @SocketMethod(id = GameServerLoginModule.CREATE)
-    Long create(@Session ServerSession session
+    CompletableFuture<ResGameCreateAccount> create(@Session ServerSession session
             , @InBody ReqGameCreateAccount reqGameCreateAccount);
 
 
@@ -32,7 +36,7 @@ public interface GameServerLoginController {
      * @return 玩家标识
      */
     @SocketMethod(id = GameServerLoginModule.LOGIN)
-    Long login(@Session ServerSession session
+    CompletableFuture<ResGameLoginAccount> login(@Session ServerSession session
             , @InBody ReqGameLoginAccount reqGameLoginAccount);
 
 

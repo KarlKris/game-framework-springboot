@@ -1,18 +1,18 @@
-package com.li.protocol.gateway.login.dto;
+package com.li.protocol.gateway.login.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * 网关层创建账号参数
+ * 网关层登陆账号参数
  * @author li-yuanwen
  * @date 2021/12/16
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReqGatewayCreateAccount {
+public class ReqGatewayLoginAccount {
 
     /** 账号 **/
     private String account;

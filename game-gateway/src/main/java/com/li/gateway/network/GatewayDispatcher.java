@@ -6,6 +6,7 @@ import com.li.engine.client.NioNettyClient;
 import com.li.engine.client.NioNettyClientFactory;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.handler.AbstractDispatcher;
+import com.li.engine.service.push.ResponseMessagePushProcessor;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.engine.service.rpc.future.ForwardSocketFuture;
 import com.li.engine.service.session.SessionManager;
@@ -13,6 +14,7 @@ import com.li.network.message.InnerMessage;
 import com.li.network.message.OuterMessage;
 import com.li.network.message.ProtocolConstant;
 import com.li.network.message.SocketProtocol;
+import com.li.network.serialize.Serializer;
 import com.li.network.session.PlayerSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,7 +29,7 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Component
-public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSession> {
+public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSession> implements ResponseMessagePushProcessor<PlayerSession> {
 
     @Resource
     private RemoteServerSeekService remoteServerSeekService;
@@ -92,5 +94,20 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
                 , responseBody);
 
         SessionManager.writeAndFlush(session, outerMessage);
+    }
+
+    @Override
+    public void response(PlayerSession session, long messageSn, SocketProtocol protocol, Object responseBody) {
+        Byte serializeType = session.getSerializeType();
+
+        byte[] body = null;
+        if (responseBody != null) {
+            Serializer serializer = serializerHolder.getSerializer(serializeType);
+            body = serializer.serialize(responseBody);
+        }
+
+        OuterMessage message = messageFactory.toOuterMessage(messageSn, ProtocolConstant.VOCATIONAL_WORK_RES
+                , protocol, serializeType, body);
+        SessionManager.writeAndFlush(session, message);
     }
 }

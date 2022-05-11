@@ -17,6 +17,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 消息分发器基类
@@ -123,7 +124,13 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         try {
             Object result = invokeMethod(session, message, protocolMethodInvokeCtx);
             if (result != null) {
-                responseBody = serializer.serialize(result);
+                if (result instanceof CompletableFuture) {
+                    CompletableFuture<?> future = (CompletableFuture<?>) result;
+                    responseBody = serializer.serialize(future.get());
+                } else {
+                    responseBody = serializer.serialize(result);
+                }
+
 
             }
         }  catch (SocketException e) {

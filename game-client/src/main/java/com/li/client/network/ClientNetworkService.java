@@ -12,8 +12,8 @@ import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
-import com.li.protocol.gateway.login.dto.ReqGatewayCreateAccount;
-import com.li.protocol.gateway.login.dto.ReqGatewayLoginAccount;
+import com.li.protocol.gateway.login.vo.ReqGatewayCreateAccount;
+import com.li.protocol.gateway.login.vo.ReqGatewayLoginAccount;
 import com.li.protocol.gateway.login.protocol.GatewayLoginModule;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -127,7 +127,7 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
             connect(address, port);
         }
 
-        SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.GAME_SERVER_LOGIN);
+        SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.LOGIN_ACCOUNT);
 
         // body
         int now = DateUtil.thisSecond();
@@ -142,7 +142,7 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
             connect(address, port);
         }
 
-        SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.GAME_SERVER_CREATE);
+        SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.CREATE_ACCOUNT);
 
         // body
         int now = DateUtil.thisSecond();

@@ -9,6 +9,7 @@ import org.springframework.util.ClassUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 业务协议相关工具类
@@ -111,7 +112,8 @@ public class ProtocolUtil {
                 if (!Void.TYPE.isAssignableFrom(type)
                         && !Number.class.isAssignableFrom(type)
                         && !Collection.class.isAssignableFrom(type)
-                        && !Map.class.isAssignableFrom(type)) {
+                        && !Map.class.isAssignableFrom(type)
+                        && !CompletableFuture.class.isAssignableFrom(type)) {
                     SocketResponse socketResponse = AnnotationUtils.findAnnotation(type, SocketResponse.class);
                     if (socketResponse == null) {
                         throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]的方法返回对象没有使用相关注解");

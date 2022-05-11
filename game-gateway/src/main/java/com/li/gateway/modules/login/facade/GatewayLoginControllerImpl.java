@@ -6,8 +6,8 @@ import com.li.common.exception.BadRequestException;
 import com.li.gateway.commom.GatewaySystemConfig;
 import com.li.gateway.modules.login.service.GatewayLoginService;
 import com.li.network.session.PlayerSession;
-import com.li.protocol.gateway.login.dto.ReqGatewayCreateAccount;
-import com.li.protocol.gateway.login.dto.ReqGatewayLoginAccount;
+import com.li.protocol.gateway.login.vo.ReqGatewayCreateAccount;
+import com.li.protocol.gateway.login.vo.ReqGatewayLoginAccount;
 import com.li.protocol.gateway.login.protocol.GatewayLoginController;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class GatewayLoginControllerImpl implements GatewayLoginController {
     private GatewayLoginService gatewayLoginService;
 
     @Override
-    public Long create(PlayerSession session, ReqGatewayCreateAccount reqGatewayCreateAccount) {
+    public void create(PlayerSession session, ReqGatewayCreateAccount reqGatewayCreateAccount) {
         if (StringUtils.isBlank(reqGatewayCreateAccount.getAccount())) {
             throw new BadRequestException(GatewayLoginResultCode.ACCOUNT_INVALID);
         }
@@ -35,14 +35,14 @@ public class GatewayLoginControllerImpl implements GatewayLoginController {
                 , reqGatewayCreateAccount.getTimestamp(), reqGatewayCreateAccount.getSign())) {
             throw new BadRequestException(GatewayLoginResultCode.SIGN_ERROR);
         }
-        return gatewayLoginService.create(session
+        gatewayLoginService.create(session
                 , reqGatewayCreateAccount.getAccount()
                 , reqGatewayCreateAccount.getChannel()
                 , reqGatewayCreateAccount.getServerId());
     }
 
     @Override
-    public Long login(PlayerSession session, ReqGatewayLoginAccount reqGatewayLoginAccount) {
+    public void login(PlayerSession session, ReqGatewayLoginAccount reqGatewayLoginAccount) {
         if (StringUtils.isBlank(reqGatewayLoginAccount.getAccount())) {
             throw new BadRequestException(GatewayLoginResultCode.ACCOUNT_INVALID);
         }
@@ -51,7 +51,8 @@ public class GatewayLoginControllerImpl implements GatewayLoginController {
                 , reqGatewayLoginAccount.getSign())) {
             throw new BadRequestException(GatewayLoginResultCode.SIGN_ERROR);
         }
-        return gatewayLoginService.login(session, reqGatewayLoginAccount.getAccount()
+
+        gatewayLoginService.login(session, reqGatewayLoginAccount.getAccount()
                 , reqGatewayLoginAccount.getChannel()
                 , reqGatewayLoginAccount.getServerId());
     }

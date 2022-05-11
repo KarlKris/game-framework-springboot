@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -111,10 +112,14 @@ public class SocketProtocolManager implements SmartInstantiationAwareBeanPostPro
             ProtocolMethodCtx ctx = sharedProtocolMethodHolder.get(entry.getKey());
             if (ctx.isSyncMethod()) {
                 Method method = ctx.getMethod();
-                if (!entry.getValue().isAssignableFrom(method.getReturnType())) {
-                    throw new BeanInitializationException("协议号["
-                            + entry.getKey() + "]的返回对象类型注解非法");
+                Class<?> returnClz = method.getReturnType();
+                if (!CompletableFuture.class.isAssignableFrom(method.getReturnType())) {
+                    if (!entry.getValue().isAssignableFrom(method.getReturnType())) {
+                        throw new BeanInitializationException("协议号["
+                                + entry.getKey() + "]的返回对象类型注解非法");
+                    }
                 }
+
             }
             ctx.setReturnClz(entry.getValue());
         }

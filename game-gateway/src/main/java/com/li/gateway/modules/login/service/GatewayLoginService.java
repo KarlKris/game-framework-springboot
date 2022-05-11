@@ -17,7 +17,7 @@ public interface GatewayLoginService {
      * @param serverId 服务器标识
      * @return 玩家标识
      */
-    Long create(PlayerSession session, String account, int channel, int serverId);
+    void create(PlayerSession session, String account, int channel, int serverId);
 
 
     /**
@@ -28,6 +28,6 @@ public interface GatewayLoginService {
      * @param serverId 服务器标识
      * @return 玩家标识
      */
-    Long login(PlayerSession session, String account, int channel, int serverId);
+    void login(PlayerSession session, String account, int channel, int serverId);
 
 }
