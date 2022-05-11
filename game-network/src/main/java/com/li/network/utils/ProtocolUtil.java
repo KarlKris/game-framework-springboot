@@ -8,9 +8,7 @@ import org.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 业务协议相关工具类
@@ -107,7 +105,26 @@ public class ProtocolUtil {
                 }
             }
 
-            ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params));
+            Class<?> returnClz = null;
+            if (socketMethod.isSyncMethod()) {
+                Class<?> type = method.getReturnType();
+                if (!Void.TYPE.isAssignableFrom(type)
+                        && !Number.class.isAssignableFrom(type)
+                        && !Collection.class.isAssignableFrom(type)
+                        && !Map.class.isAssignableFrom(type)) {
+                    SocketResponse socketResponse = AnnotationUtils.findAnnotation(type, SocketResponse.class);
+                    if (socketResponse == null) {
+                        throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]的方法返回对象没有使用相关注解");
+                    }
+
+                    if (socketResponse.module() != module || socketResponse.id() != id) {
+                        throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]的方法返回对象注解的内容不一致");
+                    }
+                }
+                returnClz = type;
+            }
+
+            ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params, socketMethod.isSyncMethod(), returnClz));
         }
 
         return ctx;
@@ -184,7 +201,7 @@ public class ProtocolUtil {
                 }
             }
 
-            ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params));
+            ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params, true));
 
         }
 

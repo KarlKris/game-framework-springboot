@@ -1,9 +1,16 @@
 package com.li.client.network;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.li.client.handler.ProtocolResponseBodyHandler;
 import com.li.client.stat.EfficiencyStatistic;
 import com.li.network.message.*;
+import com.li.network.modules.ErrorCodeModule;
+import com.li.network.protocol.ProtocolMethodCtx;
+import com.li.network.protocol.SocketProtocolManager;
+import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
 import com.li.protocol.gateway.login.dto.ReqGatewayCreateAccount;
 import com.li.protocol.gateway.login.dto.ReqGatewayLoginAccount;
@@ -13,12 +20,14 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author li-yuanwen
@@ -30,19 +39,35 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> {
 
     @Resource
+    private ApplicationContext applicationContext;
+    @Resource
     private ClientInitializer clientInitializer;
     @Resource
     private EfficiencyStatistic efficiencyStatistic;
+    @Resource
+    private SocketProtocolManager socketProtocolManager;
+    @Resource
+    private SerializerHolder serializerHolder;
+
+    private final Map<SocketProtocol, ProtocolResponseBodyHandler<?>> responseBodyHandlerHolder = new HashMap<>();
+
+    @PostConstruct
+    private void init() {
+        for (ProtocolResponseBodyHandler<?> handler : applicationContext.getBeansOfType(ProtocolResponseBodyHandler.class).values()) {
+            for (SocketProtocol protocol : handler.getSocketProtocol()) {
+                ProtocolResponseBodyHandler<?> old = responseBodyHandlerHolder.putIfAbsent(protocol, handler);
+                if (old != null) {
+                    throw new BeanInitializationException("协议:" + protocol + "响应体处理器重复");
+                }
+            }
+
+        }
+    }
 
 
     private static final String KEY = "GAME-FRAMEWORK-GATEWAY";
     private static final int CHANNEL = 1;
     private static final int SERVER_ID = 1;
-
-
-    private final AtomicLong snGenerator = new AtomicLong(0);
-    private final Set<Long> sendSns = new HashSet<>(16);
-
 
     /** 线程组 **/
     private final EventLoopGroup eventLoopGroup = new NioEventLoopGroup(1);
@@ -57,28 +82,50 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
             return;
         }
 
-        OuterMessage message = (OuterMessage) msg;
+        SocketProtocol protocol = msg.getProtocol();
+        EfficiencyStatistic.SingleProtocolStat singleProtocolStat = efficiencyStatistic.finishSingleProtocol(msg.getSn(), protocol);
 
+        OuterMessage message = (OuterMessage) msg;
+        byte[] body = message.getBody();
+        Object responseBody = null;
+        if (ArrayUtil.isNotEmpty(body)) {
+            if (message.isZip()) {
+                body = ZipUtil.unGzip(body);
+            }
+
+            Class<?> returnClz = null;
+            if (protocol.equals(ErrorCodeModule.ERROR_CODE_RESPONSE)) {
+                returnClz = Long.class;
+            } else {
+                ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);
+                returnClz = protocolMethodCtx.getReturnClz();
+            }
+
+            Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
+            responseBody = serializer.deserialize(body, returnClz);
+        }
+
+        ProtocolResponseBodyHandler bodyHandler = responseBodyHandlerHolder.get(singleProtocolStat.getProtocol());
+        if (bodyHandler != null) {
+            bodyHandler.handle(singleProtocolStat.getProtocol(), protocol, responseBody);
+        }
 
     }
 
-
     private void send(SocketProtocol protocol, Object body) {
-        long sn = snGenerator.incrementAndGet();
-        sendSns.add(sn);
+        long sn = efficiencyStatistic.nextSn();
         OuterMessageHeader header = OuterMessageHeader.of(sn, ProtocolConstant.VOCATIONAL_WORK_REQ, protocol, false
                 , SerializerHolder.DEFAULT_SERIALIZER.getSerializerType());
         OuterMessage message = OuterMessage.of(header, SerializerHolder.DEFAULT_SERIALIZER.serialize(body));
+        efficiencyStatistic.requestSingleProtocol(sn, protocol);
         channel.writeAndFlush(message);
 
     }
 
     public void login(String address, int port, String account) throws InterruptedException {
-        if (channel != null) {
-            return;
+        if (channel == null || !channel.isActive()) {
+            connect(address, port);
         }
-
-        connect(address, port);
 
         SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.GAME_SERVER_LOGIN);
 
@@ -91,11 +138,9 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
     }
 
     public void create(String address, int port, String account) throws InterruptedException {
-        if (channel != null) {
-            return;
+        if (channel == null || !channel.isActive()) {
+            connect(address, port);
         }
-
-        connect(address, port);
 
         SocketProtocol protocol = new SocketProtocol(GatewayLoginModule.MODULE, GatewayLoginModule.GAME_SERVER_CREATE);
 

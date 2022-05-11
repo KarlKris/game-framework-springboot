@@ -52,6 +52,7 @@ public class GenericSerializedExecutorService implements SerializedExecutorServi
     public void shutdown() {
         this.running = false;
         this.taskWorkerFactory.shutdown();
+        this.id2TaskWorkerHolder.clear();
     }
 
     private void checkStatus() throws RuntimeException {

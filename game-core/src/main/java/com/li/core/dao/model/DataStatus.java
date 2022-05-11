@@ -13,14 +13,19 @@ public enum DataStatus {
     INIT(0),
 
     /**
+     * 新创建的的对象
+     */
+    NEW(1),
+
+    /**
      * 对象被修改
      */
-    MODIFY(1),
+    MODIFY(2),
 
     /**
      * 需要删除，先删db以后再移除内存
      */
-    DELETE(2),
+    DELETE(3),
 
     ;
 

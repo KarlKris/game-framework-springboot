@@ -30,8 +30,8 @@ public class GameVocationalWorkHandler extends AbstractServerVocationalWorkHandl
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, InnerMessage innerMessage) throws Exception {
-        ServerSession playerSession = (ServerSession) ctx.channel().attr(ChannelAttributeKeys.SESSION).get();
-        dispatcher.dispatch(innerMessage, playerSession);
+        ServerSession serverSession = (ServerSession) ctx.channel().attr(ChannelAttributeKeys.SESSION).get();
+        dispatcher.dispatch(innerMessage, serverSession);
     }
 
     @Override
@@ -48,13 +48,15 @@ public class GameVocationalWorkHandler extends AbstractServerVocationalWorkHandl
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         ServerSession serverSession = sessionManager.removeServerSession(ctx.channel());
 
-        if (log.isDebugEnabled()) {
-            log.debug("与客户端[{}]断开连接,注册PlayerSession[{}]", serverSession.getIp(), serverSession.getSessionId());
-        }
+        if (serverSession != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("与客户端[{}]断开连接,注册PlayerSession[{}]", serverSession.getIp(), serverSession.getSessionId());
+            }
 
-        for (long id : serverSession.getIdentities()) {
-            sessionManager.logout(id);
-            executorService.destroy(id);
+            for (long id : serverSession.getIdentities()) {
+                sessionManager.logout(id);
+                executorService.destroy(id);
+            }
         }
 
         executorService.destroy(serverSession.getSessionId());

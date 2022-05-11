@@ -1,10 +1,9 @@
 package com.li.engine.service.handler;
 
-import com.li.engine.protocol.MessageFactory;
-import com.li.engine.service.VocationalWorkConfig;
 import com.li.common.exception.SocketException;
 import com.li.common.exception.code.ServerErrorCode;
 import com.li.common.thread.SerializedExecutorService;
+import com.li.engine.protocol.MessageFactory;
 import com.li.network.message.IMessage;
 import com.li.network.message.SocketProtocol;
 import com.li.network.modules.ErrorCodeModule;
@@ -34,8 +33,6 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
     @Resource
     protected MessageFactory messageFactory;
     @Resource
-    private VocationalWorkConfig config;
-    @Resource
     private SocketProtocolManager socketProtocolManager;
     @Resource
     private SerializedExecutorService executorService;
@@ -48,17 +45,18 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             }
             return;
         }
+        long id;
+        long identity = getProtocolIdentity(session, message);
+        if (identity > 0) {
+            // 请求源唯一标识已绑定对象,释放线程池
+            executorService.destroy(session.getSessionId());
+            id = identity;
+        } else {
+            id = session.getSessionId();
+        }
         // 交付给线程池执行
-        executorService.submit(getIdBySessionAndMessage(session, message), () -> dispatch0(session, message));
+        executorService.submit(id, () -> dispatch0(session, message));
     }
-
-    /**
-     * 根据session和message返回消息来源的玩家唯一标识
-     * @param session session
-     * @param message message
-     * @return 消息来源的玩家唯一标识 or sessionId
-     */
-    protected abstract long getIdBySessionAndMessage(S session, M message);
 
     /**
      * 消息分发前处理,用于判断一下信息
@@ -105,24 +103,28 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
                 response(session, message, errorSocketProtocol()
                         , serializer.serialize(createErrorCodeBody(ServerErrorCode.INVALID_OP)));
             }
-
             return;
         }
 
+        final long identity = getProtocolIdentity(session, message);
         // 检查身份标识
-        if (protocolMethodInvokeCtx.isIdentity() && getProtocolIdentity(session, message) <= 0) {
+        if (protocolMethodInvokeCtx.isIdentity() && identity <= 0) {
             response(session, message, errorSocketProtocol()
                     , serializer.serialize(createErrorCodeBody(ServerErrorCode.NO_IDENTITY)));
             return;
         }
 
-        // 将身份标识设置进ThreadLocal
-        setIdentityToThreadLocal(session, message);
+        // 将身份标识和请求序号设置进ThreadLocal,用于后续的rpc使用
+        // identity可能为0,因为identity需要通过登陆或创建角色来绑定,此时的rpc协议请求应保证不会使用@Identity注解
+        ThreadLocalContentHolder.setIdentity(identity);
+        ThreadLocalContentHolder.setMessageSn(message.getSn());
+
         byte[] responseBody = null;
         try {
             Object result = invokeMethod(session, message, protocolMethodInvokeCtx);
             if (result != null) {
                 responseBody = serializer.serialize(result);
+
             }
         }  catch (SocketException e) {
             if (log.isDebugEnabled()) {
@@ -135,11 +137,12 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             protocol = errorSocketProtocol();
             responseBody = serializer.serialize(createErrorCodeBody(ServerErrorCode.UNKNOWN));
         } finally {
-            if (responseBody != null) {
+            if (protocolMethodInvokeCtx.isSyncMethod()) {
                 response(session, message, protocol, responseBody);
             }
             // 线程执行完成移除ThreadLocal,防止内存溢出
-            ThreadSessionIdentityHolder.remove();
+            ThreadLocalContentHolder.removeIdentity();
+            ThreadLocalContentHolder.removeMessageSn();
         }
 
     }
@@ -153,19 +156,6 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         executorService.shutdown();
     }
 
-
-    /**
-     * 计算hash值
-     * @param key key
-     * @return hash
-     */
-    static int hash(Long key) {
-        int h;
-        return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
-    }
-
-
-
     /**
      * 处理需要转发的信息,由服务器性质决定是否需要具有转发消息的功能
      * @param session session
@@ -176,18 +166,12 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         return false;
     }
 
-    /**
-     * ThreadLocal<Long> 存储玩家标识
-     * @param session session
-     * @param message message
-     */
-    protected abstract void setIdentityToThreadLocal(S session, M message);
 
     /**
      * 获取消息身份标识
      * @param session session
      * @param message message
-     * @return > 0 身份标识 or 无
+     * @return > 0 身份标识
      */
     protected abstract long getProtocolIdentity(S session, M message);
 
@@ -240,10 +224,8 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
     protected abstract void response(S session, M message, SocketProtocol protocol, byte[] responseBody);
 
 
-    private final SocketProtocol errorProtocol = new SocketProtocol(ErrorCodeModule.MODULE, ErrorCodeModule.ERROR_CODE);
-
     private SocketProtocol errorSocketProtocol() {
-        return errorProtocol;
+        return ErrorCodeModule.ERROR_CODE_RESPONSE;
     }
 
 

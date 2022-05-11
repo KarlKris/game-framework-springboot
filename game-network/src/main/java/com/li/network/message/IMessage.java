@@ -44,9 +44,9 @@ public interface IMessage {
 
     /**
      * 消息是否压缩
-     * @return
+     * @return true 压缩
      */
-    default boolean zip() {
+    default boolean isZip() {
         return ProtocolConstant.zip(getMessageType());
     }
 

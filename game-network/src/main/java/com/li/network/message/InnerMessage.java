@@ -13,10 +13,10 @@ public class InnerMessage implements IMessage {
 
     /** 服务器内部心跳消息包 **/
     public static final InnerMessage HEART_BEAT_REQ = InnerMessage.of(
-            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_REQ, null, false, SerializeType.PROTO_STUFF.getType(),  0, -1, null)
+            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_REQ, null, false, SerializeType.PROTOBUF.getType(),  0, -1, null)
             , null);
     public static final InnerMessage HEART_BEAT_RES = InnerMessage.of(
-            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_RES, null, false, SerializeType.PROTO_STUFF.getType(),  0, -1, null)
+            InnerMessageHeader.of(ProtocolConstant.HEART_BEAT_RES, null, false, SerializeType.PROTOBUF.getType(),  0, -1, null)
             , null);
 
 
@@ -80,7 +80,7 @@ public class InnerMessage implements IMessage {
             message.body = new byte[in.readShort()];
             in.readBytes(message.body);
             // 消息体解压缩
-            if (message.zip()) {
+            if (message.isZip()) {
                 message.body = ZipUtil.unGzip(message.body);
             }
         }

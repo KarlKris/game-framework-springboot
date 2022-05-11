@@ -5,6 +5,8 @@ import com.li.common.exception.SocketException;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.SocketProtocol;
 import com.li.network.modules.ErrorCodeModule;
+import com.li.network.protocol.ProtocolMethodCtx;
+import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
 
@@ -20,12 +22,13 @@ public class RpcSocketFuture extends SocketFuture {
     /** rpc结果回调future **/
     private final CompletableFuture<Object> future;
     /** 回调结果类型 **/
-    private final Class<?> clazz;
+    private final SocketProtocolManager socketProtocolManager;
 
-    public RpcSocketFuture(long sn, Class<?> clazz, CompletableFuture<Object> future) {
-        super(sn);
+    public RpcSocketFuture(long sn, long outerSn, long identity, boolean sync
+            , SocketProtocolManager socketProtocolManager, CompletableFuture<Object> future) {
+        super(sn, outerSn, identity, sync);
         this.future = future;
-        this.clazz = clazz;
+        this.socketProtocolManager = socketProtocolManager;
     }
 
     @Override
@@ -39,7 +42,8 @@ public class RpcSocketFuture extends SocketFuture {
             future.completeExceptionally(new SocketException(errorCode, "请求远程服务异常"));
             return;
         }
-        Object result = serializer.deserialize(message.getBody(), clazz);
+        ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);
+        Object result = serializer.deserialize(message.getBody(), protocolMethodCtx.getReturnClz());
         future.complete(result);
     }
 }

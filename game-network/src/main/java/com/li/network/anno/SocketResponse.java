@@ -6,10 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 注解,用于标识推送目标集
+ * 协议返回对象注解
  * @author li-yuanwen
  */
-@Target(ElementType.PARAMETER)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PushIds {
+public @interface SocketResponse {
+
+    /** 业务模块号 **/
+    short module();
+
+    /** 协议号 **/
+    byte id();
+
 }

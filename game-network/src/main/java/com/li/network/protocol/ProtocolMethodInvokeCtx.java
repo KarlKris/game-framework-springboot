@@ -34,4 +34,12 @@ public class ProtocolMethodInvokeCtx {
         return ClassUtils.isAssignable(Void.TYPE, returnType);
     }
 
+    /**
+     * 协议是否是同步协议
+     * @return true 同步协议
+     */
+    public boolean isSyncMethod() {
+        return protocolMethodCtx.isSyncMethod();
+    }
+
 }

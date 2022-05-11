@@ -3,11 +3,10 @@ package com.li.engine.protocol;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ZipUtil;
 import com.li.engine.service.VocationalWorkConfig;
-import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.network.message.*;
 import com.li.network.protocol.InBodyMethodParameter;
-import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.MethodParameter;
+import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
@@ -19,9 +18,9 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 
 /**
- * @author li-yuanwen
  * 消息工厂
- * (推送,应答前只能通过工厂构建消息,不允许私自调用对应消息的构造方法或静态创建方法)
+ * 推送,应答前只能通过工厂构建消息,不允许私自调用对应消息的构造方法或静态创建方法
+ * @author li-yuanwen
  */
 @Component
 public class MessageFactory {
@@ -29,20 +28,18 @@ public class MessageFactory {
     @Resource
     private SerializerHolder serializerHolder;
     @Resource
-    private SocketFutureManager socketFutureManager;
-    @Resource
     private SocketProtocolManager socketProtocolManager;
     @Resource
     private VocationalWorkConfig config;
 
-    public InnerMessage convertToInnerMessage(OuterMessage outerMessage, PlayerSession playerSession) {
+    public InnerMessage convertToRequestInnerMessage(long sn, OuterMessage outerMessage, PlayerSession playerSession) {
 
-        byte type = outerMessage.getMessageType();
+        byte serializeType = outerMessage.getSerializeType();
         byte[] body = outerMessage.getBody();
 
-        if (ArrayUtil.isNotEmpty(body) && type != SerializerHolder.DEFAULT_SERIALIZER.getSerializerType()) {
-            Serializer originSerializer = serializerHolder.getSerializer(type);
-            type = SerializerHolder.DEFAULT_SERIALIZER.getSerializerType();
+        if (ArrayUtil.isNotEmpty(body) && serializeType != SerializerHolder.DEFAULT_SERIALIZER.getSerializerType()) {
+            Serializer originSerializer = serializerHolder.getSerializer(serializeType);
+            serializeType = SerializerHolder.DEFAULT_SERIALIZER.getSerializerType();
 
             ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(outerMessage.getProtocol());
             for (MethodParameter methodParameter : protocolMethodCtx.getParams()) {
@@ -53,20 +50,38 @@ public class MessageFactory {
             }
 
         }
-
-        long nextSn = socketFutureManager.nextSn();
-        return toInnerMessage(nextSn
+        return toInnerMessage(sn
                 , outerMessage.getMessageType()
                 , outerMessage.getProtocol()
-                , type
+                , serializeType
                 , body
                 , playerSession.getIdentity()
                 , playerSession.getIp());
     }
 
 
-    public OuterMessage convertToOuterMessage(InnerMessage message, ISession session) {
-        return null;
+    public OuterMessage convertToResponseOuterMessage(long sn, InnerMessage innerMessage, ISession session) {
+
+        byte serializeType = innerMessage.getSerializeType();
+        byte[] body = innerMessage.getBody();
+
+        if (ArrayUtil.isNotEmpty(body) && serializeType != session.getSerializeType()) {
+            Serializer originSerializer = serializerHolder.getSerializer(serializeType);
+
+            ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(innerMessage.getProtocol());
+            Object returnObj = originSerializer.deserialize(body, protocolMethodCtx.getReturnClz());
+
+            Serializer serializer = serializerHolder.getSerializer(session.getSerializeType());
+            body = serializer.serialize(returnObj);
+
+        }
+
+        return toOuterMessage(sn
+                , innerMessage.getMessageType()
+                , innerMessage.getProtocol()
+                , session.getSerializeType()
+                , body);
+
     }
 
 

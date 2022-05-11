@@ -1,6 +1,5 @@
 package com.li.client.controller;
 
-import com.li.client.network.ClientNetworkService;
 import com.li.client.ui.UiType;
 import de.felixroske.jfxsupport.AbstractFxmlView;
 import de.felixroske.jfxsupport.FXMLController;
@@ -11,7 +10,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
-import javax.annotation.Resource;
 import java.net.URL;
 import java.util.EnumMap;
 import java.util.Map;
@@ -24,7 +22,6 @@ import java.util.ResourceBundle;
 @FXMLController
 @FXMLView("/fxml/main.fxml")
 public class MainController extends AbstractFxmlView implements Initializable {
-
 
     /** 聊天室视图 **/
     @FXML
@@ -57,10 +54,6 @@ public class MainController extends AbstractFxmlView implements Initializable {
         switchUI(UiType.LOGIN);
     }
 
-    @Resource
-    private ClientNetworkService networkService;
-
-
 
     public void switchUI(UiType type) {
         Pane pane = paneMap.get(type);
@@ -71,5 +64,6 @@ public class MainController extends AbstractFxmlView implements Initializable {
         children.clear();
         children.add(pane);
     }
+
 
 }

@@ -77,7 +77,7 @@ public class OuterMessage implements IMessage {
             message.body = new byte[in.readShort()];
             in.readBytes(message.body);
             // 消息体解压缩
-            if (message.zip()) {
+            if (message.isZip()) {
                 message.body = ZipUtil.unGzip(message.body);
             }
         }

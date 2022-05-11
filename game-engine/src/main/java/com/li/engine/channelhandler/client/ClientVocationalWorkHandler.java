@@ -3,10 +3,10 @@ package com.li.engine.channelhandler.client;
 import cn.hutool.core.convert.ConvertException;
 import com.li.common.exception.SerializeFailException;
 import com.li.common.thread.SerializedExecutorService;
+import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.push.IPushExecutor;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.engine.service.rpc.future.SocketFuture;
-import com.li.network.message.IMessage;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.*;
@@ -30,7 +30,7 @@ import java.io.IOException;
 @Slf4j
 @Component
 @ChannelHandler.Sharable
-public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMessage> {
+public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<InnerMessage> {
 
     @Resource
     private SerializerHolder serializerHolder;
@@ -45,7 +45,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, IMessage msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, InnerMessage msg) throws Exception {
         // 处理从服务端收到的信息
         if (msg.isRequest()) {
             if (log.isDebugEnabled()) {
@@ -67,7 +67,23 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
             return;
         }
 
-        socketFuture.complete((InnerMessage) msg);
+        long outerSn = socketFuture.getOuterSn();
+        long identity = socketFuture.getIdentity();
+        if (socketFuture.isSync()) {
+            socketFuture.complete(msg);
+        } else {
+            // 回到玩家业务线程处理
+            executorService.submit(identity, () -> {
+                ThreadLocalContentHolder.setIdentity(identity);
+                ThreadLocalContentHolder.setMessageSn(outerSn);
+                try {
+                    socketFuture.complete(msg);
+                } finally {
+                    ThreadLocalContentHolder.removeIdentity();
+                    ThreadLocalContentHolder.removeMessageSn();
+                }
+            });
+        }
 
     }
 
@@ -95,7 +111,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<IMe
         super.userEventTriggered(ctx, evt);
     }
 
-    private void handlePushMessage(IMessage message) {
+    private void handlePushMessage(InnerMessage message) {
         executorService.submit(() -> {
             ProtocolMethodInvokeCtx protocolMethodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(message.getProtocol());
             if (protocolMethodInvokeCtx == null) {

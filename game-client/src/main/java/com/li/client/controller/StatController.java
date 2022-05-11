@@ -1,6 +1,8 @@
 package com.li.client.controller;
 
 import de.felixroske.jfxsupport.FXMLController;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 
 /**
  * @author li-yuanwen
@@ -8,4 +10,16 @@ import de.felixroske.jfxsupport.FXMLController;
  */
 @FXMLController
 public class StatController {
+
+    @FXML
+    private Label requestNum;
+    @FXML
+    private Label responseNum;
+    @FXML
+    private Label lastTime;
+    @FXML
+    private Label avgTime;
+    @FXML
+    private Label largestTime;
+
 }

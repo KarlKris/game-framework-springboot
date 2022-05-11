@@ -17,4 +17,13 @@ public @interface SocketMethod {
     /** 协议号 **/
     byte id();
 
+    /**
+     * 是否是同步协议
+     * 对于一些需要rpc的协议,线程可以不必同步等待rpc返回,而是rpc返回时再返回协议返回内容
+     * 即可以使用CompletableFuture.whenComplete()返回协议内容,减少不必要的等待
+     * @return true 同步协议
+     */
+    boolean isSyncMethod() default true;
+
+
 }

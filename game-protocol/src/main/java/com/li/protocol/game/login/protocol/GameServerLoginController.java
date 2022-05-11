@@ -1,10 +1,7 @@
 package com.li.protocol.game.login.protocol;
 
 
-import com.li.network.anno.Identity;
-import com.li.network.anno.InBody;
-import com.li.network.anno.SocketController;
-import com.li.network.anno.SocketMethod;
+import com.li.network.anno.*;
 import com.li.network.session.ServerSession;
 import com.li.protocol.game.login.dto.ReqGameCreateAccount;
 import com.li.protocol.game.login.dto.ReqGameLoginAccount;
@@ -24,7 +21,7 @@ public interface GameServerLoginController {
      * @return 玩家标识
      */
     @SocketMethod(id = GameServerLoginModule.CREATE)
-    Long create(ServerSession session
+    Long create(@Session ServerSession session
             , @InBody ReqGameCreateAccount reqGameCreateAccount);
 
 
@@ -35,7 +32,7 @@ public interface GameServerLoginController {
      * @return 玩家标识
      */
     @SocketMethod(id = GameServerLoginModule.LOGIN)
-    Long login(ServerSession session
+    Long login(@Session ServerSession session
             , @InBody ReqGameLoginAccount reqGameLoginAccount);
 
 
@@ -45,6 +42,6 @@ public interface GameServerLoginController {
      * @param identity 玩家标识
      */
     @SocketMethod(id = GameServerLoginModule.LOGOUT)
-    void logout(ServerSession session, @Identity long identity);
+    void logout(@Session ServerSession session, @Identity long identity);
 
 }

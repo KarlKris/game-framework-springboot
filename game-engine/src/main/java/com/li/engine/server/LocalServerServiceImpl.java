@@ -21,11 +21,12 @@ public class LocalServerServiceImpl implements LocalServerService {
     @Resource
     private ServerConfig serverConfig;
 
+
     @Override
     public ServerInfo getLocalServerInfo() throws SocketException {
         return new ServerInfo(String.valueOf(serverConfig.getServerId())
                 , IpUtils.getLocalIpAddress()
                 , serverConfig.getPort()
-                , protocolManager.getProtocolModules());
+                , protocolManager.getProtocolModules() );
     }
 }

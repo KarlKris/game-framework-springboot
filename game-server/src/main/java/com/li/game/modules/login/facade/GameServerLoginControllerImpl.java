@@ -77,9 +77,6 @@ public class GameServerLoginControllerImpl implements GameServerLoginController 
     }
 
     private boolean checkChannel(int channel) {
-        if (channel != this.gameServerSystemConfig.getMainChannel()) {
-            return ArrayUtil.contains(this.gameServerSystemConfig.getChannels(), channel);
-        }
-        return true;
+        return ArrayUtil.contains(this.gameServerSystemConfig.getChannels(), channel);
     }
 }

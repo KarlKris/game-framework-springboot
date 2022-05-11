@@ -19,6 +19,9 @@ import javax.annotation.Resource;
 @FXMLController
 public class LoginController {
 
+    @Resource
+    private ClientNetworkService networkService;
+
     /** 服务器地址 **/
     @FXML
     public TextField addressText;
@@ -33,10 +36,6 @@ public class LoginController {
     public Button loginBtn;
     @FXML
     public Button createBtn;
-
-
-    @Resource
-    private ClientNetworkService networkService;
 
     /**
      * 登陆

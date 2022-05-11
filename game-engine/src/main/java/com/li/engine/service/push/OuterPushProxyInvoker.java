@@ -1,17 +1,14 @@
 package com.li.engine.service.push;
 
-import com.li.common.ApplicationContextHolder;
 import com.li.common.utils.ObjectsUtil;
 import com.li.network.message.PushResponse;
-import com.li.network.protocol.InBodyMethodParameter;
-import com.li.network.protocol.ProtocolMethodCtx;
-import com.li.network.protocol.MethodParameter;
-import com.li.network.protocol.PushIdsMethodParameter;
+import com.li.network.protocol.*;
 import com.li.network.serialize.SerializerHolder;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author li-yuanwen
@@ -20,14 +17,13 @@ import java.util.*;
 public class OuterPushProxyInvoker implements InvocationHandler {
 
     /** 方法参数上下文 **/
-    private final Map<Method, PushMethodCtx> methodCtxHolder;
+    private final SocketProtocolManager socketProtocolManager;
     /** 推送执行器 **/
     private final IPushExecutor pushExecutor;
 
-    OuterPushProxyInvoker(List<ProtocolMethodCtx> protocolMethodCtxes) {
-        this.methodCtxHolder = new HashMap<>(protocolMethodCtxes.size());
-        protocolMethodCtxes.forEach(k -> this.methodCtxHolder.putIfAbsent(k.getMethod(), new PushMethodCtx(k)));
-        this.pushExecutor = ApplicationContextHolder.getBean(IPushExecutor.class);
+    public OuterPushProxyInvoker(SocketProtocolManager socketProtocolManager, IPushExecutor pushExecutor) {
+        this.socketProtocolManager = socketProtocolManager;
+        this.pushExecutor = pushExecutor;
     }
 
     @Override
@@ -36,11 +32,11 @@ public class OuterPushProxyInvoker implements InvocationHandler {
             return method.invoke(proxy, args);
         }
 
-        PushMethodCtx pushMethodCtx = this.methodCtxHolder.get(method);
-        if (pushMethodCtx == null) {
+        ProtocolMethodCtx protocolMethodCtx = this.socketProtocolManager.getMethodCtxByMethod(method);
+        if (protocolMethodCtx == null) {
             throw new IllegalArgumentException("推送方法[" + method.getName() + "]没有添加 @SocketPush 注解");
         }
-        ProtocolMethodCtx protocolMethodCtx = pushMethodCtx.getProtocolMethodCtx();
+
         MethodParameter[] params = protocolMethodCtx.getParams();
         byte[] content = null;
         Collection<Long> targets = Collections.emptyList();

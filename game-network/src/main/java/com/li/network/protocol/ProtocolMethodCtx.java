@@ -1,7 +1,6 @@
 package com.li.network.protocol;
 
 import com.li.network.message.SocketProtocol;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.lang.reflect.Method;
@@ -11,16 +10,37 @@ import java.lang.reflect.Method;
  * 方法上下文
  */
 @Getter
-@AllArgsConstructor
 public class ProtocolMethodCtx {
 
     /** 命令 **/
-    private SocketProtocol protocol;
+    private final SocketProtocol protocol;
     /** 具体方法 **/
-    private Method method;
+    private final Method method;
     /** 方法参数 **/
-    private MethodParameter[] params;
+    private final MethodParameter[] params;
+    /** 立即返回结果(用于同步方法) **/
+    private final boolean syncMethod;
+    /** 返回对象类型 **/
+    private Class<?> returnClz;
 
+    public ProtocolMethodCtx(SocketProtocol protocol, Method method, MethodParameter[] params, boolean syncMethod) {
+        this.protocol = protocol;
+        this.method = method;
+        this.params = params;
+        this.syncMethod = syncMethod;
+    }
+
+    public ProtocolMethodCtx(SocketProtocol protocol, Method method, MethodParameter[] params, boolean syncMethod, Class<?> returnClz) {
+        this.protocol = protocol;
+        this.method = method;
+        this.params = params;
+        this.syncMethod = syncMethod;
+        this.returnClz = returnClz;
+    }
+
+    public void setReturnClz(Class<?> clz) {
+        this.returnClz = clz;
+    }
 
     /** 方法是否需要身份标识 **/
     boolean identity() {

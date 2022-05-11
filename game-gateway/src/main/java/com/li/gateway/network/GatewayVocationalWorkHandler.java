@@ -1,7 +1,7 @@
 package com.li.gateway.network;
 
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
-import com.li.engine.service.handler.ThreadSessionIdentityHolder;
+import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.rpc.IRpcService;
 import com.li.common.thread.SerializedExecutorService;
 import com.li.network.message.OuterMessage;
@@ -60,12 +60,12 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
             if (playerSession.isIdentity()) {
                 long id = playerSession.getIdentity();
                 executorService.submit(id, () -> {
-                    ThreadSessionIdentityHolder.setIdentity(id);
+                    ThreadLocalContentHolder.setIdentity(id);
                     try {
                         // 网关服需要考虑通知游戏服更新玩家断开链接
                         rpcService.getSendProxy(GameServerLoginController.class, id).logout(null, 0L);
                     } finally {
-                        ThreadSessionIdentityHolder.remove();
+                        ThreadLocalContentHolder.removeIdentity();
                     }
                 });
                 executorService.destroy(id);

@@ -18,7 +18,7 @@ public class ProtoStuffSerializer implements Serializer {
 
     @Override
     public byte getSerializerType() {
-        return SerializeType.PROTO_STUFF.getType();
+        return SerializeType.PROTOBUF.getType();
     }
 
     @Override

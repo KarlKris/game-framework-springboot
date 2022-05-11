@@ -26,7 +26,7 @@ public class InnerMessageHeader {
     /** 消息序号 **/
     private long sn;
 
-    // 以下为请求消息使用的消息,响应消息不做要求
+    // 以下为请求消息需携带的属性,响应消息不做要求
 
     /** 消息身份标识(-1表示未知) **/
     private long identity;

@@ -27,10 +27,10 @@ public interface NioNettyClient {
     /**
      * 获取远程对象的代理
      *
-     * @param clasz 类对象
+     * @param clz 类对象
      * @param <T>   类
      * @return /
      */
-    <T> T getSendProxy(Class<T> clasz);
+    <T> T getSendProxy(Class<T> clz);
 
 }

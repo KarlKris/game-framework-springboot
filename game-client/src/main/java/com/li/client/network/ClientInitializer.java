@@ -1,6 +1,5 @@
 package com.li.client.network;
 
-import com.li.common.ApplicationContextHolder;
 import com.li.network.handler.HeartBeatHandler;
 import com.li.network.handler.MessageDecoder;
 import com.li.network.handler.MessageEncoder;
@@ -12,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author li-yuanwen
@@ -36,11 +36,11 @@ public class ClientInitializer extends ChannelInitializer<SocketChannel> {
 
         // 编解码器
         pipeline.addLast(MessageEncoder.class.getSimpleName(), this.messageEncoder);
-        pipeline.addLast(MessageDecoder.class.getSimpleName(), ApplicationContextHolder.getBean(MessageDecoder.class));
+        pipeline.addLast(MessageDecoder.class.getSimpleName(), new MessageDecoder(1048756, 2, 4));
 
         // 心跳
         pipeline.addLast(IdleStateHandler.class.getSimpleName()
-                , ApplicationContextHolder.getBean("clientIdleStateHandler", IdleStateHandler.class));
+                , new IdleStateHandler(0, 25, 0, TimeUnit.SECONDS));
         pipeline.addLast(HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
 
         // 业务

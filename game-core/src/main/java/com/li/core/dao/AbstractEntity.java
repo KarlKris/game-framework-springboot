@@ -1,10 +1,10 @@
 package com.li.core.dao;
 
 import com.li.core.dao.model.DataStatus;
-import org.springframework.data.annotation.Transient;
 
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +31,7 @@ public abstract class AbstractEntity<PK extends Comparable<PK> & Serializable> i
     /** 显式手动创建新的对象调用 **/
     public AbstractEntity(PK id) {
         this.id = id;
-        this.status = new AtomicInteger(DataStatus.INIT.getCode());
+        this.status = new AtomicInteger(DataStatus.NEW.getCode());
     }
 
     @Override
@@ -49,6 +49,10 @@ public abstract class AbstractEntity<PK extends Comparable<PK> & Serializable> i
 
     public boolean isDeleteStatus() {
         return this.status.get() == DataStatus.DELETE.getCode();
+    }
+
+    public boolean isNewStatus() {
+        return this.status.get() == DataStatus.NEW.getCode();
     }
 
     public boolean swap(int oldStatus, int newStatus) {

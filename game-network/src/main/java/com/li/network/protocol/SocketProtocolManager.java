@@ -2,6 +2,7 @@ package com.li.network.protocol;
 
 import com.li.network.anno.SocketController;
 import com.li.network.anno.SocketPush;
+import com.li.network.anno.SocketResponse;
 import com.li.network.message.SocketProtocol;
 import com.li.network.utils.ProtocolUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +41,16 @@ import java.util.stream.Collectors;
 @Component
 public class SocketProtocolManager implements SmartInstantiationAwareBeanPostProcessor, ResourceLoaderAware {
 
-    @Value("${server.protocol.package:classpath*:com/li/protocol/**/**/protocol/*.class}")
+    @Value("${server.protocol.package:classpath*:com/li/protocol/**/**/**/*.class}")
     private String protocolPackage;
 
     private ResourceLoader resourceLoader;
 
-    /** 所有的协议 **/
-    private final Map<SocketProtocol, ProtocolMethodCtx> allProtocolMethodCtx = new HashMap<>(128);
+    /** 共享的协议 **/
+    private final Map<Method, SocketProtocol> sharedMethodProtocolHolder = new HashMap<>();
+    private final Map<SocketProtocol, ProtocolMethodCtx> sharedProtocolMethodHolder = new HashMap<>(128);
+
+
     /** 协议执行上下文 **/
     private final Map<SocketProtocol, ProtocolMethodInvokeCtx> invokeCtxHolder = new HashMap<>();
 
@@ -60,37 +65,60 @@ public class SocketProtocolManager implements SmartInstantiationAwareBeanPostPro
         MetadataReaderFactory metaReader = new CachingMetadataReaderFactory(resourceLoader);
         Resource[] resources = resolver.getResources(protocolPackage);
 
+        Map<SocketProtocol, Class<?>> returnClzHolder = new HashMap<>(64);
         for (Resource r : resources) {
             MetadataReader reader = metaReader.getMetadataReader(r);
-            if (!reader.getClassMetadata().isInterface()) {
-                continue;
-            }
-
             Class<?> aClass = Class.forName(reader.getClassMetadata().getClassName());
-            SocketController socketController = AnnotationUtils.findAnnotation(aClass, SocketController.class);
-            if (socketController == null) {
-                continue;
-            }
-
-            List<ProtocolMethodCtx> ctx = null;
-
-            SocketPush annotation = AnnotationUtils.findAnnotation(aClass, SocketPush.class);
-            if (annotation == null) {
-                ctx = ProtocolUtil.getMethodCtxBySocketCommand(aClass);
-            } else {
-                ctx = ProtocolUtil.getMethodCtxBySocketPush(aClass);
-            }
-
-            for (ProtocolMethodCtx protocolMethodCtx : ctx) {
-                ProtocolMethodCtx old = allProtocolMethodCtx.putIfAbsent(protocolMethodCtx.getProtocol(), protocolMethodCtx);
-                if (old != null) {
+            if (!reader.getClassMetadata().isInterface()) {
+                SocketResponse socketResponse = AnnotationUtils.findAnnotation(aClass, SocketResponse.class);
+                if (socketResponse == null) {
+                    continue;
+                }
+                SocketProtocol protocol = new SocketProtocol(socketResponse.module(), socketResponse.id());
+                Class<?> oldClz = returnClzHolder.putIfAbsent(protocol, aClass);
+                if (oldClz != null) {
                     throw new BeanInitializationException("出现相同协议号["
-                            + protocolMethodCtx.getProtocol()
-                            + "]");
+                            + protocol + "]的返回对象类型");
+                }
+            } else {
+                SocketController socketController = AnnotationUtils.findAnnotation(aClass, SocketController.class);
+                if (socketController == null) {
+                    continue;
+                }
+
+                List<ProtocolMethodCtx> ctx = null;
+
+                SocketPush annotation = AnnotationUtils.findAnnotation(aClass, SocketPush.class);
+                if (annotation == null) {
+                    ctx = ProtocolUtil.getMethodCtxBySocketCommand(aClass);
+                } else {
+                    ctx = ProtocolUtil.getMethodCtxBySocketPush(aClass);
+                }
+
+                for (ProtocolMethodCtx protocolMethodCtx : ctx) {
+                    sharedMethodProtocolHolder.put(protocolMethodCtx.getMethod(), protocolMethodCtx.getProtocol());
+                    ProtocolMethodCtx old = sharedProtocolMethodHolder.putIfAbsent(protocolMethodCtx.getProtocol(), protocolMethodCtx);
+                    if (old != null) {
+                        throw new BeanInitializationException("出现相同协议号["
+                                + protocolMethodCtx.getProtocol()
+                                + "]");
+                    }
                 }
             }
-
         }
+
+        for (Map.Entry<SocketProtocol, Class<?>> entry : returnClzHolder.entrySet()) {
+            ProtocolMethodCtx ctx = sharedProtocolMethodHolder.get(entry.getKey());
+            if (ctx.isSyncMethod()) {
+                Method method = ctx.getMethod();
+                if (!entry.getValue().isAssignableFrom(method.getReturnType())) {
+                    throw new BeanInitializationException("协议号["
+                            + entry.getKey() + "]的返回对象类型注解非法");
+                }
+            }
+            ctx.setReturnClz(entry.getValue());
+        }
+
     }
 
     /**
@@ -122,7 +150,20 @@ public class SocketProtocolManager implements SmartInstantiationAwareBeanPostPro
      * @return 协议上下文,理论上不会返回null
      */
     public ProtocolMethodCtx getMethodCtxBySocketProtocol(SocketProtocol protocol) {
-        return allProtocolMethodCtx.get(protocol);
+        return sharedProtocolMethodHolder.get(protocol);
+    }
+
+    /**
+     * 获取协议上下文
+     * @param method 协议方法
+     * @return 协议上下文,理论上不会返回null
+     */
+    public ProtocolMethodCtx getMethodCtxByMethod(Method method) {
+        SocketProtocol protocol = sharedMethodProtocolHolder.get(method);
+        if (protocol == null) {
+            return null;
+        }
+        return sharedProtocolMethodHolder.get(protocol);
     }
 
 
@@ -134,7 +175,8 @@ public class SocketProtocolManager implements SmartInstantiationAwareBeanPostPro
         }
 
         for (ProtocolMethodCtx protocolMethodCtx : protocolMethodCtxHolder) {
-            if (this.invokeCtxHolder.putIfAbsent(protocolMethodCtx.getProtocol(), new ProtocolMethodInvokeCtx(bean, protocolMethodCtx)) != null) {
+            ProtocolMethodCtx ctx = sharedProtocolMethodHolder.computeIfAbsent(protocolMethodCtx.getProtocol(), k -> protocolMethodCtx);
+            if (this.invokeCtxHolder.putIfAbsent(protocolMethodCtx.getProtocol(), new ProtocolMethodInvokeCtx(bean, ctx)) != null) {
                 throw new BeanInitializationException("出现相同协议号["
                         + protocolMethodCtx.getProtocol()
                         + "]");

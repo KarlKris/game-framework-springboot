@@ -2,8 +2,11 @@ package com.li.client.service;
 
 import com.li.network.anno.SocketController;
 import com.li.network.anno.SocketPush;
+import com.li.network.anno.SocketResponse;
+import com.li.network.message.SocketProtocol;
 import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.utils.ProtocolUtil;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -18,8 +21,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author li-yuanwen
@@ -47,26 +53,62 @@ public class ProtocolService implements ResourceLoaderAware {
         MetadataReaderFactory metaReader = new CachingMetadataReaderFactory(resourceLoader);
         Resource[] resources = resolver.getResources(protocolPackage);
 
+        final Map<SocketProtocol, ProtocolMethodCtx> sharedProtocolMethodHolder = new HashMap<>(128);
+        final Map<SocketProtocol, Class<?>> returnClzHolder = new HashMap<>(64);
         for (Resource r : resources) {
             MetadataReader reader = metaReader.getMetadataReader(r);
-            if (!reader.getClassMetadata().isInterface()) {
-                continue;
-            }
-
             Class<?> aClass = Class.forName(reader.getClassMetadata().getClassName());
-            SocketController socketController = AnnotationUtils.findAnnotation(aClass, SocketController.class);
-            if (socketController == null) {
-                continue;
+            if (!reader.getClassMetadata().isInterface()) {
+                SocketResponse socketResponse = AnnotationUtils.findAnnotation(aClass, SocketResponse.class);
+                if (socketResponse == null) {
+                    continue;
+                }
+                SocketProtocol protocol = new SocketProtocol(socketResponse.module(), socketResponse.id());
+                Class<?> oldClz = returnClzHolder.putIfAbsent(protocol, aClass);
+                if (oldClz != null) {
+                    throw new BeanInitializationException("出现相同协议号["
+                            + protocol + "]的返回对象类型");
+                }
+            } else {
+                SocketController socketController = AnnotationUtils.findAnnotation(aClass, SocketController.class);
+                if (socketController == null) {
+                    continue;
+                }
+
+                List<ProtocolMethodCtx> ctx = null;
+
+                SocketPush annotation = AnnotationUtils.findAnnotation(aClass, SocketPush.class);
+                if (annotation == null) {
+                    ctx = ProtocolUtil.getMethodCtxBySocketCommand(aClass);
+                } else {
+                    ctx = ProtocolUtil.getMethodCtxBySocketPush(aClass);
+                }
+
+                for (ProtocolMethodCtx protocolMethodCtx : ctx) {
+                    ProtocolMethodCtx old = sharedProtocolMethodHolder.putIfAbsent(protocolMethodCtx.getProtocol(), protocolMethodCtx);
+                    if (old != null) {
+                        throw new BeanInitializationException("出现相同协议号["
+                                + protocolMethodCtx.getProtocol()
+                                + "]");
+                    }
+                }
             }
-
-            SocketPush annotation = AnnotationUtils.findAnnotation(aClass, SocketPush.class);
-            if (annotation != null) {
-                continue;
-            }
-
-            protocolMethodCtxHolder.addAll(ProtocolUtil.getMethodCtxBySocketCommand(aClass));
-
         }
+
+        for (Map.Entry<SocketProtocol, Class<?>> entry : returnClzHolder.entrySet()) {
+            ProtocolMethodCtx ctx = sharedProtocolMethodHolder.get(entry.getKey());
+            if (ctx.isSyncMethod()) {
+                Method method = ctx.getMethod();
+                if (!entry.getValue().isAssignableFrom(method.getReturnType())) {
+                    throw new BeanInitializationException("协议号["
+                            + entry.getKey() + "]的返回对象类型注解非法");
+                }
+            }
+            ctx.setReturnClz(entry.getValue());
+        }
+
+        protocolMethodCtxHolder.addAll(sharedProtocolMethodHolder.values());
+
     }
 
     public List<ProtocolMethodCtx> getMethodCtxHolder() {

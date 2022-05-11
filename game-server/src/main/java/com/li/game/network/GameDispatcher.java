@@ -1,7 +1,6 @@
 package com.li.game.network;
 
 import com.li.engine.service.handler.AbstractDispatcher;
-import com.li.engine.service.handler.ThreadSessionIdentityHolder;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.ProtocolConstant;
@@ -26,11 +25,6 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
     private SessionManager sessionManager;
 
     @Override
-    protected void setIdentityToThreadLocal(ServerSession session, InnerMessage message) {
-        ThreadSessionIdentityHolder.setIdentity(message.getMessageType());
-    }
-
-    @Override
     protected long getProtocolIdentity(ServerSession session, InnerMessage message) {
         return message.getIdentity();
     }
@@ -48,15 +42,6 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
         SessionManager.writeAndFlush(session, innerMessage);
     }
 
-
-    @Override
-    protected long getIdBySessionAndMessage(ServerSession session, InnerMessage message) {
-        long id = session.getSessionId();
-        if (message.getIdentity() > 0) {
-            id = message.getIdentity();
-        }
-        return id;
-    }
 
     @Override
     protected boolean beforeDispatch(ServerSession session, InnerMessage message) {

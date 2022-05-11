@@ -15,12 +15,8 @@ import org.springframework.context.annotation.PropertySource;
 public class GameServerSystemConfig {
 
 
-    /** 游戏主渠道 **/
-    @Value("${server.system.mainChannel}")
-    private int mainChannel;
-
     /** 游戏混渠道 **/
-    @Value("#{'${server.system.mainChannel}'.split(',')}")
+    @Value("#{'${server.system.channels}'.split(',')}")
     private int[] channels;
 
 }

@@ -86,7 +86,7 @@ public class HibernateAccessorImpl implements IDataAccessor, DataFinder {
             if (params != null) {
                 int length = params.length;
                 for (int i = 0; i < length; i++) {
-                    query.setParameter(i, params[i]);
+                    query.setParameter(i + 1, params[i]);
                 }
             }
 

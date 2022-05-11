@@ -7,7 +7,7 @@ package com.li.network.serialize;
 public enum SerializeType {
 
     /** Proto Stuff框架 **/
-    PROTO_STUFF((byte)0x0),
+    PROTOBUF((byte)0x0),
 
     /** JSON **/
     JSON((byte)0x1),

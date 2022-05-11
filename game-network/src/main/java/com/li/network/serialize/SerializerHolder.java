@@ -35,7 +35,7 @@ public class SerializerHolder {
             }
         }
 
-        DEFAULT_SERIALIZER = serializerHolder.get(SerializeType.PROTO_STUFF.getType());
+        DEFAULT_SERIALIZER = serializerHolder.get(SerializeType.PROTOBUF.getType());
     }
 
     /** 获取序列化/反序列化工具 **/

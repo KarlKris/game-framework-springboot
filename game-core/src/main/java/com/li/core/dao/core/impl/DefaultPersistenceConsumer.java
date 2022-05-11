@@ -71,7 +71,7 @@ public class DefaultPersistenceConsumer implements IPersistenceConsumer {
 
     @Override
     public <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> void commit(T entity) {
-        if (entity.isDeleteStatus() || entity.commit()) {
+        if (entity.isDeleteStatus() || entity.commit() || entity.isNewStatus()) {
             this.queue.offer(entity);
             Map<Object, AbstractEntity<?>> map = this.class2EntityQueue.computeIfAbsent(entity.getClass()
                     , k -> new ConcurrentHashMap<>(64));
@@ -105,16 +105,12 @@ public class DefaultPersistenceConsumer implements IPersistenceConsumer {
         if (!running) {
             return;
         }
-        scheduleWithFixedDelay(this);
+        scheduleWithFixedDelay();
     }
 
 
-    private void scheduleWithFixedDelay(Runnable runnable) {
-        try {
-            executorService.schedule(this, intervalSecond, TimeUnit.SECONDS);
-        } finally {
-            startScheduler();
-        }
+    private void scheduleWithFixedDelay() {
+        executorService.scheduleWithFixedDelay(this, intervalSecond, intervalSecond, TimeUnit.SECONDS);
     }
 
     @Override
@@ -129,7 +125,9 @@ public class DefaultPersistenceConsumer implements IPersistenceConsumer {
             try {
                 if (entity.isDeleteStatus()) {
                     dataAccessor.remove(entity);
-                } else if (entity.swap(DataStatus.MODIFY.getCode(), DataStatus.INIT.getCode())) {
+                } else if(entity.swap(DataStatus.NEW.getCode(), DataStatus.INIT.getCode())){
+                    dataAccessor.create(entity);
+                }else if (entity.swap(DataStatus.MODIFY.getCode(), DataStatus.INIT.getCode())) {
                     dataAccessor.update(entity);
                 }
                 successCount += 1;

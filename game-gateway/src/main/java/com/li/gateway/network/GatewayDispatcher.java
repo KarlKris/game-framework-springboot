@@ -1,15 +1,14 @@
 package com.li.gateway.network;
 
+import com.li.common.rpc.RemoteServerSeekService;
+import com.li.common.rpc.model.Address;
 import com.li.engine.client.NioNettyClient;
 import com.li.engine.client.NioNettyClientFactory;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.handler.AbstractDispatcher;
-import com.li.engine.service.handler.ThreadSessionIdentityHolder;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.engine.service.rpc.future.ForwardSocketFuture;
 import com.li.engine.service.session.SessionManager;
-import com.li.common.rpc.RemoteServerSeekService;
-import com.li.common.rpc.model.Address;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.OuterMessage;
 import com.li.network.message.ProtocolConstant;
@@ -40,15 +39,6 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     private MessageFactory messageFactory;
 
     @Override
-    protected long getIdBySessionAndMessage(PlayerSession session, OuterMessage message) {
-        long id = session.getSessionId();
-        if (session.isIdentity()) {
-            id = session.getIdentity();
-        }
-        return id;
-    }
-
-    @Override
     protected boolean forwardMessage(PlayerSession session, OuterMessage message) {
         if (!session.isIdentity()) {
             if (log.isDebugEnabled()) {
@@ -70,7 +60,9 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
             return false;
         }
 
-        InnerMessage innerMessage = messageFactory.convertToInnerMessage(message, session);
+        long nextSn = socketFutureManager.nextSn();
+        InnerMessage innerMessage = messageFactory.convertToRequestInnerMessage(nextSn, message, session);
+        final long identity = getProtocolIdentity(session, message);
 
         NioNettyClient client = clientFactory.connectTo(address);
 
@@ -78,17 +70,12 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
             client.send(innerMessage
                     , (msg, completableFuture)
                             -> socketFutureManager.addSocketFuture(new ForwardSocketFuture(msg.getSn()
-                            , message.getSn(), session)));
+                            , message.getSn(), identity, session, messageFactory)));
             return true;
         } catch (InterruptedException e) {
             log.error("消息转发至[{}]发生未知异常", address, e);
             return false;
         }
-    }
-
-    @Override
-    protected void setIdentityToThreadLocal(PlayerSession session, OuterMessage message) {
-        ThreadSessionIdentityHolder.setIdentity(session.getIdentity());
     }
 
     @Override

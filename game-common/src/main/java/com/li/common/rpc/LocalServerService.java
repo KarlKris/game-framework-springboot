@@ -14,8 +14,8 @@ public interface LocalServerService {
 
     /**
      * 查询本服务器的信息
-     *
      * @return 服务器的信息
+     * @throws SocketException 服务器启动失败时抛出
      */
     ServerInfo getLocalServerInfo() throws SocketException;
 
