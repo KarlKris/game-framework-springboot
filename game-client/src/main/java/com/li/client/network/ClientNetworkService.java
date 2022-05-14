@@ -112,11 +112,18 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
 
     }
 
-    private void send(SocketProtocol protocol, Object body) {
+    public void send(SocketProtocol protocol, Object body) {
         long sn = efficiencyStatistic.nextSn();
         OuterMessageHeader header = OuterMessageHeader.of(sn, ProtocolConstant.VOCATIONAL_WORK_REQ, protocol, false
                 , SerializerHolder.DEFAULT_SERIALIZER.getSerializerType());
-        OuterMessage message = OuterMessage.of(header, SerializerHolder.DEFAULT_SERIALIZER.serialize(body));
+
+
+        byte[] requestBody = null;
+        if (body != null) {
+            requestBody = SerializerHolder.DEFAULT_SERIALIZER.serialize(body);
+        }
+
+        OuterMessage message = OuterMessage.of(header, requestBody);
         efficiencyStatistic.requestSingleProtocol(sn, protocol);
         channel.writeAndFlush(message);
 

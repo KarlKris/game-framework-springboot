@@ -22,8 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +40,7 @@ public class ProtocolService implements ResourceLoaderAware {
     private ResourceLoader resourceLoader;
 
     /** 所有的协议 **/
-    private final List<ProtocolMethodCtx> protocolMethodCtxHolder = new LinkedList<>();
+    private Map<SocketProtocol, ProtocolMethodCtx> protocolMethodCtxHolder = new HashMap<>();
 
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
@@ -107,11 +107,16 @@ public class ProtocolService implements ResourceLoaderAware {
             ctx.setReturnClz(entry.getValue());
         }
 
-        protocolMethodCtxHolder.addAll(sharedProtocolMethodHolder.values());
+
+        protocolMethodCtxHolder = sharedProtocolMethodHolder;
 
     }
 
-    public List<ProtocolMethodCtx> getMethodCtxHolder() {
-        return protocolMethodCtxHolder;
+    public Collection<ProtocolMethodCtx> getMethodCtxHolder() {
+        return protocolMethodCtxHolder.values();
+    }
+
+    public ProtocolMethodCtx getProtocolMethodCtxBySocketProtocol(SocketProtocol protocol) {
+        return protocolMethodCtxHolder.get(protocol);
     }
 }

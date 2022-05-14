@@ -64,9 +64,8 @@ public class ProtocolUtil {
 
             Class<?>[] parameterTypes = annotationMethod.getParameterTypes();
             int length = parameterTypes.length;
-            if (length > 3) {
-                throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]的方法参数大于3个");
-            }
+
+            int bodyParamLength = 0;
 
             // 方法参数
             MethodParameter[] params = new MethodParameter[length];
@@ -94,6 +93,7 @@ public class ProtocolUtil {
                     // @InBody注解
                     if (annotation instanceof InBody) {
                         params[i] = new InBodyMethodParameter(clazz);
+                        bodyParamLength++;
                         break;
                     }
                     // @PushIds注解
@@ -104,6 +104,10 @@ public class ProtocolUtil {
 
                     throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]的方法参数没有使用相关注解");
                 }
+            }
+
+            if (bodyParamLength > 1) {
+                throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]的方法@InBody修饰的参数不可大于1");
             }
 
             Class<?> returnClz = null;
@@ -174,9 +178,7 @@ public class ProtocolUtil {
 
             Class<?>[] parameterTypes = annotationMethod.getParameterTypes();
             int length = parameterTypes.length;
-            if (length > 2) {
-                throw new IllegalArgumentException("推送 模块号[" + module + "]方法标识[" + id + "]的方法参数大于2个");
-            }
+            int bodyParamLength = 0;
 
             // 方法参数
             MethodParameter[] params = new MethodParameter[length];
@@ -196,11 +198,16 @@ public class ProtocolUtil {
                     // @InBody注解
                     if (annotation instanceof InBody) {
                         params[i] = new InBodyMethodParameter(clazz);
+                        bodyParamLength++;
                         break;
                     }
 
                     throw new IllegalArgumentException("推送 模块号[" + module + "]方法标识[" + id + "]的方法参数没有使用相关注解");
                 }
+            }
+
+            if (bodyParamLength > 1) {
+                throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]的方法@InBody修饰的参数不可大于1");
             }
 
             ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params, true));

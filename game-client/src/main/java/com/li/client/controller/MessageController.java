@@ -25,4 +25,8 @@ public class MessageController {
         Platform.runLater(() -> messageArea.appendText(DateUtil.date() + "  ERROR  " + msg + "\n"));
     }
 
+    public void clear() {
+        Platform.runLater(() -> messageArea.clear());
+    }
+
 }
