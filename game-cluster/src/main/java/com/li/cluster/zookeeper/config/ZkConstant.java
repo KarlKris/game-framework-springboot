@@ -1,6 +1,6 @@
 package com.li.cluster.zookeeper.config;
 
-import com.li.cluster.zookeeper.model.ServiceInstancePayLoad;
+import com.li.cluster.zookeeper.model.InstanceDetails;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 
 /**
@@ -10,15 +10,18 @@ import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
  **/
 public interface ZkConstant {
 
-    JsonInstanceSerializer<ServiceInstancePayLoad> SERIALIZER = new JsonInstanceSerializer<>(ServiceInstancePayLoad.class);
+    JsonInstanceSerializer<InstanceDetails> SERIALIZER = new JsonInstanceSerializer<>(InstanceDetails.class);
 
     /** zookeeper 路径划分符号 **/
     String ZOOKEEPER_SLASH = "/";
 
-    /** 服务发现名称后缀 **/
-    String SERVICE_DISCOVERY_SUFFIX = "_DISCOVERY";
+    /** 服务发现名称 **/
+    String SERVICE_DISCOVERY = "DISCOVERY";
 
-    /** 连接数节点父节点名称后缀 **/
-    String SERVICE_COUNT_SUFFIX = "_COUNT";
+    /** 连接数名称 **/
+    String SERVICE_CONNECT_COUNT = "CONNECT_COUNT";
+
+    /** 模块号 **/
+    String SERVICE_MODULES = "MODULES";
 
 }

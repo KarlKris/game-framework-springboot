@@ -57,6 +57,9 @@ public class ProtocolController implements Initializable {
             if (protocol.isPushProtocol()) {
                 continue;
             }
+            if (protocol.getModule() <= 3) {
+                continue;
+            }
             String protocolName = protocol.getModule() + SEPARATOR
                     + protocol.getMethodId() + SEPARATOR + ctx.getMethod().getName();
             protocolComboBox.getItems().add(protocolName);

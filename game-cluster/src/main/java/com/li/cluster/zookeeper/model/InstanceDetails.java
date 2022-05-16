@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ServiceInstancePayLoad {
+public class InstanceDetails {
 
-    /**  **/
+    /** 服务器标识 **/
     private String serverId;
 
 }

@@ -1,12 +1,11 @@
 package com.li.cluster.zookeeper.discovery;
 
-import cn.hutool.core.util.ArrayUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.li.cluster.zookeeper.model.ServerType;
 import com.li.cluster.zookeeper.model.ServiceDiscoveryNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,6 +31,10 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
     @Resource
     private ObjectMapper objectMapper;
 
+    /** 服务名称 **/
+    @Value("${zookeeper.server.serviceName}")
+    private ServerType thisType;
+
 
     /** 服务节点缓存 **/
     private final ConcurrentHashMap<String, ServiceDiscoveryNode> discoveryNodeCache = new ConcurrentHashMap<>(ServerType.values().length);
@@ -44,34 +46,23 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
     public ServiceDiscoveryNode checkAndGetServiceDiscoveryNode(ServerType type) throws Exception {
         ServiceDiscoveryNode discoveryNode = null;
         if ((discoveryNode = this.discoveryNodeCache.get(type.name())) == null || !discoveryNode.isConnected()) {
-            discoveryNode = new ServiceDiscoveryNode(type);
+            synchronized(type.name()) {
+                discoveryNode = new ServiceDiscoveryNode(type, objectMapper);
+                // 处理并发
+                ServiceDiscoveryNode old = this.discoveryNodeCache.put(type.name(), discoveryNode);
+                if (old == null || !old.isConnected()) {
+                    discoveryNode.start(this.curatorFramework);
 
-            // 处理并发
-            ServiceDiscoveryNode old = this.discoveryNodeCache.putIfAbsent(type.name(), discoveryNode);
-            if (old == null || !old.isConnected()) {
-                this.discoveryNodeCache.put(type.name(), discoveryNode);
-                discoveryNode.start(this.curatorFramework, bytes -> {
-                    try {
-                        if (ArrayUtil.isEmpty(bytes)) {
-                            return;
-                        }
-                        synchronized (module2Type) {
-                            for (short module : objectMapper.readValue(bytes
-                                    , new TypeReference<Set<Short>>() {})) {
-                                ServerType old1 = module2Type.putIfAbsent(module, type);
-                                if (old1 != null) {
-                                    log.warn("出现相同模块号[{}],不同服务[{},{}]"
-                                            , module, old1.name(), type.name());
-                                }
-                            }
-                        }
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            } else {
-                discoveryNode = old;
+                } else {
+                    discoveryNode = old;
+                }
+            }
+            for (short module : discoveryNode.getModules()) {
+                ServerType old1 = module2Type.putIfAbsent(module, type);
+                if (old1 != null && old1 != type) {
+                    log.warn("出现相同模块号[{}],不同服务[{},{}]"
+                            , module, old1.name(), type.name());
+                }
             }
         }
 
@@ -93,6 +84,9 @@ public class ZkDiscoveryService implements ApplicationListener<ContextClosedEven
             return type;
         }
         for (ServerType serverType : ServerType.values()) {
+            if (serverType == thisType) {
+                continue;
+            }
             checkAndGetServiceDiscoveryNode(serverType);
         }
         return this.module2Type.get(module);

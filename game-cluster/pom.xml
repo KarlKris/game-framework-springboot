@@ -15,7 +15,7 @@
     <description>游戏框架集群包</description>
 
     <properties>
-        <curator-version>5.0.0</curator-version>
+        <curator-version>4.3.0</curator-version>
     </properties>
 
     <dependencies>

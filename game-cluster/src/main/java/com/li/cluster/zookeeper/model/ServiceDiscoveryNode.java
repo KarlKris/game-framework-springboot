@@ -1,12 +1,16 @@
 package com.li.cluster.zookeeper.model;
 
 import cn.hutool.core.util.ByteUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.li.cluster.zookeeper.config.ZkConstant;
+import com.li.cluster.zookeeper.util.CuratorUtil;
 import com.li.common.rpc.model.Address;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.x.discovery.ServiceCache;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
@@ -17,7 +21,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Set;
 
 /**
  * @author li-yuanwen
@@ -31,6 +35,9 @@ public class ServiceDiscoveryNode {
     @Getter
     private final ServerType type;
 
+    /** json序列化与反序列化工具 **/
+    private final ObjectMapper objectMapper;
+
     /** 连接状态 **/
     private boolean connected;
 
@@ -38,22 +45,23 @@ public class ServiceDiscoveryNode {
     private CuratorFramework curatorFramework;
 
     /** 服务发现 **/
-    private ServiceDiscovery<ServiceInstancePayLoad> discovery;
+    private ServiceDiscovery<InstanceDetails> discovery;
 
     /** 服务缓存 **/
-    private ServiceCache<ServiceInstancePayLoad> cache;
+    private ServiceCache<InstanceDetails> cache;
 
     /** 服务地址缓存 **/
     @Getter
     private Map<String, Address> addressCache;
 
     /** 当前连接第二少的连接数量 **/
-    private int lastSecondConnectNum;
+    private int lastConnectNum;
 
     /** 当前最少连接数节点id **/
     private String minConnectInstanceId;
 
-    public ServiceDiscoveryNode(ServerType type) {
+    public ServiceDiscoveryNode(ServerType type, ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.type = type;
     }
 
@@ -63,11 +71,11 @@ public class ServiceDiscoveryNode {
             return;
         }
 
-        this.cache.close();
-        this.discovery.close();
+        CloseableUtils.closeQuietly(this.cache);
+        CloseableUtils.closeQuietly(this.discovery);
     }
 
-    public void start(CuratorFramework curatorFramework, Consumer<byte[]> consumer) throws Exception {
+    public void start(CuratorFramework curatorFramework) throws Exception {
         if (this.discovery != null) {
             return;
         }
@@ -75,7 +83,7 @@ public class ServiceDiscoveryNode {
         this.curatorFramework = curatorFramework;
 
         String discoveryPath = toDiscoveryPath();
-        this.discovery = ServiceDiscoveryBuilder.builder(ServiceInstancePayLoad.class)
+        this.discovery = ServiceDiscoveryBuilder.builder(InstanceDetails.class)
                 .client(curatorFramework)
                 .basePath(discoveryPath)
                 .serializer(ZkConstant.SERIALIZER)
@@ -84,6 +92,8 @@ public class ServiceDiscoveryNode {
         this.discovery.start();
 
         this.cache = this.discovery.serviceCacheBuilder().name(type.name()).build();
+        this.cache.start();
+        initInstanceAddressCache();
 
         this.cache.addListener(new ServiceCacheListener() {
             @Override
@@ -99,17 +109,9 @@ public class ServiceDiscoveryNode {
                 if (log.isWarnEnabled()) {
                     log.warn("服务集群[{}]状态发生变更[{}]", type.name(), newState.name());
                 }
-                // todo 后续改进处理断开连接的情况
                 connected = newState.isConnected();
-
             }
         });
-
-        this.cache.start();;
-        initInstanceAddressCache();
-
-        // 获取模块数据
-        consumer.accept(this.curatorFramework.getData().forPath(ZkConstant.ZOOKEEPER_SLASH + discoveryPath));
 
         this.connected = true;
 
@@ -122,22 +124,36 @@ public class ServiceDiscoveryNode {
 
     private void initInstanceAddressCache() {
         Map<String, Address> tempAddress = new HashMap<>(8);
-        for (ServiceInstance<ServiceInstancePayLoad> instance : this.cache.getInstances()) {
+        for (ServiceInstance<InstanceDetails> instance : this.cache.getInstances()) {
             tempAddress.put(instance.getId(), new Address(instance.getAddress(), instance.getPort()));
         }
         this.addressCache = Collections.unmodifiableMap(tempAddress);
     }
 
+    /** 获取负责的模块号 **/
+    public Set<Short> getModules() throws Exception {
+        if (!isConnected()) {
+            throw new RuntimeException("节点未连接");
+        }
+
+        String modulesPath = ZkConstant.ZOOKEEPER_SLASH
+                + ZkConstant.SERVICE_MODULES
+                + ZkConstant.ZOOKEEPER_SLASH
+                + type.name();
+
+        return CuratorUtil.getData(curatorFramework, modulesPath, objectMapper, new TypeReference<Set<Short>>() {});
+    }
+
     /** 获取负载量最小的连接节点id **/
     public String checkAndGetMinServiceCountInstanceId() throws Exception {
-        String countPath = toCountPath();
+        String countPath = toCountPathPrefix();
 
         boolean change = true;
         if (this.minConnectInstanceId != null) {
             byte[] bytes = this.curatorFramework.getData()
                     .forPath(countPath + ZkConstant.ZOOKEEPER_SLASH + minConnectInstanceId);
             int curCount = ByteUtil.bytesToInt(bytes);
-            change = curCount < this.lastSecondConnectNum;
+            change = curCount < this.lastConnectNum;
         }
 
         if (!change) {
@@ -151,7 +167,7 @@ public class ServiceDiscoveryNode {
 
     /** 获取总共连接数 **/
     public int getTotalCount() throws Exception {
-        String countPath = toCountPath();
+        String countPath = toCountPathPrefix();
         int count = 0;
         for (String id : this.curatorFramework.getChildren().forPath(countPath)) {
             byte[] bytes = this.curatorFramework.getData().forPath(countPath + ZkConstant.ZOOKEEPER_SLASH + id);
@@ -162,7 +178,7 @@ public class ServiceDiscoveryNode {
 
     /** 获取某个服务的连接数 **/
     public int getCount(String id) throws Exception {
-        String countPath = toCountPath()+ ZkConstant.ZOOKEEPER_SLASH + id;
+        String countPath = toCountPathPrefix()+ ZkConstant.ZOOKEEPER_SLASH + id;
         return ByteUtil.bytesToInt(this.curatorFramework.getData().forPath(countPath));
     }
 
@@ -176,12 +192,12 @@ public class ServiceDiscoveryNode {
         return addressCache.get(id);
     }
 
-    private void doSearchMinCountServiceInstanceId(String countPath) throws Exception {
+    private void doSearchMinCountServiceInstanceId(String countPathPrefix) throws Exception {
         int min = Integer.MAX_VALUE;
         int lastButOne = Integer.MAX_VALUE;
         String selectedInstanceId = null;
-        for (String id : this.curatorFramework.getChildren().forPath(countPath)) {
-            byte[] bytes = this.curatorFramework.getData().forPath(countPath + ZkConstant.ZOOKEEPER_SLASH + id);
+        for (String id : this.curatorFramework.getChildren().forPath(countPathPrefix)) {
+            byte[] bytes = this.curatorFramework.getData().forPath(countPathPrefix + ZkConstant.ZOOKEEPER_SLASH + id);
             int curCount = ByteUtil.bytesToInt(bytes);
             if (min > curCount) {
                 min = curCount;
@@ -193,17 +209,18 @@ public class ServiceDiscoveryNode {
         }
 
         this.minConnectInstanceId = selectedInstanceId;
-        this.lastSecondConnectNum = lastButOne;
+        this.lastConnectNum = lastButOne;
     }
 
 
     public String toDiscoveryPath() {
-        return type.name() + ZkConstant.SERVICE_DISCOVERY_SUFFIX;
+        return ZkConstant.SERVICE_DISCOVERY;
     }
 
-    private String toCountPath() {
-        return toDiscoveryPath()
+    private String toCountPathPrefix() {
+        return ZkConstant.ZOOKEEPER_SLASH
+                + ZkConstant.SERVICE_CONNECT_COUNT
                 + ZkConstant.ZOOKEEPER_SLASH
-                + type.name() + ZkConstant.SERVICE_COUNT_SUFFIX;
+                + type.name();
     }
 }

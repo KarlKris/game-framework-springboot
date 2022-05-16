@@ -1,7 +1,5 @@
 package com.li.cluster.zookeeper.config;
 
-import com.li.cluster.zookeeper.model.ServerType;
-import lombok.Getter;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -24,11 +22,6 @@ public class CuratorFrameworkConfiguration {
     /** 命名空间 **/
     @Value("${zookeeper.namespace}")
     private String nameSpace;
-
-    /** 服务名称 **/
-    @Getter
-    @Value("${zookeeper.server.serviceName}")
-    private ServerType serverType;
 
 
     @Bean

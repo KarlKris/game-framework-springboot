@@ -6,11 +6,11 @@ import com.li.common.exception.BadRequestException;
 import com.li.gateway.commom.GatewaySystemConfig;
 import com.li.gateway.modules.login.service.GatewayLoginService;
 import com.li.network.session.PlayerSession;
+import com.li.protocol.gateway.login.protocol.GatewayLoginController;
 import com.li.protocol.gateway.login.vo.ReqGatewayCreateAccount;
 import com.li.protocol.gateway.login.vo.ReqGatewayLoginAccount;
-import com.li.protocol.gateway.login.protocol.GatewayLoginController;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 
@@ -28,7 +28,7 @@ public class GatewayLoginControllerImpl implements GatewayLoginController {
 
     @Override
     public void create(PlayerSession session, ReqGatewayCreateAccount reqGatewayCreateAccount) {
-        if (StringUtils.isBlank(reqGatewayCreateAccount.getAccount())) {
+        if (!StringUtils.hasLength(reqGatewayCreateAccount.getAccount())) {
             throw new BadRequestException(GatewayLoginResultCode.ACCOUNT_INVALID);
         }
         if (!checkSign(reqGatewayCreateAccount.getAccount()
@@ -43,7 +43,7 @@ public class GatewayLoginControllerImpl implements GatewayLoginController {
 
     @Override
     public void login(PlayerSession session, ReqGatewayLoginAccount reqGatewayLoginAccount) {
-        if (StringUtils.isBlank(reqGatewayLoginAccount.getAccount())) {
+        if (!StringUtils.hasLength(reqGatewayLoginAccount.getAccount())) {
             throw new BadRequestException(GatewayLoginResultCode.ACCOUNT_INVALID);
         }
         if (!checkSign(reqGatewayLoginAccount.getAccount()
