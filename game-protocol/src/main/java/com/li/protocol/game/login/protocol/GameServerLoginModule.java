@@ -7,7 +7,7 @@ package com.li.protocol.game.login.protocol;
 public interface GameServerLoginModule {
 
     /** 模块号 **/
-    short MODULE = 3;
+    short MODULE = 1;
 
     /** 创建账号 **/
     byte CREATE = 1;

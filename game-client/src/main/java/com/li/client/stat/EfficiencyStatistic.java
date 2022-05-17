@@ -1,8 +1,10 @@
 package com.li.client.stat;
 
+import com.li.client.controller.StatController;
 import com.li.network.message.SocketProtocol;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -15,6 +17,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class EfficiencyStatistic {
 
+    @Resource
+    private StatController statController;
+
     /** 请求消息序号生成器 **/
     private final AtomicLong snGenerator = new AtomicLong(0);
     /** 协议统计 **/
@@ -22,12 +27,19 @@ public class EfficiencyStatistic {
     /** 已发送协议 **/
     private final Map<Long, SingleProtocolStat> sentProtocolHolder = new HashMap<>(16);
 
+    /** 请求次数 **/
+    private final AtomicLong request = new AtomicLong(0);
+    /** 总耗时 **/
+    private final AtomicLong totalConsumed = new AtomicLong(0);
+
     public long nextSn() {
         return snGenerator.incrementAndGet();
     }
 
     public void requestSingleProtocol(long sn, SocketProtocol protocol) {
         sentProtocolHolder.put(sn, new SingleProtocolStat(protocol, sn));
+        statController.incrementRequest();
+        request.incrementAndGet();
     }
 
     public SingleProtocolStat finishSingleProtocol(long sn, SocketProtocol protocol) {
@@ -40,6 +52,9 @@ public class EfficiencyStatistic {
             } else {
                 protocolStat.fail(timeConsumed);
             }
+            long avgTime = totalConsumed.addAndGet(timeConsumed) / request.get();
+            statController.incrementResponse(avgTime);
+
         }
         return stat;
     }
@@ -93,6 +108,8 @@ public class EfficiencyStatistic {
             this.num++;
             this.totalConsumed += timeConsumed;
         }
+
+
     }
 
 }

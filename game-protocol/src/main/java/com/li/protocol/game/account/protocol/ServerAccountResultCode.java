@@ -8,6 +8,6 @@ package com.li.protocol.game.account.protocol;
 public interface ServerAccountResultCode {
 
     /** 账号不存在 **/
-    int ACCOUNT_NOT_FOUND = 5001;
+    int ACCOUNT_NOT_FOUND = 1004001;
 
 }

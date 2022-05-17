@@ -7,7 +7,7 @@ package com.li.protocol.gateway.login.protocol;
 public interface GatewayLoginModule {
 
     /** 模块号 **/
-    short MODULE = 2;
+    short MODULE = 1002;
 
     // 数据服 业务
 

@@ -4,17 +4,21 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.li.client.controller.MessageController;
 import com.li.client.handler.ProtocolResponseBodyHandler;
 import com.li.client.stat.EfficiencyStatistic;
 import com.li.network.message.*;
 import com.li.network.modules.ErrorCodeModule;
+import com.li.network.protocol.InBodyMethodParameter;
+import com.li.network.protocol.MethodParameter;
 import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.SocketProtocolManager;
 import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
+import com.li.protocol.gateway.login.protocol.GatewayLoginModule;
 import com.li.protocol.gateway.login.vo.ReqGatewayCreateAccount;
 import com.li.protocol.gateway.login.vo.ReqGatewayLoginAccount;
-import com.li.protocol.gateway.login.protocol.GatewayLoginModule;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -48,6 +52,10 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
     private SocketProtocolManager socketProtocolManager;
     @Resource
     private SerializerHolder serializerHolder;
+    @Resource
+    protected MessageController messageController;
+    @Resource
+    private ObjectMapper objectMapper;
 
     private final Map<SocketProtocol, ProtocolResponseBodyHandler<?>> responseBodyHandlerHolder = new HashMap<>();
 
@@ -83,8 +91,6 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
         }
 
         SocketProtocol protocol = msg.getProtocol();
-        EfficiencyStatistic.SingleProtocolStat singleProtocolStat = efficiencyStatistic.finishSingleProtocol(msg.getSn(), protocol);
-
         OuterMessage message = (OuterMessage) msg;
         byte[] body = message.getBody();
         Object responseBody = null;
@@ -98,16 +104,41 @@ public class ClientNetworkService extends SimpleChannelInboundHandler<IMessage> 
                 returnClz = Long.class;
             } else {
                 ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);
-                returnClz = protocolMethodCtx.getReturnClz();
+                if (protocol.isPushProtocol()) {
+                    for (MethodParameter param : protocolMethodCtx.getParams()) {
+                        if (param instanceof InBodyMethodParameter) {
+                            returnClz = ((InBodyMethodParameter) param).getParameterClass();
+                            break;
+                        }
+                    }
+                } else {
+                    returnClz = protocolMethodCtx.getReturnClz();
+                }
             }
 
             Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
             responseBody = serializer.deserialize(body, returnClz);
         }
 
-        ProtocolResponseBodyHandler bodyHandler = responseBodyHandlerHolder.get(singleProtocolStat.getProtocol());
-        if (bodyHandler != null) {
-            bodyHandler.handle(singleProtocolStat.getProtocol(), protocol, responseBody);
+        if (!protocol.isPushProtocol()) {
+            EfficiencyStatistic.SingleProtocolStat singleProtocolStat = efficiencyStatistic.finishSingleProtocol(msg.getSn(), protocol);
+            ProtocolResponseBodyHandler bodyHandler = responseBodyHandlerHolder.get(singleProtocolStat.getProtocol());
+            if (bodyHandler != null) {
+                bodyHandler.handle(singleProtocolStat.getProtocol(), protocol, responseBody);
+            } else {
+                if (protocol.equals(singleProtocolStat.getProtocol())) {
+                    messageController.addInfoMessage(objectMapper.writeValueAsString(responseBody));
+                } else {
+                    messageController.addErrorMessage(objectMapper.writeValueAsString(responseBody));
+                }
+            }
+        } else {
+            ProtocolResponseBodyHandler bodyHandler = responseBodyHandlerHolder.get(protocol);
+            if (bodyHandler != null) {
+                bodyHandler.handle(protocol, protocol, responseBody);
+            } else {
+                messageController.addInfoMessage("收到推送: " + objectMapper.writeValueAsString(responseBody));
+            }
         }
 
     }

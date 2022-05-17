@@ -12,7 +12,7 @@ public interface ErrorCodeModule {
     SocketProtocol ERROR_CODE_RESPONSE = new SocketProtocol(ErrorCodeModule.MODULE, ErrorCodeModule.ERROR_CODE);
 
     /** 模块号 **/
-    short MODULE = 1;
+    short MODULE = 1001;
 
     /** 错误码 **/
     byte ERROR_CODE = 1;

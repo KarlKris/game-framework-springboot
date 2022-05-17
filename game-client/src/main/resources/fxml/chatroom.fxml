@@ -8,8 +8,8 @@
 <Pane prefHeight="177.0" prefWidth="411.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.li.client.controller.ChatController">
    <children>
-      <TextArea layoutX="-1.0" layoutY="28.0" prefHeight="149.0" prefWidth="411.0" />
+      <TextArea fx:id="chatBox" layoutX="-1.0" layoutY="28.0" prefHeight="149.0" prefWidth="411.0" />
       <Label layoutX="5.0" layoutY="7.0" prefHeight="15.0" prefWidth="195.0" text="聊天室" />
-      <Button layoutX="340.0" layoutY="3.0" mnemonicParsing="false" text="清空消息" />
+      <Button layoutX="340.0" layoutY="3.0" mnemonicParsing="false" text="清空消息" onAction="#clearMessage" />
    </children>
 </Pane>

@@ -5,7 +5,6 @@ import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.li.client.network.ClientNetworkService;
 import com.li.client.service.ProtocolService;
 import com.li.network.message.SocketProtocol;
@@ -43,21 +42,19 @@ public class ProtocolController implements Initializable {
     private ProtocolService protocolService;
     @Resource
     private ClientNetworkService clientNetworkService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Resource
+    private ObjectMapper objectMapper;
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
         protocolComboBox.getItems().clear();
         for (ProtocolMethodCtx ctx : protocolService.getMethodCtxHolder()) {
             SocketProtocol protocol = ctx.getProtocol();
             if (protocol.isPushProtocol()) {
                 continue;
             }
-            if (protocol.getModule() <= 3) {
+            if (protocol.getModule() <= 1000) {
                 continue;
             }
             String protocolName = protocol.getModule() + SEPARATOR

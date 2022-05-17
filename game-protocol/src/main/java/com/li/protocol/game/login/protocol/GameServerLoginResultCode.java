@@ -7,10 +7,10 @@ public interface GameServerLoginResultCode {
 
 
     /** 重复创建 **/
-    int CREATE_REPEAT = 2001;
+    int CREATE_REPEAT = 1001;
     /** 账号未创建 **/
-    int ACCOUNT_NOT_FOUND = 2002;
+    int ACCOUNT_NOT_FOUND = 1002;
     /** 拒绝服务 **/
-    int REJECT = 2003;
+    int REJECT = 1003;
 
 }

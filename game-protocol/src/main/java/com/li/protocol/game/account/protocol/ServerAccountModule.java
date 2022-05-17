@@ -8,7 +8,7 @@ package com.li.protocol.game.account.protocol;
 public interface ServerAccountModule {
 
     /** 模块号 **/
-    short MODULE = 5;
+    short MODULE = 1004;
 
 
     /** 获取账号展示VO **/

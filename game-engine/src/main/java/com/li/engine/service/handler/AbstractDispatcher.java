@@ -17,7 +17,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * 消息分发器基类
@@ -124,14 +124,12 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         try {
             Object result = invokeMethod(session, message, protocolMethodInvokeCtx);
             if (result != null) {
-                if (result instanceof CompletableFuture) {
-                    CompletableFuture<?> future = (CompletableFuture<?>) result;
+                if (result instanceof Future) {
+                    Future<?> future = (Future<?>) result;
                     responseBody = serializer.serialize(future.get());
                 } else {
                     responseBody = serializer.serialize(result);
                 }
-
-
             }
         }  catch (SocketException e) {
             if (log.isDebugEnabled()) {
@@ -144,7 +142,8 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             protocol = errorSocketProtocol();
             responseBody = serializer.serialize(createErrorCodeBody(ServerErrorCode.UNKNOWN));
         } finally {
-            if (protocolMethodInvokeCtx.isSyncMethod()) {
+            // 同步协议或有响应体时返回
+            if (protocolMethodInvokeCtx.isSyncMethod() || responseBody != null) {
                 response(session, message, protocol, responseBody);
             }
             // 线程执行完成移除ThreadLocal,防止内存溢出

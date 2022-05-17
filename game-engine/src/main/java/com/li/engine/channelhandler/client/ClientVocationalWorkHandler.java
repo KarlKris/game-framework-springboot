@@ -141,7 +141,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
                 Object[] args = new Object[params.length];
                 for (int i = 0; i < params.length; i++) {
                     if (params[i] instanceof PushIdsMethodParameter) {
-                        args[i] = pushResponse.getContent();
+                        args[i] = pushResponse.getTargets();
                         continue;
                     }
 

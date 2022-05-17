@@ -7,7 +7,7 @@ package com.li.protocol.game.chat.protocol;
 public interface ChatModule {
 
     /** 聊天模块号 **/
-    short MODULE = 4;
+    short MODULE = 1003;
 
     /** 发送消息 **/
     byte SEND = 1;

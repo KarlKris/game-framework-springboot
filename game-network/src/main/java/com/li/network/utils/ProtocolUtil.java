@@ -128,6 +128,11 @@ public class ProtocolUtil {
                     }
                 }
                 returnClz = type;
+            } else {
+                // 异步方法,返回类型必须是void
+                if (!Void.TYPE.isAssignableFrom(method.getReturnType())) {
+                    throw new IllegalArgumentException("模块号[" + module + "]方法标识[" + id + "]为异步方法返回类型必须为void");
+                }
             }
 
             ctx.add(new ProtocolMethodCtx(new SocketProtocol(module, id), method, params, socketMethod.isSyncMethod(), returnClz));

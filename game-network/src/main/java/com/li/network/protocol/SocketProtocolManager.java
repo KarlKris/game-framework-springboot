@@ -176,7 +176,20 @@ public class SocketProtocolManager implements SmartInstantiationAwareBeanPostPro
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        List<ProtocolMethodCtx> protocolMethodCtxHolder = ProtocolUtil.getMethodCtxBySocketCommand(AopUtils.getTargetClass(bean));
+        Class<?> targetClass = AopUtils.getTargetClass(bean);
+        SocketController socketController = AnnotationUtils.findAnnotation(targetClass, SocketController.class);
+        if (socketController == null) {
+            return bean;
+        }
+        List<ProtocolMethodCtx> protocolMethodCtxHolder = null;
+
+        SocketPush annotation = AnnotationUtils.findAnnotation(targetClass, SocketPush.class);
+        if (annotation == null) {
+            protocolMethodCtxHolder = ProtocolUtil.getMethodCtxBySocketCommand(targetClass);
+        } else {
+            protocolMethodCtxHolder = ProtocolUtil.getMethodCtxBySocketPush(targetClass);
+        }
+
         if (CollectionUtils.isEmpty(protocolMethodCtxHolder)) {
             return bean;
         }

@@ -3,7 +3,6 @@ package com.li.client.handler.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.li.client.controller.MainController;
-import com.li.client.controller.MessageController;
 import com.li.client.handler.AbstractProtocolResponseBodyHandler;
 import com.li.client.ui.UiType;
 import com.li.network.message.SocketProtocol;
@@ -21,8 +20,6 @@ import javax.annotation.Resource;
 public class LoginAccountProtocolResponseBodyHandler extends AbstractProtocolResponseBodyHandler<ResGatewayLoginAccount> {
 
     @Resource
-    private MessageController messageController;
-    @Resource
     private MainController mainController;
     @Resource
     private ObjectMapper objectMapper;
@@ -37,10 +34,6 @@ public class LoginAccountProtocolResponseBodyHandler extends AbstractProtocolRes
         mainController.switchUI(UiType.PLAYER_DETAILS);
     }
 
-    @Override
-    protected void error(long errorCode) {
-        messageController.addErrorMessage(String.valueOf(errorCode));
-    }
 
     @Override
     public SocketProtocol[] getSocketProtocol() {
