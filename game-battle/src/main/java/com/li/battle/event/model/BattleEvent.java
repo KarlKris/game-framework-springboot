@@ -1,23 +1,18 @@
 package com.li.battle.event.model;
 
 /**
- * 战斗相关事件
+ * 战斗事件
  * @author li-yuanwen
- * @date 2021/10/18
+ * @date 2022/5/18
  */
-public interface BattleEvent<T> {
+public interface BattleEvent {
+
 
     /**
-     * 获取战斗类型
-     * @return 战斗类型
+     * 事件来源标识
+     * @return 事件来源标识
      */
-    BattleEventType getType();
-
-    /**
-     * 获取战斗事件内容
-     * @return 战斗事件内容
-     */
-    T getEventBody();
+    long getSource();
 
 
 }

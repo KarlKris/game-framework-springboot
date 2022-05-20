@@ -1,7 +1,6 @@
 package com.li.battle.buff.core.impl;
 
 import com.li.battle.buff.core.Buff;
-import com.li.battle.core.context.BuffCreateContext;
 
 /**
  * 所有buff的基类，包含各类成员函数和基本接口
@@ -33,8 +32,6 @@ public abstract class AbstractBuff implements Buff {
     /** buff失效回合数=创建时回合数 + (buff时长(毫秒) / 回合执行间隔时长(毫秒)) **/
     protected long expireRound;
 
-    /** buff创建时的一些相关上下文数据 **/
-    protected BuffCreateContext context;
 
     @Override
     public void expire() {
@@ -50,5 +47,48 @@ public abstract class AbstractBuff implements Buff {
     @Override
     public long getNextRound() {
         return nextRound;
+    }
+
+
+    // ---------------------BuffMonitor适配器----------------------------------
+
+    @Override
+    public void onAbilityExecuted() {
+
+    }
+
+    @Override
+    public void onBeforeGiveDamage() {
+
+    }
+
+    @Override
+    public void onAfterGiveDamage() {
+
+    }
+
+    @Override
+    public void onBeforeTakeDamage() {
+
+    }
+
+    @Override
+    public void onAfterTakeDamage() {
+
+    }
+
+    @Override
+    public void onBeforeDead() {
+
+    }
+
+    @Override
+    public void onAfterDead() {
+
+    }
+
+    @Override
+    public void onKill() {
+
     }
 }

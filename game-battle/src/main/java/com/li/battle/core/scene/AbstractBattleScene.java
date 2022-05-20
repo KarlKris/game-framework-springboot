@@ -6,7 +6,7 @@ import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.projectile.core.Projectile;
 import com.li.battle.skill.executor.BattleSkillExecutor;
-import com.li.battle.skill.model.BattleSkillCtx;
+import com.li.battle.skill.model.BattleSkill;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -37,7 +37,7 @@ public abstract class AbstractBattleScene implements BattleScene {
     protected final List<Projectile> projectiles;
 
     /** 技能容器 **/
-    protected final List<BattleSkillCtx> skills;
+    protected final List<BattleSkill> skills;
 
     /** 单线程池(定时执行战斗逻辑) **/
     protected final ScheduledExecutorService executorService;
@@ -54,7 +54,9 @@ public abstract class AbstractBattleScene implements BattleScene {
     /** 技能执行器 **/
     private final BattleSkillExecutor battleSkillExecutor;
 
-    public AbstractBattleScene(long sceneId, SceneMap sceneMap, ScheduledExecutorService executorService) {
+    public AbstractBattleScene(long sceneId, SceneMap sceneMap
+            , ScheduledExecutorService executorService
+            , BattleSkillExecutor battleSkillExecutor) {
         this.sceneId = sceneId;
         this.sceneMap = sceneMap;
         this.fightUnits = new HashMap<>();
@@ -62,7 +64,7 @@ public abstract class AbstractBattleScene implements BattleScene {
         this.projectiles = new LinkedList<>();
         this.skills = new LinkedList<>();
         this.executorService = executorService;
-        this.battleSkillExecutor = (skillCtx, scene) -> false;
+        this.battleSkillExecutor = battleSkillExecutor;
     }
 
     @Override
@@ -126,7 +128,7 @@ public abstract class AbstractBattleScene implements BattleScene {
             executeBuffs();
             // 执行技能
             executeSkills();
-            // todo 执行玩家战斗单元AI
+            // todo 执行战斗单元AI
 
         } catch (Exception e) {
             log.error("执行场景逻辑{}出现位置异常", getClass().getSimpleName(), e);
@@ -190,14 +192,17 @@ public abstract class AbstractBattleScene implements BattleScene {
 
     /** 执行技能操作 **/
     protected void executeSkills() {
-        Iterator<BattleSkillCtx> iterator = skills.iterator();
+        Iterator<BattleSkill> iterator = skills.iterator();
         while (iterator.hasNext()) {
-            BattleSkillCtx skillCtx = iterator.next();
-            if (skillCtx.getNextRound() > round) {
+            BattleSkill skill = iterator.next();
+            if (skill.getNextRound() > round) {
                 continue;
             }
-            if (skillCtx.getExpireRound() >= round
-                    || battleSkillExecutor.execute(skillCtx, this)) {
+            if (skill.getExpireRound() >= round) {
+                battleSkillExecutor.execute(skill, this);
+            }
+
+            if (skill.getNextRound() < round) {
                 iterator.remove();
             }
         }

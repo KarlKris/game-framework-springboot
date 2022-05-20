@@ -124,7 +124,7 @@ public class SteeringBehaviourUtil {
         Vector2D toPursuer = pursuer.getPosition().subtract(evader.getPosition());
 
         // 预测的时间正比于二者的距离;反比于二者速度
-        double lookAheadTime = toPursuer.getNorm() / ((evader.getMaxSpeed() - pursuer.getSpeed()) * 1.0d);
+        double lookAheadTime = toPursuer.getNorm() / (evader.getMaxSpeed() - pursuer.getSpeed());
 
         // 现在逃离追逐者预测的位置
         return flee(evader, pursuer.getPosition().add(pursuer.getVelocity()).scalarMultiply(lookAheadTime), 100);
@@ -297,7 +297,7 @@ public class SteeringBehaviourUtil {
         ;
 
         /** 速度级别,越大,减速幅度越小 **/
-        private int speedLevel;
+        private final int speedLevel;
 
         Deceleration(int speedLevel) {
             this.speedLevel = speedLevel;

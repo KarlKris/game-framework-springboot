@@ -4,7 +4,7 @@ package com.li.battle.buff.core;
  * buff基本接口
  * @author li-yuanwen
  */
-public interface Buff {
+public interface Buff extends BuffMonitor {
 
     /** 当Buff添加时，存在相同类型且施加者相同的时候，Buff执行刷新流程(更新Buff层数，等级，持续时间等数据) **/
     void onBuffRefresh();
