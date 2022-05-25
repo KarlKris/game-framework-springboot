@@ -1,9 +1,8 @@
 package com.li.battle.skill.handler;
 
-import com.li.battle.config.GeneralSkillConfig;
-import com.li.battle.core.scene.BattleScene;
-import com.li.battle.skill.model.BattleSkill;
-import com.li.battle.skill.model.SkillType;
+import com.li.battle.resource.GeneralSkillConfig;
+import com.li.battle.skill.BattleSkill;
+import com.li.battle.skill.SkillType;
 import com.li.battle.skill.processor.SkillProcessor;
 import com.li.battle.skill.processor.SkillProcessorHolder;
 import com.li.common.resource.anno.ResourceInject;
@@ -33,10 +32,10 @@ public class GeneralSkillHandler implements SkillHandler {
     }
 
     @Override
-    public void handle(BattleSkill skill, BattleScene scene) {
+    public void handle(BattleSkill skill) {
         GeneralSkillConfig skillConfig = storage.getResource(skill.getSkillId());
         SkillProcessor<GeneralSkillConfig> skillProcessor
                 = (SkillProcessor<GeneralSkillConfig>) skillProcessorHolder.getSkillProcessor(skill.getNextStage());
-        skillProcessor.process(skill, scene, skillConfig);
+        skillProcessor.process(skill, skillConfig);
     }
 }

@@ -1,12 +1,13 @@
 package com.li.battle.core.scene;
 
 import com.li.battle.buff.core.Buff;
+import com.li.battle.core.BattleSceneHelper;
 import com.li.battle.core.scene.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.projectile.core.Projectile;
+import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.executor.BattleSkillExecutor;
-import com.li.battle.skill.model.BattleSkill;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -54,9 +55,13 @@ public abstract class AbstractBattleScene implements BattleScene {
     /** 技能执行器 **/
     private final BattleSkillExecutor battleSkillExecutor;
 
+    /** 战斗组件容器 **/
+    private final BattleSceneHelper helper;
+
     public AbstractBattleScene(long sceneId, SceneMap sceneMap
             , ScheduledExecutorService executorService
-            , BattleSkillExecutor battleSkillExecutor) {
+            , BattleSkillExecutor battleSkillExecutor
+            , BattleSceneHelper helper) {
         this.sceneId = sceneId;
         this.sceneMap = sceneMap;
         this.fightUnits = new HashMap<>();
@@ -65,6 +70,7 @@ public abstract class AbstractBattleScene implements BattleScene {
         this.skills = new LinkedList<>();
         this.executorService = executorService;
         this.battleSkillExecutor = battleSkillExecutor;
+        this.helper = helper;
     }
 
     @Override
@@ -84,6 +90,11 @@ public abstract class AbstractBattleScene implements BattleScene {
             trySceneRunning();
         }
         return success;
+    }
+
+    @Override
+    public FightUnit getFightUnit(long unitId) {
+        return fightUnits.get(unitId);
     }
 
     @Override
@@ -137,22 +148,7 @@ public abstract class AbstractBattleScene implements BattleScene {
 
     /** 开始运行Buff逻辑 **/
     protected void executeBuffs() {
-        long round = getSceneRound();
-        Iterator<Buff> iterator = this.buffs.iterator();
-        if (iterator.hasNext()) {
-            Buff buff = iterator.next();
-            // buff已失效,执行逻辑
-            if (buff.expire(round)) {
-                // 执行移除容器前逻辑
-                buff.onBuffRemove();
-                // 移除容器
-                iterator.remove();
-                // 执行移除容器后逻辑
-                buff.onBuffDestroy();
-            } else if (buff.getNextRound() <= round){
-                buff.onIntervalThink();
-            }
-        }
+
     }
 
     /** 执行子弹逻辑 **/
@@ -199,7 +195,7 @@ public abstract class AbstractBattleScene implements BattleScene {
                 continue;
             }
             if (skill.getExpireRound() >= round) {
-                battleSkillExecutor.execute(skill, this);
+                battleSkillExecutor.execute(skill);
             }
 
             if (skill.getNextRound() < round) {
@@ -214,4 +210,8 @@ public abstract class AbstractBattleScene implements BattleScene {
     }
 
 
+    @Override
+    public BattleSceneHelper getBattleSceneHelper() {
+        return helper;
+    }
 }

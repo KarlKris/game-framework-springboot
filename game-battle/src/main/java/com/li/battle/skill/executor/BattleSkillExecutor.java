@@ -1,10 +1,9 @@
 package com.li.battle.skill.executor;
 
-import com.li.battle.config.SkillConfig;
-import com.li.battle.core.scene.BattleScene;
+import com.li.battle.resource.SkillConfig;
 import com.li.battle.skill.handler.SkillHandler;
-import com.li.battle.skill.model.BattleSkill;
-import com.li.battle.skill.model.SkillType;
+import com.li.battle.skill.BattleSkill;
+import com.li.battle.skill.SkillType;
 import com.li.common.resource.anno.ResourceInject;
 import com.li.common.resource.storage.ResourceStorage;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -13,7 +12,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 战斗单元释放的技能执行器(会放入到技能容器中)
@@ -48,16 +50,15 @@ public class BattleSkillExecutor {
     /**
      * 执行技能效果
      * @param skill 技能上下文
-     * @param scene 战斗场景
      * @return true 技能失效，移除容器
      */
-    public void execute(BattleSkill skill, BattleScene scene) {
+    public void execute(BattleSkill skill) {
         SkillConfig config = storage.getResource(skill.getSkillId());
         for (SkillHandler skillHandler : handlerHolder) {
             if (!SkillType.belongTo(config.getType(), skillHandler.getSkillType())) {
                 continue;
             }
-            skillHandler.handle(skill, scene);
+            skillHandler.handle(skill);
         }
     }
 

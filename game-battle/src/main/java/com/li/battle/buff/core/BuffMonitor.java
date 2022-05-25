@@ -4,6 +4,7 @@ package com.li.battle.buff.core;
  * buff监听器(后续进行更细腻的拆分)
  * @author li-yuanwen
  */
+@Deprecated
 public interface BuffMonitor {
 
     /** 监听Buff生效前 **/

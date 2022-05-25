@@ -1,9 +1,8 @@
 package com.li.battle.skill.handler;
 
-import com.li.battle.config.ChannelSkillConfig;
-import com.li.battle.core.scene.BattleScene;
-import com.li.battle.skill.model.BattleSkill;
-import com.li.battle.skill.model.SkillType;
+import com.li.battle.resource.ChannelSkillConfig;
+import com.li.battle.skill.BattleSkill;
+import com.li.battle.skill.SkillType;
 import com.li.battle.skill.processor.SkillProcessor;
 import com.li.battle.skill.processor.SkillProcessorHolder;
 import com.li.common.resource.anno.ResourceInject;
@@ -32,10 +31,10 @@ public class ChannelSkillHandler implements SkillHandler {
     }
 
     @Override
-    public void handle(BattleSkill skill, BattleScene scene) {
+    public void handle(BattleSkill skill) {
         ChannelSkillConfig skillConfig = storage.getResource(skill.getSkillId());
         SkillProcessor<ChannelSkillConfig> skillProcessor
                 = (SkillProcessor<ChannelSkillConfig>) skillProcessorHolder.getSkillProcessor(skill.getNextStage());
-        skillProcessor.process(skill, scene, skillConfig);
+        skillProcessor.process(skill, skillConfig);
     }
 }

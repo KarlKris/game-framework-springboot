@@ -1,8 +1,8 @@
 ﻿package com.li.battle.core.unit;
 
-import com.li.battle.core.unit.model.Attribute;
-import com.li.battle.core.unit.model.UnitState;
-import com.li.battle.core.unit.model.UnitType;
+import com.li.battle.core.Attribute;
+import com.li.battle.core.UnitState;
+import com.li.battle.core.UnitType;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.Map;
@@ -35,10 +35,10 @@ public abstract class AbstractFightUnit implements FightUnit {
 
 
     /** 战斗属性 **/
-    private final Map<Attribute, Double> attributes;
+    private final Map<Attribute, Long> attributes;
 
     public AbstractFightUnit(long id, UnitType type, double radius, int maxSpeed
-            , Vector2D position, Map<Attribute, Double> attributes) {
+            , Vector2D position, Map<Attribute, Long> attributes) {
         this.id = id;
         this.type = type;
         this.radius = radius;
@@ -56,12 +56,12 @@ public abstract class AbstractFightUnit implements FightUnit {
     }
 
     @Override
-    public Double getAttributeValue(Attribute attribute) {
-        return attributes.getOrDefault(attribute, 0D);
+    public long getAttributeValue(Attribute attribute) {
+        return attributes.getOrDefault(attribute, 0L);
     }
 
     @Override
-    public void modifyAttribute(Attribute attribute, Double value) {
+    public void modifyAttribute(Attribute attribute, Long value) {
         this.attributes.put(attribute, value);
     }
 

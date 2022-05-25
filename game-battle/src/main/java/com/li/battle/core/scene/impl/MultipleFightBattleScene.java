@@ -1,8 +1,9 @@
 package com.li.battle.core.scene.impl;
 
+import com.li.battle.core.BattleSceneHelper;
 import com.li.battle.core.scene.AbstractBattleScene;
 import com.li.battle.core.scene.map.SceneMap;
-import com.li.battle.core.unit.Unit;
+import com.li.battle.core.unit.FightUnit;
 import com.li.battle.skill.executor.BattleSkillExecutor;
 
 import java.util.Collection;
@@ -18,8 +19,9 @@ public class MultipleFightBattleScene extends AbstractBattleScene {
 
     public MultipleFightBattleScene(long sceneId, SceneMap sceneMap
             , ScheduledExecutorService executorService
-            , BattleSkillExecutor battleSkillExecutor) {
-        super(sceneId, sceneMap, executorService, battleSkillExecutor);
+            , BattleSkillExecutor battleSkillExecutor
+            , BattleSceneHelper helper) {
+        super(sceneId, sceneMap, executorService, battleSkillExecutor, helper);
     }
 
     @Override
@@ -34,7 +36,7 @@ public class MultipleFightBattleScene extends AbstractBattleScene {
     }
 
     @Override
-    public Collection<Unit> getUnits() {
+    public Collection<FightUnit> getUnits() {
         return null;
     }
 }

@@ -1,8 +1,7 @@
 package com.li.battle.skill.processor;
 
-import com.li.battle.core.scene.BattleScene;
-import com.li.battle.skill.model.BattleSkill;
-import com.li.battle.skill.model.SkillStage;
+import com.li.battle.skill.BattleSkill;
+import com.li.battle.skill.SkillStage;
 
 /**
  * 技能阶段执行器
@@ -22,9 +21,8 @@ public interface SkillProcessor<T> {
     /**
      * 执行技能效果
      * @param skill 技能
-     * @param scene 战斗场景
      * @param config 技能配置
      */
-    void process(BattleSkill skill, BattleScene scene, T config);
+    void process(BattleSkill skill, T config);
 
 }

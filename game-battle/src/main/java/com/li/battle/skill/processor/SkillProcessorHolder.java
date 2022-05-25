@@ -1,6 +1,6 @@
 package com.li.battle.skill.processor;
 
-import com.li.battle.skill.model.SkillStage;
+import com.li.battle.skill.SkillStage;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,7 @@
 package com.li.battle.core.scene;
 
+import com.li.battle.core.BattleSceneHelper;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.core.unit.Unit;
 
 import java.util.Collection;
 
@@ -38,10 +38,17 @@ public interface BattleScene {
     boolean enterScene(FightUnit unit);
 
     /**
-     * 获取场景内所有单元
-     * @return 场景内所有单元
+     * 获取指定的战斗单元
+     * @param unitId 战斗单元标识
+     * @return 战斗单元
      */
-    Collection<Unit> getUnits();
+    FightUnit getFightUnit(long unitId);
+
+    /**
+     * 获取场景内所有战斗单元
+     * @return 场景内所有战斗单元
+     */
+    Collection<FightUnit> getUnits();
 
     /**
      * 离开场景
@@ -59,5 +66,11 @@ public interface BattleScene {
      * 开始运行场景逻辑
      */
     void start();
+
+    /**
+     * 获取配置获取实例
+     * @return 配置获取实例
+     */
+    BattleSceneHelper getBattleSceneHelper();
 
 }

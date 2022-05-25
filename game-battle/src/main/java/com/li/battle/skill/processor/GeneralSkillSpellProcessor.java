@@ -1,10 +1,9 @@
 package com.li.battle.skill.processor;
 
-import com.li.battle.config.GeneralSkillConfig;
-import com.li.battle.core.scene.BattleScene;
+import com.li.battle.resource.GeneralSkillConfig;
 import com.li.battle.effect.Effect;
-import com.li.battle.skill.model.BattleSkill;
-import com.li.battle.skill.model.SkillStage;
+import com.li.battle.skill.BattleSkill;
+import com.li.battle.skill.SkillStage;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,9 +20,9 @@ public class GeneralSkillSpellProcessor implements SkillProcessor<GeneralSkillCo
     }
 
     @Override
-    public void process(BattleSkill skill, BattleScene scene, GeneralSkillConfig config) {
+    public void process(BattleSkill skill, GeneralSkillConfig config) {
         for (Effect effect : config.getSpellEffects()) {
-            effect.onAction();
+            effect.onAction(skill);
         }
     }
 }

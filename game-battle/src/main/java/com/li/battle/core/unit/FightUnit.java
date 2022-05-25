@@ -1,6 +1,6 @@
 package com.li.battle.core.unit;
 
-import com.li.battle.core.unit.model.Attribute;
+import com.li.battle.core.Attribute;
 
 /**
  * 战斗单元对外接口
@@ -14,13 +14,13 @@ public interface FightUnit extends MoveUnit {
      * @param attribute 属性类型
      * @return 属性值
      */
-    Double getAttributeValue(Attribute attribute);
+    long getAttributeValue(Attribute attribute);
 
     /**
      * 修改属性
      * @param attribute 属性类型
      * @param value 更新值
      */
-    void modifyAttribute(Attribute attribute, Double value);
+    void modifyAttribute(Attribute attribute, Long value);
 
 }
