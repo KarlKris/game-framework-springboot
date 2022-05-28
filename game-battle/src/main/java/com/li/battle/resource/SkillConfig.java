@@ -1,5 +1,7 @@
 package com.li.battle.resource;
 
+import com.li.battle.buff.core.Buff;
+import com.li.battle.effect.Effect;
 import lombok.Getter;
 
 /**
@@ -15,9 +17,11 @@ public class SkillConfig {
     /** 技能类型 **/
     private byte type;
     /** 技能CD(毫秒) **/
-    private int cooldown;
+    private int coolDown;
     /** 技能射程 **/
     private int range;
+    /** 技能初始化效果(技能类型包含被动技能时会在角色进场景时执行效果) **/
+    private Effect<Buff>[] initEffects;
 
 
 }

@@ -1,5 +1,6 @@
 package com.li.battle.resource;
 
+import com.li.battle.buff.core.Buff;
 import com.li.battle.effect.Effect;
 import lombok.Getter;
 
@@ -18,18 +19,18 @@ public class ChannelSkillConfig {
     /** 技能选择目标选择集 **/
     private List<Integer> selectorIds;
     /** 技能起手阶段效果 **/
-    private Effect[] initEffects;
+    private Effect<Buff>[] initEffects;
     /** 前摇时长(毫秒) **/
     private int frontRockingTime;
     /** 前摇阶段是否可打断 **/
     private boolean frontInterrupted;
 
     /** 引导开始阶段效果 **/
-    private Effect[] startEffects;
+    private Effect<Buff>[] startEffects;
     /** 引导施法阶段效果 **/
-    private Effect[] thinkEffects;
+    private Effect<Buff>[] thinkEffects;
     /** 引导结束阶段效果 **/
-    private Effect[] finishEffects;
+    private Effect<Buff>[] finishEffects;
     /** 引导施法触发间隔(毫秒) **/
     private int thinkInterval;
     /** 引导总时长(毫秒) **/
@@ -40,6 +41,6 @@ public class ChannelSkillConfig {
     /** 后摇阶段是否可打断 **/
     private boolean backInterrupted;
     /** 结束阶段效果 **/
-    private Effect[] destroyEffects;
+    private Effect<Buff>[] destroyEffects;
 
 }

@@ -3,11 +3,13 @@ package com.li.battle.event;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.event.core.BattleEvent;
 import com.li.battle.event.core.BattleEventType;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
 /**
  * 事件分发器
+ * todo 考虑单位退出场景后相应的EventHandlerContext的删除问题
  * @author li-yuanwen
  * @date 2022/5/18
  */
@@ -19,7 +21,9 @@ public class EventDispatcher {
     /** 注册的所有事件处理器 **/
     private final Map<BattleEventType, List<EventHandlerContext>> contextHolder = new EnumMap<>(BattleEventType.class);
     /** 待处理的事件队列 **/
-    private final PriorityQueue<EventElement> queue = new PriorityQueue<>();
+    private final PriorityQueue<EventElement> queue = new PriorityQueue<>(Comparator.comparingLong(o -> o.round));
+    /** EventReceiver持有者汇总 **/
+    private final Map<Long, List<EventReceiver>> receivers = new HashMap<>();
 
     public EventDispatcher(BattleScene scene) {
         this.scene = scene;
@@ -36,20 +40,34 @@ public class EventDispatcher {
             List<EventHandlerContext> contexts = contextHolder.computeIfAbsent(type, k -> new LinkedList<>());
             contexts.add(context);
         }
+
+        List<EventReceiver> eventReceivers = receivers.computeIfAbsent(receiver.getOwner(), k -> new LinkedList<>());
+        eventReceivers.add(receiver);
+    }
+
+
+    /**
+     * 注销事件接收者
+     * @param owner 事件接收者持有者标识,即单位唯一标识
+     */
+    public void unregister(long owner) {
+        List<EventReceiver> eventReceivers = receivers.remove(owner);
+        if (!CollectionUtils.isEmpty(eventReceivers)) {
+            eventReceivers.forEach(EventReceiver::makeExpire);
+        }
     }
 
 
     /**
      * 分发事件
      * @param event 事件
-     * @param curRound 当前回合数
      * @param delay 延时执行事件处理回合数, 0或-1 立即处理
      */
-    public void dispatch(BattleEvent event, long curRound, int delay) {
+    public void dispatch(BattleEvent event, int delay) {
         if (delay <= 0) {
-            handle(event, curRound);
+            handle(event, scene.getSceneRound());
         } else {
-            queue.offer(new EventElement(curRound + delay, event));
+            queue.offer(new EventElement(scene.getSceneRound() + delay, event));
         }
     }
 
@@ -57,11 +75,11 @@ public class EventDispatcher {
     /**
      * 每帧的事件处理
      */
-    public void update(long curRound) {
+    public void update() {
         EventElement eventElement = queue.peek();
-        while (eventElement != null && eventElement.round <= curRound) {
+        while (eventElement != null && eventElement.round <= scene.getSceneRound()) {
             queue.poll();
-            handle(eventElement.event, curRound);
+            handle(eventElement.event, scene.getSceneRound());
             eventElement = queue.peek();
         }
     }
@@ -77,7 +95,7 @@ public class EventDispatcher {
         Iterator<EventHandlerContext> iterator = contexts.iterator();
         while (iterator.hasNext()) {
             EventHandlerContext context = iterator.next();
-            if (context.eventReceiver().isValid(curRound)) {
+            if (context.eventReceiver().isInvalid(curRound)) {
                 // 失效移除
                 iterator.remove();
                 continue;

@@ -4,7 +4,6 @@ import com.li.battle.core.BattleSceneHelper;
 import com.li.battle.core.scene.AbstractBattleScene;
 import com.li.battle.core.scene.map.SceneMap;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.skill.executor.BattleSkillExecutor;
 
 import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
@@ -19,9 +18,8 @@ public class MultipleFightBattleScene extends AbstractBattleScene {
 
     public MultipleFightBattleScene(long sceneId, SceneMap sceneMap
             , ScheduledExecutorService executorService
-            , BattleSkillExecutor battleSkillExecutor
             , BattleSceneHelper helper) {
-        super(sceneId, sceneMap, executorService, battleSkillExecutor, helper);
+        super(sceneId, sceneMap, executorService, helper);
     }
 
     @Override

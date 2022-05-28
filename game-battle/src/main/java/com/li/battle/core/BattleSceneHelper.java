@@ -2,7 +2,9 @@ package com.li.battle.core;
 
 import com.li.battle.ConfigHelper;
 import com.li.battle.buff.BuffFactory;
+import com.li.battle.event.EventHandlerHolder;
 import com.li.battle.selector.SelectorHolder;
+import com.li.battle.skill.executor.BattleSkillExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -21,17 +23,29 @@ public class BattleSceneHelper {
     private SelectorHolder selectorHolder;
     @Resource
     private BuffFactory bufferFactory;
+    @Resource
+    private EventHandlerHolder eventHandlerHolder;
+    @Resource
+    private BattleSkillExecutor battleSkillExecutor;
 
 
-    public ConfigHelper getConfigHelper() {
+    public ConfigHelper configHelper() {
         return configHelper;
     }
 
-    public SelectorHolder getSelectorHolder() {
+    public SelectorHolder selectorHolder() {
         return selectorHolder;
     }
 
-    public BuffFactory getBufferFactory() {
+    public BuffFactory buffFactory() {
         return bufferFactory;
+    }
+
+    public EventHandlerHolder eventHandlerHolder() {
+        return eventHandlerHolder;
+    }
+
+    public BattleSkillExecutor battleSkillExecutor() {
+        return battleSkillExecutor;
     }
 }

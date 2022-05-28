@@ -1,12 +1,14 @@
 package com.li.battle.effect;
 
 import com.li.battle.buff.core.Buff;
+import com.li.battle.core.BattleSceneHelper;
+import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.event.EventPipeline;
-import com.li.battle.event.core.BattleEventType;
+import com.li.battle.core.unit.IPosition;
+import com.li.battle.resource.TriggerConfig;
 import com.li.battle.skill.BattleSkill;
-import com.li.battle.trigger.Trigger;
-import com.li.battle.trigger.TriggerType;
+import com.li.battle.trigger.TriggerReceiver;
+import com.li.battle.trigger.TriggerReceiverFactory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,59 +21,41 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TriggerEffect extends EffectAdapter<Buff> implements Trigger {
+public class TriggerEffect extends EffectAdapter<Buff> {
 
-    /** 触发器类 **/
-    private Trigger trigger;
-    /** 实际效果 **/
-    private Effect[] effects;
+    /** 触发器标识 **/
+    private int triggerId;
 
     @Override
     public void onAction(FightUnit unit) {
-        registerEventReceiverIfNecessary();
+        registerEventReceiverIfNecessary(unit.getScene(), unit.getId(), unit.getId(), 0, 0);
     }
 
     @Override
     public void onAction(BattleSkill skill) {
-        registerEventReceiverIfNecessary();
+        for (IPosition position : skill.getTarget().getResults()) {
+            if (!(position instanceof FightUnit)) {
+                continue;
+            }
+
+            registerEventReceiverIfNecessary(skill.getContext().getScene(), skill.getCaster()
+                    , ((FightUnit) position).getId(), skill.getSkillId(), 0);
+        }
+
     }
 
     @Override
     public void onAction(Buff buff) {
-        registerEventReceiverIfNecessary();
+        registerEventReceiverIfNecessary(buff.getContext().getScene(), buff.getCaster(), buff.getParent(), buff.getSkillId(), buff.getSkillId());
     }
 
-    @Override
-    public TriggerType getType() {
-        return trigger.getType();
+
+    private void registerEventReceiverIfNecessary(BattleScene scene, long unitId, long target, int skillId, int buffId) {
+        BattleSceneHelper battleSceneHelper = scene.battleSceneHelper();
+        TriggerConfig triggerConfig = battleSceneHelper.configHelper().getTriggerConfigById(triggerId);
+
+        TriggerReceiver triggerReceiver = TriggerReceiverFactory.newInstanceAndRegister(unitId, target, skillId, buffId, triggerConfig, scene);
+        scene.triggerManager().addTriggerReceiver(triggerReceiver);
     }
 
-    @Override
-    public boolean tryTrigger() {
-        return trigger.tryTrigger();
-    }
-
-    @Override
-    public boolean isTimeOut() {
-        return trigger.isTimeOut();
-    }
-
-    @Override
-    public Trigger copy() {
-        return new TriggerEffect(trigger.copy(), effects);
-    }
-
-    @Override
-    public void registerEventReceiverIfNecessary() {
-        TriggerType triggerType = trigger.getType();
-        BattleEventType type = triggerType.getEventType();
-        // TODO 根据事件类型,添加责任链
-
-        EventPipeline pipeline = eventPipeline();
-    }
-
-    @Override
-    public boolean isValid(long curRound) {
-        return trigger.isTimeOut();
-    }
 }

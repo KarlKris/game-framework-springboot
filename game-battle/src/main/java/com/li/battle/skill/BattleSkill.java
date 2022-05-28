@@ -1,5 +1,6 @@
 package com.li.battle.skill;
 
+import com.li.battle.core.IOwner;
 import com.li.battle.core.context.AbstractDamageAlterContext;
 import com.li.battle.selector.SelectorResult;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.Getter;
  * @date 2021/10/20
  */
 @Getter
-public class BattleSkill {
+public class BattleSkill implements IOwner {
 
     /** 技能配置 **/
     private int skillId;
@@ -33,4 +34,12 @@ public class BattleSkill {
     }
 
 
+    public boolean isExpire(long curRound) {
+        return expireRound != 0 && curRound > expireRound;
+    }
+
+    @Override
+    public long getOwner() {
+        return caster;
+    }
 }

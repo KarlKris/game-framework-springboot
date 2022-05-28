@@ -1,8 +1,10 @@
 package com.li.battle.buff.core;
 
 import cn.hutool.core.util.ArrayUtil;
+import com.li.battle.buff.handler.SkillExecutedBuffEventHandler;
 import com.li.battle.core.context.AbstractContext;
 import com.li.battle.core.scene.BattleScene;
+import com.li.battle.event.EventHandlerHolder;
 import com.li.battle.event.EventPipeline;
 import com.li.battle.event.handler.EventHandler;
 import com.li.battle.resource.BuffConfig;
@@ -55,8 +57,13 @@ public abstract class AbstractBuff implements Buff {
     }
 
     @Override
-    public void onBuffRefresh(Buff other) {
-        config.getMergeRule().merge(this, other);
+    public boolean onBuffRefresh(Buff other) {
+        return config.getMergeRule().merge(this, other);
+    }
+
+    @Override
+    public long getOwner() {
+        return caster;
     }
 
     @Override
@@ -91,6 +98,11 @@ public abstract class AbstractBuff implements Buff {
 
     @Override
     public void expire() {
+        makeExpire();
+    }
+
+    @Override
+    public void makeExpire() {
         expireRound = -1;
     }
 
@@ -101,12 +113,12 @@ public abstract class AbstractBuff implements Buff {
 
     /** buff是否失效 **/
     @Override
-    public boolean expire(long curRound) {
+    public boolean isExpire(long curRound) {
         return isExpire0(curRound);
     }
 
     @Override
-    public boolean isValid(long curRound) {
+    public boolean isInvalid(long curRound) {
         return isExpire0(curRound);
     }
 
@@ -127,10 +139,13 @@ public abstract class AbstractBuff implements Buff {
     @Override
     public void registerEventReceiverIfNecessary() {
 
+        BattleScene scene = getContext().getScene();
+        EventHandlerHolder eventHandlerHolder = scene.battleSceneHelper().eventHandlerHolder();
         List<EventHandler> handlers = new LinkedList<>();
         // 根据BuffConfig添加Handler
         if (ArrayUtil.isNotEmpty(config.getExecutedEffects())) {
-            // todo 注册技能执行事件处理器
+            //  注册技能执行事件处理器
+            handlers.add(eventHandlerHolder.getEventHandler(SkillExecutedBuffEventHandler.class));
         }
 
         if (ArrayUtil.isNotEmpty(config.getBeforeDamageEffects())) {
@@ -157,7 +172,8 @@ public abstract class AbstractBuff implements Buff {
             EventPipeline pipeline = eventPipeline();
             handlers.forEach(pipeline::addHandler);
 
-            // todo 注册自身
+            //  注册自身
+            scene.eventDispatcher().register(this);
         }
 
     }

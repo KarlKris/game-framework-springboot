@@ -15,7 +15,7 @@ public class EffectAdapter<B extends Buff> implements Effect<B> {
 
     @Override
     public void onAction(FightUnit unit) {
-        log.info("战斗单位:[{}]执行效果[{}]", unit.getClass().getSimpleName(), this.getClass().getSimpleName());
+        log.info("战斗单位:[{},{}]执行效果[{}]", unit.getClass().getSimpleName(), unit.getId(), this.getClass().getSimpleName());
     }
 
     @Override
@@ -26,5 +26,12 @@ public class EffectAdapter<B extends Buff> implements Effect<B> {
     @Override
     public void onAction(B buff) {
         log.info("buff:[{}]执行效果[{}]", buff.getBuffId(), this.getClass().getSimpleName());
+    }
+
+    @Override
+    public void onAction(FightUnit caster, FightUnit target) {
+        log.info("战斗单位:[{},{}]向战斗单位:[{}]执行效果[{},{}]", caster.getClass().getSimpleName(), caster.getId()
+                , target.getClass().getSimpleName(), target.getId()
+                , this.getClass().getSimpleName());
     }
 }

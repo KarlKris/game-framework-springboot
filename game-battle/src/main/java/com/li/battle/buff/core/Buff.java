@@ -2,6 +2,7 @@ package com.li.battle.buff.core;
 
 import com.li.battle.core.context.AbstractContext;
 import com.li.battle.event.EventReceiver;
+import com.li.battle.resource.BuffConfig;
 
 /**
  * buff基本接口
@@ -14,6 +15,12 @@ public interface Buff extends EventReceiver {
      * @return buff标识
      */
     int getBuffId();
+
+    /**
+     * 获取Buff配置
+     * @return Buff配置
+     */
+    BuffConfig getConfig();
 
     /**
      * 获取buff关联的技能id
@@ -36,8 +43,9 @@ public interface Buff extends EventReceiver {
     /**
      * 当Buff添加时，存在相同类型且施加者相同的时候，Buff执行刷新流程(更新Buff层数，等级，持续时间等数据)
      * @param other 其他buff
+     * @return true 成功合并刷新
      **/
-    void onBuffRefresh(Buff other);
+    boolean onBuffRefresh(Buff other);
 
     /**
      * 获取buff层数
@@ -103,7 +111,7 @@ public interface Buff extends EventReceiver {
      * @param curRound 当前场景回合数
      * @return true buff已失效
      */
-    boolean expire(long curRound);
+    boolean isExpire(long curRound);
 
     /**
      * 获取buff创建上下文

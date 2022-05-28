@@ -7,11 +7,8 @@ package com.li.battle.core;
  */
 public enum UnitType {
 
-    /** 玩家 **/
-    PLAYER,
-
-    /** 玩家镜像 **/
-    PLAYER_MIRROR,
+    /** 英雄 **/
+    HERO,
 
     /** 怪物 **/
     MONSTER,

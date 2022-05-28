@@ -10,9 +10,7 @@ import com.li.battle.util.ValueAlter;
  * @author li-yuanwen
  * @date 2022/5/24
  */
-public abstract class AbstractDamageEffect<B extends BuffModifier> implements Effect<B> {
-
-
+public abstract class AbstractDamageEffect<B extends BuffModifier> extends EffectAdapter<B> {
 
     protected void incrementDamage(BattleSkill skill, long incrementValue) {
         incrementDamage0(skill.getContext(), incrementValue);

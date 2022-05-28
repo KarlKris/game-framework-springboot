@@ -1,12 +1,11 @@
 package com.li.battle.skill.handler;
 
+import com.li.battle.ConfigHelper;
 import com.li.battle.resource.ChannelSkillConfig;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillType;
 import com.li.battle.skill.processor.SkillProcessor;
 import com.li.battle.skill.processor.SkillProcessorHolder;
-import com.li.common.resource.anno.ResourceInject;
-import com.li.common.resource.storage.ResourceStorage;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -19,9 +18,8 @@ import javax.annotation.Resource;
 @Component
 public class ChannelSkillHandler implements SkillHandler {
 
-    @ResourceInject
-    private ResourceStorage<Integer, ChannelSkillConfig> storage;
-
+    @Resource
+    private ConfigHelper configHelper;
     @Resource
     private SkillProcessorHolder skillProcessorHolder;
 
@@ -32,7 +30,7 @@ public class ChannelSkillHandler implements SkillHandler {
 
     @Override
     public void handle(BattleSkill skill) {
-        ChannelSkillConfig skillConfig = storage.getResource(skill.getSkillId());
+        ChannelSkillConfig skillConfig = configHelper.getChannelSkillConfigById(skill.getSkillId());
         SkillProcessor<ChannelSkillConfig> skillProcessor
                 = (SkillProcessor<ChannelSkillConfig>) skillProcessorHolder.getSkillProcessor(skill.getNextStage());
         skillProcessor.process(skill, skillConfig);

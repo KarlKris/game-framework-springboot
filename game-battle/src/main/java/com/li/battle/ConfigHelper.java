@@ -20,8 +20,6 @@ public class ConfigHelper {
     @ResourceInject
     private ResourceStorage<Integer, GeneralSkillConfig> generalSkillStorage;
     @ResourceInject
-    private ResourceStorage<Integer, PassiveSkillConfig> passiveSkillStorage;
-    @ResourceInject
     private ResourceStorage<Integer, SkillConfig> skillStorage;
     @ResourceInject
     private ResourceStorage<Integer, ToggleSkillConfig> toggleSkillStorage;
@@ -29,6 +27,8 @@ public class ConfigHelper {
     private ResourceStorage<Integer, BuffConfig> buffStorage;
     @ResourceInject
     private ResourceStorage<Integer, SelectorConfig> selectorStorage;
+    @ResourceInject
+    private ResourceStorage<Integer, TriggerConfig> triggerStorage;
 
 
     public ActivateSkillConfig getActivateSkillConfigById(Integer id) {
@@ -41,10 +41,6 @@ public class ConfigHelper {
 
     public GeneralSkillConfig getGeneralSkillConfigById(Integer id) {
         return generalSkillStorage.getResource(id);
-    }
-
-    public PassiveSkillConfig getPassiveSkillConfigById(Integer id) {
-        return passiveSkillStorage.getResource(id);
     }
 
     public SkillConfig getSkillConfigById(Integer id) {
@@ -61,6 +57,10 @@ public class ConfigHelper {
 
     public SelectorConfig getSelectorConfigById(Integer id) {
         return selectorStorage.getResource(id);
+    }
+
+    public TriggerConfig getTriggerConfigById(Integer id) {
+        return triggerStorage.getResource(id);
     }
 
 

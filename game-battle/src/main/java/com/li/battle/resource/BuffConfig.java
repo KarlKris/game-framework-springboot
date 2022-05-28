@@ -1,6 +1,7 @@
 package com.li.battle.resource;
 
 import com.li.battle.buff.BuffMerge;
+import com.li.battle.buff.BuffMonitorSkillCasterType;
 import com.li.battle.buff.BuffType;
 import com.li.battle.effect.Effect;
 import lombok.Getter;
@@ -27,10 +28,14 @@ public class BuffConfig {
     private List<Integer> selectorIds;
     /** buff时长(毫秒) 0表永久 **/
     private int duration;
-    /** buff生效效果 **/
-    private Effect[] startEffects;
     /** buff刷新合并规则（更新Buff层数，等级，持续时间等数据） **/
     private BuffMerge mergeRule;
+
+    /** buff生效效果 **/
+    private Effect[] startEffects;
+
+    /** buff生效效果 **/
+    private Effect[] awakeEffects;
 
     /** buff触发间隔(毫秒) **/
     private int thinkInterval;
@@ -41,6 +46,7 @@ public class BuffConfig {
     private Effect[] removeEffects;
     /** buff销毁效果 **/
     private Effect[] destroyEffects;
+
     /** buff改变运动状态时效果 **/
     private Effect[] motionUpdateEffects;
     /** buff打断运动时效果 **/
@@ -49,7 +55,9 @@ public class BuffConfig {
     /** 某个主动技能执行成功时效果 **/
     private Effect[] executedEffects;
     /** 监听的主动技能id **/
-    private int skillId;
+    private int[] skillIds;
+    /** 技能施法人类型 **/
+    private BuffMonitorSkillCasterType monitorSkillCasterType;
 
     /** 我方给目标造成伤害前触发效果 **/
     private Effect[] beforeDamageEffects;

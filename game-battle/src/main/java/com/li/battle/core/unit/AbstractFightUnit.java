@@ -33,9 +33,10 @@ public abstract class AbstractFightUnit implements FightUnit {
     /** 上次徘徊的随机点 **/
     private Vector2D localWander;
 
-
     /** 战斗属性 **/
     private final Map<Attribute, Long> attributes;
+
+
 
     public AbstractFightUnit(long id, UnitType type, double radius, int maxSpeed
             , Vector2D position, Map<Attribute, Long> attributes) {

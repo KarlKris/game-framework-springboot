@@ -1,5 +1,6 @@
 package com.li.battle.resource;
 
+import com.li.battle.buff.core.Buff;
 import com.li.battle.effect.Effect;
 import lombok.Getter;
 
@@ -18,18 +19,18 @@ public class GeneralSkillConfig {
     /** 技能选择目标选择集 **/
     private List<Integer> selectorIds;
     /** 技能起手阶段效果 **/
-    private Effect[] startEffects;
+    private Effect<Buff>[] startEffects;
     /** 前摇时长(毫秒) **/
     private int frontRockingTime;
     /** 前摇阶段是否可打断 **/
     private boolean frontInterrupted;
     /** 施法阶段效果 **/
-    private Effect[] spellEffects;
+    private Effect<Buff>[] spellEffects;
     /** 后摇时长(毫秒) **/
     private int backRockingTime;
     /** 后摇阶段是否可打断 **/
     private boolean backInterrupted;
     /** 结束阶段效果 **/
-    private Effect[] finishEffects;
+    private Effect<Buff>[] finishEffects;
 
 }

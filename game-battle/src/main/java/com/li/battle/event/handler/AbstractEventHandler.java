@@ -42,7 +42,7 @@ public abstract class AbstractEventHandler<I extends EventReceiver, E extends Ba
     protected abstract void handle0(EventHandlerContext context, I receiver, E event);
 
 
-    private boolean accept(Object receiver, Object event) {
+    protected boolean accept(Object receiver, Object event) {
         return receiverMatcher.match(receiver) && eventMatcher.match(event);
     }
 }

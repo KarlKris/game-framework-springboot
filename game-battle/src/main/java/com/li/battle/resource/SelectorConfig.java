@@ -4,7 +4,7 @@ import com.li.battle.selector.SelectorType;
 import lombok.Getter;
 
 /**
- * 选择器配置 选择器选择需要的参数 选择人,选择器配置,射程
+ * 选择器配置
  * @author li-yuanwen
  * @date 2022/5/25
  */

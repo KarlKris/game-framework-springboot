@@ -5,8 +5,11 @@ package com.li.battle.core.task;
  * @author li-yuanwen
  * @date 2021/10/18
  */
-public interface PlayerOperateTask {
+public interface PlayerOperateTask<R> {
 
-    /** 执行玩家任务 **/
-    void run();
+    /**
+     * 执行玩家任务
+     * @return 玩家任务执行结果
+     */
+    R run();
 }

@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Getter
 @Slf4j
-public class AddBuffEffect implements Effect<Buff> {
+public class AddBuffEffect extends EffectAdapter<Buff> {
 
     /** buff标识 **/
     private int buffId;
@@ -32,17 +32,17 @@ public class AddBuffEffect implements Effect<Buff> {
     @Override
     public void onAction(FightUnit unit) {
         BattleScene battleScene = unit.getScene();
-        BattleSceneHelper helper = battleScene.getBattleSceneHelper();
-        ConfigHelper configHelper = helper.getConfigHelper();
+        BattleSceneHelper helper = battleScene.battleSceneHelper();
+        ConfigHelper configHelper = helper.configHelper();
         BuffConfig config = configHelper.getBuffConfigById(buffId);
 
-        BuffFactory buffFactory = helper.getBufferFactory();
+        BuffFactory buffFactory = helper.buffFactory();
 
         // 存在多个buff选择器时,按顺序选择目标至其一目标集不为空而终
         for (int selectorId : config.getSelectorIds()) {
 
             SelectorConfig selectorConfig = configHelper.getSelectorConfigById(selectorId);
-            Selector selector = helper.getSelectorHolder().getSelectorByType(selectorConfig.getType());
+            Selector selector = helper.selectorHolder().getSelectorByType(selectorConfig.getType());
             SelectorResult result = selector.select(unit, selectorConfig);
             List<IPosition> results = result.getResults();
             if (results.isEmpty()) {
@@ -66,6 +66,8 @@ public class AddBuffEffect implements Effect<Buff> {
 
 
             }
+
+            break;
         }
 
 

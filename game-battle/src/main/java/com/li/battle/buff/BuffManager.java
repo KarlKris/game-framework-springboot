@@ -7,10 +7,12 @@ import com.li.battle.core.unit.FightUnit;
 import com.li.battle.effect.Effect;
 import com.li.battle.resource.BuffConfig;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 /**
  * Buff管理
+ * todo 考虑单位退出场景后相应的Buff删除问题
  * @author li-yuanwen
  * @date 2022/5/18
  */
@@ -20,7 +22,7 @@ public class BuffManager {
     private final BattleScene scene;
 
     /** 待处理的buff队列 **/
-    private final PriorityQueue<BuffElement> queue = new PriorityQueue<>();
+    private final PriorityQueue<Buff> queue = new PriorityQueue<>(Comparator.comparingLong(Buff::getNextRound));
 
 
     public BuffManager(BattleScene scene) {
@@ -30,15 +32,20 @@ public class BuffManager {
     public void addBuff(Buff buff) {
         // todo 判断是否需要合并
 
-        BuffConfig config = scene.getBattleSceneHelper().getConfigHelper().getBuffConfigById(buff.getBuffId());
+        BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
         if (ArrayUtil.isNotEmpty(config.getStartEffects())) {
             for (Effect effect : config.getStartEffects()) {
                 effect.onAction(buff);
             }
         }
 
-        queue.offer(new BuffElement(buff.getNextRound(), buff));
+        queue.offer(buff);
     }
+
+    public void removeBuff(long ownerId) {
+        queue.removeIf(buff -> buff.getOwner() == ownerId);
+    }
+
 
     /**
      * 判断目标是否免疫buff
@@ -51,18 +58,19 @@ public class BuffManager {
         return false;
     }
 
-    public void update(long curRound) {
-        BuffElement element = queue.peek();
-        while (element != null && element.round <= curRound) {
+    public void update() {
+        Buff element = queue.peek();
+        long curRound = scene.getSceneRound();
+        while (element != null && element.getNextRound() <= curRound) {
             queue.poll();
-            handle(element.buff, curRound);
+            handle(element, curRound);
             element = queue.peek();
         }
     }
 
     private void handle(Buff buff, long curRound) {
-        BuffConfig config = scene.getBattleSceneHelper().getConfigHelper().getBuffConfigById(buff.getBuffId());
-        if (!buff.expire(curRound)) {
+        BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
+        if (!buff.isExpire(curRound)) {
             if (ArrayUtil.isNotEmpty(config.getThinkEffects())) {
                 for (Effect effect : config.getThinkEffects()) {
                     effect.onAction(buff);
@@ -70,7 +78,7 @@ public class BuffManager {
             }
 
             buff.updateNextRound(buff.getNextRound() + config.getThinkInterval() / scene.getRoundPeriod());
-            queue.offer(new BuffElement(buff.getNextRound(), buff));
+            queue.offer(buff);
         } else {
             // 执行销毁效果
             if (ArrayUtil.isNotEmpty(config.getDestroyEffects())) {
@@ -80,21 +88,6 @@ public class BuffManager {
             }
         }
 
-    }
-
-
-
-    private static final class BuffElement {
-
-        /** 执行的回合数 **/
-        private final long round;
-        /** 事件内容 **/
-        private final Buff buff;
-
-        public BuffElement(long round, Buff buff) {
-            this.round = round;
-            this.buff = buff;
-        }
     }
 
 
