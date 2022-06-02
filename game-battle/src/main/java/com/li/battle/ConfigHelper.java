@@ -29,6 +29,8 @@ public class ConfigHelper {
     private ResourceStorage<Integer, SelectorConfig> selectorStorage;
     @ResourceInject
     private ResourceStorage<Integer, TriggerConfig> triggerStorage;
+    @ResourceInject
+    private ResourceStorage<Integer, ProjectileConfig> projectileStorage;
 
 
     public ActivateSkillConfig getActivateSkillConfigById(Integer id) {
@@ -61,6 +63,10 @@ public class ConfigHelper {
 
     public TriggerConfig getTriggerConfigById(Integer id) {
         return triggerStorage.getResource(id);
+    }
+
+    public ProjectileConfig getProjectileConfigById(Integer id) {
+        return projectileStorage.getResource(id);
     }
 
 

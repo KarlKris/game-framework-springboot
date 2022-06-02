@@ -7,6 +7,8 @@ package com.li.battle.core;
  */
 public enum CampType {
 
+    // 后续增加阵营时,需要同步修改SelectorType.ENEMY_CAMP选择器逻辑
+
     /** 进攻方 **/
     ATTACKER,
 

@@ -2,6 +2,7 @@ package com.li.battle.effect;
 
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.BattleSceneHelper;
+import com.li.battle.core.Skill;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.core.unit.IPosition;
@@ -27,8 +28,8 @@ public class TriggerEffect extends EffectAdapter<Buff> {
     private int triggerId;
 
     @Override
-    public void onAction(FightUnit unit) {
-        registerEventReceiverIfNecessary(unit.getScene(), unit.getId(), unit.getId(), 0, 0);
+    public void onAction(FightUnit unit, Skill skill) {
+        registerEventReceiverIfNecessary(unit.getScene(), unit.getId(), unit.getId(), skill.getSkillId(), 0);
     }
 
     @Override
@@ -49,6 +50,10 @@ public class TriggerEffect extends EffectAdapter<Buff> {
         registerEventReceiverIfNecessary(buff.getContext().getScene(), buff.getCaster(), buff.getParent(), buff.getSkillId(), buff.getSkillId());
     }
 
+    @Override
+    public void onAction(FightUnit caster, FightUnit target, TriggerReceiver receiver) {
+        registerEventReceiverIfNecessary(target.getScene(), caster.getId(), target.getId(), receiver.getSkillId(), receiver.getBuffId());
+    }
 
     private void registerEventReceiverIfNecessary(BattleScene scene, long unitId, long target, int skillId, int buffId) {
         BattleSceneHelper battleSceneHelper = scene.battleSceneHelper();

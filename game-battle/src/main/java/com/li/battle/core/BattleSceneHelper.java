@@ -3,6 +3,7 @@ package com.li.battle.core;
 import com.li.battle.ConfigHelper;
 import com.li.battle.buff.BuffFactory;
 import com.li.battle.event.EventHandlerHolder;
+import com.li.battle.projectile.ProjectileCreatorHolder;
 import com.li.battle.selector.SelectorHolder;
 import com.li.battle.skill.executor.BattleSkillExecutor;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,8 @@ public class BattleSceneHelper {
     private EventHandlerHolder eventHandlerHolder;
     @Resource
     private BattleSkillExecutor battleSkillExecutor;
+    @Resource
+    private ProjectileCreatorHolder projectileCreatorHolder;
 
 
     public ConfigHelper configHelper() {
@@ -47,5 +50,9 @@ public class BattleSceneHelper {
 
     public BattleSkillExecutor battleSkillExecutor() {
         return battleSkillExecutor;
+    }
+
+    public ProjectileCreatorHolder projectileCreatorHolder() {
+        return projectileCreatorHolder;
     }
 }

@@ -50,7 +50,7 @@ public abstract class AbstractTriggerHandler<E extends BattleEvent> extends Abst
             FightUnit caster = scene.getFightUnit(receiver.getUnitId());
             FightUnit target = scene.getFightUnit(triggerId);
             for (Effect<Buff> effect : receiver.getConfig().getTriggerEffects()) {
-                effect.onAction(caster, target);
+                effect.onAction(caster, target, receiver);
             }
         });
 

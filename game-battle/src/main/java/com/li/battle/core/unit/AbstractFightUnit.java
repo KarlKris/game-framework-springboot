@@ -1,10 +1,12 @@
-﻿package com.li.battle.core.unit;
+package com.li.battle.core.unit;
 
-import com.li.battle.core.Attribute;
-import com.li.battle.core.UnitState;
-import com.li.battle.core.UnitType;
+import com.li.battle.core.*;
+import com.li.battle.core.scene.BattleScene;
+import com.li.battle.resource.SkillConfig;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +21,8 @@ public abstract class AbstractFightUnit implements FightUnit {
     private final long id;
     /** 类型 **/
     private final UnitType type;
+    /** 所属阵营 **/
+    private final CampType campType;
     /** 范围半径 **/
     private final double radius;
     /** 当前状态 **/
@@ -33,19 +37,33 @@ public abstract class AbstractFightUnit implements FightUnit {
     /** 上次徘徊的随机点 **/
     private Vector2D localWander;
 
-    /** 战斗属性 **/
-    private final Map<Attribute, Long> attributes;
+    /** 所属场景 **/
+    private BattleScene scene;
+
+    // 属性一分为三 个人基础属性,战斗中因各种效果而修改的属性值,场景全局属性变更
+
+    /** 基础属性 **/
+    private final Map<Attribute, Long> baseAttributes;
+    /** 场景内属性变更值 **/
+    private final Map<Attribute, Long> increaseAttributes;
 
 
+    /** 技能信息 **/
+    private final List<Skill> skills;
 
-    public AbstractFightUnit(long id, UnitType type, double radius, int maxSpeed
-            , Vector2D position, Map<Attribute, Long> attributes) {
+
+    public AbstractFightUnit(long id, UnitType type, CampType campType, double radius, int maxSpeed
+            , Vector2D position, Map<Attribute, Long> baseAttributes, List<Skill> skills) {
         this.id = id;
         this.type = type;
+        this.campType = campType;
         this.radius = radius;
         this.maxSpeed = maxSpeed;
-        this.attributes = attributes;
         this.position = position;
+
+        this.baseAttributes = baseAttributes;
+        this.increaseAttributes = new HashMap<>(16);
+        this.skills = skills;
 
         this.state = UnitState.NORMAL;
         this.velocity = Vector2D.ZERO;
@@ -57,13 +75,20 @@ public abstract class AbstractFightUnit implements FightUnit {
     }
 
     @Override
+    public CampType getCampType() {
+        return campType;
+    }
+
+    @Override
     public long getAttributeValue(Attribute attribute) {
-        return attributes.getOrDefault(attribute, 0L);
+        return baseAttributes.getOrDefault(attribute, 0L)
+                + increaseAttributes.getOrDefault(attribute, 0L)
+                + scene.getGlobalAttribute(attribute);
     }
 
     @Override
     public void modifyAttribute(Attribute attribute, Long value) {
-        this.attributes.put(attribute, value);
+        this.increaseAttributes.merge(attribute, value, Long::sum);
     }
 
     @Override
@@ -119,5 +144,42 @@ public abstract class AbstractFightUnit implements FightUnit {
     @Override
     public double getRadius() {
         return radius;
+    }
+
+    @Override
+    public List<Skill> getSkills() {
+        return skills;
+    }
+
+    @Override
+    public Skill getSkillById(int skillId) {
+        return skills.stream().filter(skill -> skill.getSkillId() == skillId).findFirst().orElse(null);
+    }
+
+    @Override
+    public void coolDownSkill(int skillId) {
+        Skill skill = getSkillById(skillId);
+        if (skill == null) {
+            return;
+        }
+        BattleScene scene = getScene();
+        SkillConfig skillConfig = scene.battleSceneHelper().configHelper().getSkillConfigById(skillId);
+        skill.afterSkillExecuted(skillConfig, scene);
+    }
+
+    @Override
+    public BattleScene getScene() {
+        return scene;
+    }
+
+    @Override
+    public void enterScene(BattleScene scene) {
+        this.scene = scene;
+    }
+
+    @Override
+    public void leaveScene() {
+        this.scene = null;
+        this.increaseAttributes.clear();
     }
 }

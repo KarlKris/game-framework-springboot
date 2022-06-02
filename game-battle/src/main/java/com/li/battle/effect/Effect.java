@@ -3,9 +3,10 @@ package com.li.battle.effect;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.li.battle.buff.core.Buff;
+import com.li.battle.core.Skill;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.skill.BattleSkill;
-import org.springframework.lang.Nullable;
+import com.li.battle.trigger.TriggerReceiver;
 
 /**
  * 效果
@@ -27,10 +28,11 @@ public interface Effect<B extends Buff> {
     String DAMAGE = "DAMAGE";
 
     /**
-     * 由战斗单元引起的效果触发,例如被动技能效果执行
+     * 被动技能效果执行
      * @param unit 战斗单元
+     * @param skill 技能
      */
-    void onAction(FightUnit unit);
+    void onAction(FightUnit unit, Skill skill);
 
     /**
      * 由技能引起的效果触发
@@ -46,10 +48,11 @@ public interface Effect<B extends Buff> {
 
     /**
      * 战斗单位caster对战斗单位target触发效果,用于触发器技能
-     * @param caster 施法者 施法者可能存在为null的情况,在该触发器为非战斗单位主动释放的效果时
+     * @param caster 施法者
      * @param target 承受者
+     * @param receiver 触发效果的TriggerReceiver
      */
-    void onAction(@Nullable FightUnit caster, FightUnit target);
+    void onAction(FightUnit caster, FightUnit target, TriggerReceiver receiver);
 
 
 }

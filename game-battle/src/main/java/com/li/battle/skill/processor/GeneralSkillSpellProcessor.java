@@ -1,7 +1,6 @@
 package com.li.battle.skill.processor;
 
 import com.li.battle.resource.GeneralSkillConfig;
-import com.li.battle.effect.Effect;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillStage;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @date 2022/5/20
  */
 @Component
-public class GeneralSkillSpellProcessor implements SkillProcessor<GeneralSkillConfig> {
+public class GeneralSkillSpellProcessor extends AbstractSkillProcessor<GeneralSkillConfig> {
 
     @Override
     public SkillStage getSkillType() {
@@ -21,8 +20,8 @@ public class GeneralSkillSpellProcessor implements SkillProcessor<GeneralSkillCo
 
     @Override
     public void process(BattleSkill skill, GeneralSkillConfig config) {
-        for (Effect effect : config.getSpellEffects()) {
-            effect.onAction(skill);
+        if (isExecutable(config.getSpellEffects())) {
+            process0(skill, config.getSpellEffects());
         }
     }
 }

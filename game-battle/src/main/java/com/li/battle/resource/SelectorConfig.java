@@ -15,6 +15,9 @@ public class SelectorConfig {
     private int id;
     /** 选择器类型 **/
     private SelectorType type;
-    /**  **/
+    /** 选择范围 **/
+    private int range;
+    /** 选择宽度 **/
+    private int width;
 
 }

@@ -2,6 +2,7 @@ package com.li.battle.effect;
 
 import com.li.battle.buff.core.BuffModifier;
 import com.li.battle.core.Attribute;
+import com.li.battle.core.Skill;
 import com.li.battle.core.context.AbstractContext;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
@@ -24,9 +25,9 @@ public class ModifyAttributeEffect extends EffectAdapter<BuffModifier> {
     private long value;
 
     @Override
-    public void onAction(FightUnit unit) {
+    public void onAction(FightUnit unit, Skill skill) {
         unit.modifyAttribute(attribute
-                , unit.getAttributeValue(attribute) + value);
+                , value);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class ModifyAttributeEffect extends EffectAdapter<BuffModifier> {
             if (unit instanceof FightUnit) {
                 FightUnit u = (FightUnit) unit;
                 u.modifyAttribute(attribute
-                        , u.getAttributeValue(attribute) + value);
+                        , value);
             }
 
         }

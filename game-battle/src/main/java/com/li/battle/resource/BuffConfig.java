@@ -6,8 +6,6 @@ import com.li.battle.buff.BuffType;
 import com.li.battle.effect.Effect;
 import lombok.Getter;
 
-import java.util.List;
-
 /**
  * buff配置
  * @author li-yuanwen
@@ -25,7 +23,7 @@ public class BuffConfig {
     /** 免疫buff种类 **/
     private byte immuneTag;
     /** 技能选择目标选择集（存在多个buff选择器时,按顺序选择目标至其一目标集不为空而终） **/
-    private List<Integer> selectorIds;
+    private int selectorId;
     /** buff时长(毫秒) 0表永久 **/
     private int duration;
     /** buff刷新合并规则（更新Buff层数，等级，持续时间等数据） **/

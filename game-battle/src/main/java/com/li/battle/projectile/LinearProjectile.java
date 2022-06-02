@@ -1,4 +1,8 @@
-package com.li.battle.projectile.core.impl;
+package com.li.battle.projectile;
+
+import com.li.battle.core.scene.BattleScene;
+import com.li.battle.util.Rectangle;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 /**
  * todo 后续实现方法
@@ -10,19 +14,12 @@ package com.li.battle.projectile.core.impl;
  */
 public abstract class LinearProjectile extends AbstractProjectile {
 
-    // todo 成员属性：飞行方向,等腰梯形检测盒（起点宽度，终点宽度，两者距离）,子弹筛选目标信息
-
-    /** 子弹飞行的方向 **/
 
 
-    /** 等腰梯形检测盒 **/
 
-
-    /** 子弹筛选的目标信息 **/
-
-
-    public LinearProjectile(long owner, int skillId, int[] fromPosition, int speed) {
-        super(owner, skillId, fromPosition, speed);
+    public LinearProjectile(BattleScene scene, int projectileId, long owner, int skillId
+            , Vector2D position, int speed, Rectangle rectangle) {
+        super(scene, projectileId, owner, skillId, position, speed, rectangle);
     }
 
 }

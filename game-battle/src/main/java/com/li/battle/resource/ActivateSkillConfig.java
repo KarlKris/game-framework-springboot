@@ -1,4 +1,4 @@
-﻿package com.li.battle.resource;
+package com.li.battle.resource;
 
 import com.li.battle.buff.core.Buff;
 import com.li.battle.effect.Effect;

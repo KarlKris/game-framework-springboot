@@ -1,13 +1,22 @@
 package com.li.battle.core.scene;
 
+import com.li.battle.ConfigHelper;
 import com.li.battle.buff.BuffManager;
+import com.li.battle.buff.core.Buff;
+import com.li.battle.core.Attribute;
 import com.li.battle.core.BattleSceneHelper;
+import com.li.battle.core.Skill;
 import com.li.battle.core.scene.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
+import com.li.battle.effect.Effect;
 import com.li.battle.event.EventDispatcher;
+import com.li.battle.resource.SkillConfig;
 import com.li.battle.skill.SkillManager;
+import com.li.battle.skill.SkillType;
 import com.li.battle.trigger.TriggerManager;
+import com.li.battle.util.QuadTree;
+import com.li.battle.util.Rectangle2D;
 import com.li.common.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +42,8 @@ public abstract class AbstractBattleScene implements BattleScene {
     protected final Queue<BattleTask<?>> queue = new ConcurrentLinkedQueue<>();
     /** 场景当前回合数 **/
     private long round;
+    /** 裁判 **/
+    private final BattleSceneReferee referee;
     /** 战斗组件容器 **/
     private final BattleSceneHelper helper;
     /** 单线程池(定时执行战斗逻辑) **/
@@ -49,7 +60,12 @@ public abstract class AbstractBattleScene implements BattleScene {
     /** 定时Future **/
     private final ScheduledFuture<?> future;
     /** 战斗场景销毁状态 **/
-    private volatile boolean destroy;
+    protected volatile boolean destroy;
+
+    /** 全局属性加成 **/
+    private final Map<Attribute, Long> attributes;
+    /** 场景内战斗单位的分布图(用于优化碰撞检测列表) **/
+    private final QuadTree<FightUnit> distributed;
 
     public AbstractBattleScene(long sceneId, SceneMap sceneMap
             , ScheduledExecutorService executorService
@@ -59,10 +75,14 @@ public abstract class AbstractBattleScene implements BattleScene {
         this.fightUnits = new HashMap<>();
         this.executorService = executorService;
         this.helper = helper;
+        this.referee = new BattleSceneReferee(this);
         this.eventDispatcher = new EventDispatcher(this);
         this.buffManager = new BuffManager(this);
         this.skillManager = new SkillManager(this);
         this.triggerManager = new TriggerManager(this);
+        this.attributes = new HashMap<>();
+        this.distributed = new QuadTree<>(0, new Rectangle2D(0, 0, sceneMap.getHorizontalLength(), sceneMap.getVerticalLength()));
+
         this.future = this.executorService.scheduleAtFixedRate(this::start, getRoundPeriod(), getRoundPeriod(), TimeUnit.MILLISECONDS);
     }
 
@@ -78,7 +98,25 @@ public abstract class AbstractBattleScene implements BattleScene {
 
     @Override
     public CompletableFuture<Boolean> enterScene(FightUnit unit) {
-        return addTask(() -> fightUnits.putIfAbsent(unit.getId(), unit) == null);
+        return addTask(() -> {
+            boolean enter =  fightUnits.putIfAbsent(unit.getId(), unit) == null;
+            if (!enter) {
+                return false;
+            }
+            unit.enterScene(this);
+            // 释放被动技能
+            ConfigHelper configHelper = battleSceneHelper().configHelper();
+            for (Skill skill : unit.getSkills()) {
+                SkillConfig config = configHelper.getSkillConfigById(skill.getSkillId());
+                if (SkillType.belongTo(config.getType(), SkillType.PASSIVE_SKILL)) {
+                    for (Effect<Buff> effect : config.getInitEffects()) {
+                        effect.onAction(unit, skill);
+                    }
+                    skill.afterSkillExecuted(config, this);
+                }
+            }
+            return true;
+        });
     }
 
     @Override
@@ -89,11 +127,16 @@ public abstract class AbstractBattleScene implements BattleScene {
     @Override
     public CompletableFuture<Void> leaveScene(long unitId) {
         return addTask(() -> {
-            buffManager.removeBuff(unitId);
-            skillManager.removeBattleSkill(unitId);
-            triggerManager.removeTriggerReceiver(unitId);
-            eventDispatcher.unregister(unitId);
-            fightUnits.remove(unitId);
+            FightUnit unit = fightUnits.remove(unitId);
+            if (unit != null) {
+                unit.leaveScene();
+                buffManager.removeBuff(unitId);
+                skillManager.removeBattleSkill(unitId);
+                triggerManager.removeTriggerReceiver(unitId);
+                eventDispatcher.unregister(unitId);
+
+                distributed.remove(unit);
+            }
             return null;
         });
     }
@@ -142,11 +185,15 @@ public abstract class AbstractBattleScene implements BattleScene {
     }
 
 
+    @Override
+    public Long getGlobalAttribute(Attribute attribute) {
+        return attributes.getOrDefault(attribute, 0L);
+    }
+
     /** 更新回合数 **/
     protected void increaseRound() {
         this.round++;
     }
-
 
     @Override
     public BattleSceneHelper battleSceneHelper() {
@@ -168,7 +215,23 @@ public abstract class AbstractBattleScene implements BattleScene {
         return triggerManager;
     }
 
-    private <R> CompletableFuture<R> addTask(PlayerOperateTask<R> task) {
+    @Override
+    public SkillManager skillManager() {
+        return skillManager;
+    }
+
+    @Override
+    public BattleSceneReferee battleSceneReferee() {
+        return referee;
+    }
+
+    @Override
+    public QuadTree<FightUnit> distributed() {
+        return distributed;
+    }
+
+    @Override
+    public <R> CompletableFuture<R> addTask(PlayerOperateTask<R> task) {
         if (destroy) {
             // todo "场景已销毁"
             throw new BadRequestException(-1);

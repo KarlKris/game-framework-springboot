@@ -1,7 +1,6 @@
 package com.li.battle.skill.processor;
 
 import com.li.battle.resource.ChannelSkillConfig;
-import com.li.battle.effect.Effect;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillStage;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @date 2022/5/20
  */
 @Component
-public class ChannelSkillInitProcessor implements SkillProcessor<ChannelSkillConfig> {
+public class ChannelSkillInitProcessor extends AbstractSkillProcessor<ChannelSkillConfig> {
 
     @Override
     public SkillStage getSkillType() {
@@ -21,8 +20,11 @@ public class ChannelSkillInitProcessor implements SkillProcessor<ChannelSkillCon
 
     @Override
     public void process(BattleSkill skill, ChannelSkillConfig config) {
-        for (Effect effect : config.getInitEffects()) {
-            effect.onAction(skill);
+        if (isExecutable(config.getInitEffects())) {
+            process0(skill, config.getInitEffects());
+            // 技能进CD
+            makeSkillStartCoolDown(skill);
         }
+        skill.updateSkillStage(SkillStage.CHANNEL_START);
     }
 }

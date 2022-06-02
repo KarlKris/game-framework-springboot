@@ -98,14 +98,14 @@ public class SteeringBehaviourUtil {
 
         // 在前面(距离向量与追逐者朝向在90°内)
         if (toEvader.dotProduct(pursuer.getHeading()) > 0
-                && Vector2D.angle(pursuer.getHeading(), evader.getHeading()) > 160) {
+                && Vector2D.angle(pursuer.getHeading(), evader.getHeading()) > Math.toRadians(160.0)) {
             return seek(pursuer, evader.getPosition());
         }
 
         // 预测逃避者的位置
 
         // 预测的时间正比于二者的距离;反比于二者速度
-        double lookAheadTime = toEvader.getNorm() / ((pursuer.getMaxSpeed() - evader.getVelocity().getNorm()) * 1.0d);
+        double lookAheadTime = toEvader.getNorm() / (pursuer.getMaxSpeed() - evader.getVelocity().getNorm());
 
         // 现在靠近逃避者的被预测位置
         return seek(pursuer, evader.getPosition().add(evader.getVelocity()).scalarMultiply(lookAheadTime));
@@ -180,8 +180,8 @@ public class SteeringBehaviourUtil {
         double distToClosestObstacle = Double.MAX_VALUE;
         // 最近障碍物对应的移动目标的局部坐标
         Vector2D localPosOfClosestObstacle = null;
-        // 遍历场景内所有单位
-        for (Unit otherUnit : scene.getUnits()) {
+        // 遍历场景unit所在有可能发生碰撞的单位
+        for (Unit otherUnit : scene.distributed().retrieve(unit)) {
             if (unit.getId() == otherUnit.getId()) {
                 continue;
             }

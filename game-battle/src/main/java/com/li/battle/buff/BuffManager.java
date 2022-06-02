@@ -29,7 +29,7 @@ public class BuffManager {
         this.scene = scene;
     }
 
-    public void addBuff(Buff buff) {
+    public boolean addBuff(Buff buff) {
         // todo 判断是否需要合并
 
         BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
@@ -40,6 +40,7 @@ public class BuffManager {
         }
 
         queue.offer(buff);
+        return true;
     }
 
     public void removeBuff(long ownerId) {

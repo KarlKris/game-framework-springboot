@@ -4,18 +4,18 @@ import com.li.battle.ConfigHelper;
 import com.li.battle.buff.BuffFactory;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.BattleSceneHelper;
+import com.li.battle.core.Skill;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.core.unit.IPosition;
 import com.li.battle.resource.BuffConfig;
 import com.li.battle.resource.SelectorConfig;
+import com.li.battle.selector.SelectParam;
 import com.li.battle.selector.Selector;
 import com.li.battle.selector.SelectorResult;
 import com.li.battle.skill.BattleSkill;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 /**
  * 添加Buff效果
@@ -30,7 +30,7 @@ public class AddBuffEffect extends EffectAdapter<Buff> {
     private int buffId;
 
     @Override
-    public void onAction(FightUnit unit) {
+    public void onAction(FightUnit unit, Skill skill) {
         BattleScene battleScene = unit.getScene();
         BattleSceneHelper helper = battleScene.battleSceneHelper();
         ConfigHelper configHelper = helper.configHelper();
@@ -38,36 +38,23 @@ public class AddBuffEffect extends EffectAdapter<Buff> {
 
         BuffFactory buffFactory = helper.buffFactory();
 
-        // 存在多个buff选择器时,按顺序选择目标至其一目标集不为空而终
-        for (int selectorId : config.getSelectorIds()) {
-
-            SelectorConfig selectorConfig = configHelper.getSelectorConfigById(selectorId);
-            Selector selector = helper.selectorHolder().getSelectorByType(selectorConfig.getType());
-            SelectorResult result = selector.select(unit, selectorConfig);
-            List<IPosition> results = result.getResults();
-            if (results.isEmpty()) {
+        SelectorConfig selectorConfig = configHelper.getSelectorConfigById(config.getSelectorId());
+        Selector selector = helper.selectorHolder().getSelectorByType(selectorConfig.getType());
+        SelectorResult result = selector.select(unit, selectorConfig, SelectParam.EMPTY, 0);
+        for (IPosition position : result.getResults()) {
+            if (!(position instanceof FightUnit)) {
+                log.warn("添加Buff效果,buffId:{} 的选择器结果非FightUnit,检查配置", buffId);
                 continue;
             }
 
-            for (IPosition position : results) {
-                if (!(position instanceof FightUnit)) {
-                    log.warn("添加Buff效果,buffId:{} 的选择器结果非FightUnit,检查配置", buffId);
-                    continue;
-                }
+            FightUnit target = (FightUnit) position;
+            Buff buff = buffFactory.newInstance(unit, target, config, skill.getSkillId());
+            // todo Before_Buff_Awake_Event事件
 
-                FightUnit target = (FightUnit) position;
-                Buff buff = buffFactory.newInstance(unit, target, config, -1);
-                // todo Before_Buff_Awake_Event事件
-
-                if (!buff.isManualExpire()) {
-                    // todo Buff容器内添加,同时判断是否往EventDispatcher注册
-
-                }
-
-
+            //  Buff容器内添加,同时判断是否往EventDispatcher注册
+            if (!buff.isManualExpire() && battleScene.buffManager().addBuff(buff)) {
+                buff.registerEventReceiverIfNecessary();
             }
-
-            break;
         }
 
 

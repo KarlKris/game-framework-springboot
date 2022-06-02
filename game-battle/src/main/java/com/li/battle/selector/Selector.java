@@ -1,9 +1,7 @@
 package com.li.battle.selector;
 
-import com.li.battle.buff.core.Buff;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.SelectorConfig;
-import com.li.battle.skill.BattleSkill;
 
 /**
  * 目标选择器
@@ -18,31 +16,14 @@ public interface Selector {
      */
     SelectorType getType();
 
-
     /**
      * 战斗单位选择目标
      * @param unit 主动选择单位
      * @param config 选择器配置
+     * @param param 目标选择相关参数
+     * @param range 技能施法范围 or 0
      * @return 命中目标集
      */
-    SelectorResult select(FightUnit unit, SelectorConfig config);
+    SelectorResult select(FightUnit unit, SelectorConfig config, SelectParam param, int range);
 
-
-    /**
-     * 技能选择目标
-     * @param unit 主动选择单位
-     * @param config 选择器配置
-     * @param skill 技能
-     * @return 命中目标集
-     */
-    SelectorResult select(FightUnit unit, SelectorConfig config, BattleSkill skill);
-
-    /**
-     * 技能选择目标
-     * @param unit 主动选择单位
-     * @param config 选择器配置
-     * @param buff buff
-     * @return 命中目标集
-     */
-    SelectorResult select(FightUnit unit, SelectorConfig config, Buff buff);
 }

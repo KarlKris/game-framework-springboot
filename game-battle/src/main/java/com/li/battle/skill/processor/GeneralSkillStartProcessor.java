@@ -1,7 +1,6 @@
 package com.li.battle.skill.processor;
 
 import com.li.battle.resource.GeneralSkillConfig;
-import com.li.battle.effect.Effect;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillStage;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @date 2022/5/19
  */
 @Component
-public class GeneralSkillStartProcessor implements SkillProcessor<GeneralSkillConfig> {
+public class GeneralSkillStartProcessor extends AbstractSkillProcessor<GeneralSkillConfig> {
 
 
     @Override
@@ -22,8 +21,10 @@ public class GeneralSkillStartProcessor implements SkillProcessor<GeneralSkillCo
 
     @Override
     public void process(BattleSkill skill, GeneralSkillConfig config) {
-        for (Effect effect : config.getStartEffects()) {
-            effect.onAction(skill);
+        if (isExecutable(config.getStartEffects())) {
+            process0(skill, config.getStartEffects());
+            // 技能进CD
+            makeSkillStartCoolDown(skill);
         }
     }
 }

@@ -52,7 +52,7 @@ public class TriggerManager {
         FightUnit caster = scene.getFightUnit(receiver.getUnitId());
         FightUnit target = scene.getFightUnit(receiver.getTarget());
         for (Effect<Buff> effect :  receiver.getConfig().getDestroyEffects()) {
-            effect.onAction(caster, target);
+            effect.onAction(caster, target, receiver);
         }
     }
 }

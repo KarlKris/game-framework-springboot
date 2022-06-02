@@ -1,7 +1,6 @@
-﻿package com.li.battle.skill.processor;
+package com.li.battle.skill.processor;
 
 import com.li.battle.resource.ChannelSkillConfig;
-import com.li.battle.effect.Effect;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillStage;
 
@@ -10,7 +9,7 @@ import com.li.battle.skill.SkillStage;
  * @author li-yuanwen
  * @date 2022/5/20
  */
-public class ChannelSkillFinishProcessor implements SkillProcessor<ChannelSkillConfig> {
+public class ChannelSkillFinishProcessor extends AbstractSkillProcessor<ChannelSkillConfig> {
 
     @Override
     public SkillStage getSkillType() {
@@ -19,8 +18,8 @@ public class ChannelSkillFinishProcessor implements SkillProcessor<ChannelSkillC
 
     @Override
     public void process(BattleSkill skill, ChannelSkillConfig config) {
-        for (Effect effect : config.getFinishEffects()) {
-            effect.onAction(skill);
+        if (isExecutable(config.getFinishEffects())) {
+            process0(skill, config.getFinishEffects());
         }
     }
 }

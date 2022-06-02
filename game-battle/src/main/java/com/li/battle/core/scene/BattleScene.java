@@ -1,10 +1,14 @@
 package com.li.battle.core.scene;
 
 import com.li.battle.buff.BuffManager;
+import com.li.battle.core.Attribute;
 import com.li.battle.core.BattleSceneHelper;
+import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.event.EventDispatcher;
+import com.li.battle.skill.SkillManager;
 import com.li.battle.trigger.TriggerManager;
+import com.li.battle.util.QuadTree;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -33,6 +37,14 @@ public interface BattleScene {
      * @return 场景当前回合数
      */
     long getSceneRound();
+
+    /**
+     * 向场景内的队列提交任务
+     * @param task 任务
+     * @param <R> 任务结果类型
+     * @return 任务结果future
+     */
+    <R> CompletableFuture<R> addTask(PlayerOperateTask<R> task);
 
     /**
      * 进入场景
@@ -78,6 +90,12 @@ public interface BattleScene {
     void start();
 
     /**
+     * 战斗场景内的裁判
+     * @return 裁判
+     */
+    BattleSceneReferee battleSceneReferee();
+
+    /**
      * 获取配置获取实例
      * @return 配置获取实例
      */
@@ -100,5 +118,27 @@ public interface BattleScene {
      * @return 触发器容器
      */
     TriggerManager triggerManager();
+
+    /**
+     * 获取技能容器
+     * @return 技能容器
+     */
+    SkillManager skillManager();
+
+
+    /**
+     * 获取场景内全局加成的属性值
+     * @param attribute 属性
+     * @return 属性值
+     */
+    Long getGlobalAttribute(Attribute attribute);
+
+
+    /**
+     * 获取场景内战斗单位的分布信息
+     * @return 场景内战斗单位的分布信息
+     */
+    QuadTree<FightUnit> distributed();
+
 
 }

@@ -34,8 +34,7 @@ public abstract class BuffModifier extends AbstractBuff {
      * @param alter 属性变更值
      */
     public void modifyAttribute(FightUnit unit, AttributeValueAlter alter) {
-        long value = unit.getAttributeValue(alter.getAttribute());
-        unit.modifyAttribute(alter.getAttribute(), value + alter.getValue());
+        unit.modifyAttribute(alter.getAttribute(), alter.getValue());
     }
 
     @Override

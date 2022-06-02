@@ -30,7 +30,7 @@ public class MultipleFightBattleScene extends AbstractBattleScene {
     @Override
     public boolean checkDestroy() {
         // 场景内无战斗单元,可销毁
-        return this.fightUnits.isEmpty();
+        return this.fightUnits.isEmpty() || destroy;
     }
 
     @Override

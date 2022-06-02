@@ -1,5 +1,6 @@
 package com.li.battle.resource;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.effect.Effect;
 import lombok.Getter;
@@ -16,6 +17,8 @@ public class GeneralSkillConfig {
 
     /** 技能id **/
     private int id;
+    /** 技能施法范围 **/
+    private int range;
     /** 技能选择目标选择集 **/
     private List<Integer> selectorIds;
     /** 技能起手阶段效果 **/
@@ -32,5 +35,12 @@ public class GeneralSkillConfig {
     private boolean backInterrupted;
     /** 结束阶段效果 **/
     private Effect<Buff>[] finishEffects;
+    /** 子弹命中效果 **/
+    private Effect<Buff>[] hitEffects;
+
+    @JsonIgnore
+    public int getDurationTime() {
+        return frontRockingTime + backRockingTime;
+    }
 
 }
