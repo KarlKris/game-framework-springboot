@@ -9,7 +9,6 @@ import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -28,13 +27,12 @@ import java.lang.reflect.Type;
  */
 @Slf4j
 @Component
-@ConditionalOnBean(StorageManager.class)
 public class ResourceInjectProcessor implements SmartInstantiationAwareBeanPostProcessor {
 
     private final StorageManager storageManager;
     private final ConversionService conversionService;
 
-    public ResourceInjectProcessor(@Autowired StorageManager storageManager
+    public ResourceInjectProcessor(@Autowired(required = false) StorageManager storageManager
             , @Autowired ConversionService conversionService) {
         this.storageManager = storageManager;
         this.conversionService = conversionService;
@@ -42,6 +40,9 @@ public class ResourceInjectProcessor implements SmartInstantiationAwareBeanPostP
 
     @Override
     public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+        if (storageManager == null) {
+            return true;
+        }
         ReflectionUtils.doWithFields(bean.getClass(), field -> {
             ResourceInject annotation = field.getAnnotation(ResourceInject.class);
             if (annotation == null) {

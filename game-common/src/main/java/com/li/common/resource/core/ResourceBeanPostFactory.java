@@ -15,6 +15,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.event.EventListenerFactory;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
@@ -40,7 +41,7 @@ import java.util.Set;
  */
 @Slf4j
 @Component
-public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
+public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, PriorityOrdered {
 
     private final Set<Integer> registriesPostProcessed = new HashSet<>();
 
@@ -57,6 +58,11 @@ public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProces
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 
     @Override
