@@ -45,7 +45,7 @@ public class XmlReader implements ResourceReader {
         List<E> results = new LinkedList<>();
         for (Element element : getElements(in)) {
             E instance = ObjectsUtil.newInstance(clz);
-            for (XmlFieldHolder fieldHolder : fieldParser.fieldHolders) {
+            for (XmlFieldResolver fieldHolder : fieldParser.fieldHolders) {
                 String fieldName = fieldHolder.getFieldName();
                 Attribute attribute = element.attribute(fieldName);
                 if (attribute == null) {
@@ -69,20 +69,20 @@ public class XmlReader implements ResourceReader {
 
     private final class FieldParser {
 
-        private final List<XmlFieldHolder> fieldHolders;
+        private final List<XmlFieldResolver> fieldHolders;
 
         FieldParser(Class<?> clz) {
-            final List<XmlFieldHolder> fieldHolders = new LinkedList<>();
+            final List<XmlFieldResolver> fieldHolders = new LinkedList<>();
             ReflectionUtils.doWithFields(clz, field -> {
-                fieldHolders.add(new XmlFieldHolder(field));
+                fieldHolders.add(new XmlFieldResolver(field));
             }, field -> !Modifier.isStatic(field.getModifiers()));
             this.fieldHolders = fieldHolders;
         }
 
     }
 
-    private final class XmlFieldHolder extends AbstractFieldHolder {
-        XmlFieldHolder(Field field) {
+    private final class XmlFieldResolver extends AbstractFieldResolver {
+        XmlFieldResolver(Field field) {
             super(field, convertorType -> strConvertorHolder.getStrConvertorByType(convertorType));
         }
     }

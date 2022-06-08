@@ -149,7 +149,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         /** 解析结果 **/
         private final List<E> results = new LinkedList<>();
         /** 属性信息 **/
-        private final List<XlsxFieldHolder> fieldHolders = new LinkedList<>();
+        private final List<XlsxFieldResolver> fieldHolders = new LinkedList<>();
         /** 同一行列信息 **/
         private final List<String> colValues = new ArrayList<>();
         /** 单个单元格内容 **/
@@ -407,7 +407,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         }
 
         private void buildFieldHolders() {
-            List<XlsxFieldHolder> list = new ArrayList<>();
+            List<XlsxFieldResolver> list = new ArrayList<>();
             for (int i = 1; i < colValues.size(); i++) {
                 String fieldName = colValues.get(i);
                 if (!StringUtils.hasLength(fieldName)) {
@@ -415,7 +415,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
                 }
                 try {
                     Field field = clz.getDeclaredField(fieldName);
-                    list.add(new XlsxFieldHolder(field, i));
+                    list.add(new XlsxFieldResolver(field, i));
                 } catch (NoSuchFieldException e) {
                     log.warn("资源类[{}]分页[{}]的声明属性[{}]不存在", clz, sheetName, fieldName);
                 } catch (Exception e) {
@@ -433,7 +433,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         private void parseRow0() {
             E instance = ObjectsUtil.newInstance(clz);
             int indexSize = colValues.size() - 1;
-            for (XlsxFieldHolder fieldHolder : fieldHolders) {
+            for (XlsxFieldResolver fieldHolder : fieldHolders) {
                 int index = fieldHolder.index;
                 if (index > indexSize) {
                     continue;
@@ -494,12 +494,12 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
     }
 
     /** 属性持有对象 **/
-    private final class XlsxFieldHolder extends AbstractFieldHolder {
+    private final class XlsxFieldResolver extends AbstractFieldResolver {
 
         /** 列数 **/
         private final int index;
 
-        public XlsxFieldHolder(Field field, int index)  {
+        public XlsxFieldResolver(Field field, int index)  {
             super(field, convertorType -> strConvertorHolder.getStrConvertorByType(convertorType));
             this.index = index;
         }
