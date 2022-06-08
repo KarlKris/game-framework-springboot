@@ -38,8 +38,8 @@ public interface ResourceReader {
     <E> List<E> read(InputStream in, Class<E> clz);
 
 
-    /** 抽象属性持有信息 **/
-    abstract class AbstractFieldHolder {
+    /** 抽象属性解析器 **/
+    abstract class AbstractFieldResolver {
 
         /** 属性 **/
         private final Field field;
@@ -48,7 +48,7 @@ public interface ResourceReader {
         /** 转换器 **/
         private final StrConvertor convertor;
 
-        public AbstractFieldHolder(Field field, Function<ConvertorType, StrConvertor> convertorFunction) {
+        public AbstractFieldResolver(Field field, Function<ConvertorType, StrConvertor> convertorFunction) {
             this.field = field;
             this.descriptor = TypeDescriptorUtil.newInstance(field);
             ReflectionUtils.makeAccessible(field);
@@ -56,7 +56,7 @@ public interface ResourceReader {
             if (annotation != null) {
                 this.convertor = convertorFunction.apply(annotation.convertorType());
             } else {
-                this.convertor = convertorFunction.apply(ConvertorType.SPRING);
+                this.convertor = convertorFunction.apply(ConvertorType.JSON);
             }
         }
 
