@@ -53,6 +53,10 @@ public class JsonStrConvertor implements StrConvertor {
             } else {
                 javaType = typeFactory.constructType(targetDescriptor.getType());
             }
+
+            if (javaType.isEnumType()) {
+                return objectMapper.convertValue(content, javaType);
+            }
             return objectMapper.readValue(content, javaType);
         } catch (JsonProcessingException e) {
             String message = MessageFormatter.format("字符串[{}]无法转换成指定类型[{}]"
