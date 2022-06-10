@@ -1,4 +1,4 @@
-package com.li.battle;
+package com.li.battle.core;
 
 import com.li.battle.resource.*;
 import com.li.common.resource.anno.ResourceInject;

@@ -23,7 +23,7 @@ public enum SkillType {
 	/** 开关类型 0000 011 0 **/
 	TOGGLE_SKILL((byte) (1 << 2 + 1 << 1)),
 
-	/** 激活类型 0001 100 0 **/
+	/** 激活类型 0000 100 0 **/
 	ACTIVATE_SKILL((byte) (1 << 3)),
 
 	;

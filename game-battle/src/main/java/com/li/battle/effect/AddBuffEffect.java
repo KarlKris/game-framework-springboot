@@ -1,6 +1,6 @@
 package com.li.battle.effect;
 
-import com.li.battle.ConfigHelper;
+import com.li.battle.core.ConfigHelper;
 import com.li.battle.buff.BuffFactory;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.BattleSceneHelper;

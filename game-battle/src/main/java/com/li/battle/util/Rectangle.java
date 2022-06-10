@@ -37,6 +37,14 @@ public class Rectangle implements Shape {
         return halfWidth;
     }
 
+    public Vector2D getStart() {
+        return start;
+    }
+
+    public Vector2D getEnd() {
+        return end;
+    }
+
     @Override
     public double getLeft() {
         double subY = cos * halfWidth;

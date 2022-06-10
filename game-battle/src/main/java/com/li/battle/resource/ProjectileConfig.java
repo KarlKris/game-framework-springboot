@@ -1,6 +1,8 @@
 package com.li.battle.resource;
 
 import com.li.battle.projectile.ProjectileType;
+import com.li.common.resource.anno.ResourceId;
+import com.li.common.resource.anno.ResourceObj;
 import lombok.Getter;
 
 /**
@@ -9,9 +11,11 @@ import lombok.Getter;
  * @date 2022/6/2
  */
 @Getter
+@ResourceObj
 public class ProjectileConfig {
 
     /** 子弹id **/
+    @ResourceId
     private int id;
     /** 子弹类型 **/
     private ProjectileType type;

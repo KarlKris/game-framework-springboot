@@ -3,9 +3,12 @@ package com.li.battle.effect;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.Skill;
 import com.li.battle.core.unit.FightUnit;
+import com.li.battle.projectile.Projectile;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.trigger.TriggerReceiver;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collection;
 
 /**
  * 效果适配器
@@ -35,6 +38,13 @@ public class EffectAdapter<B extends Buff> implements Effect<B> {
     public void onAction(FightUnit caster, FightUnit target, TriggerReceiver receiver) {
         log.info("战斗单位:[{},{}]向战斗单位:[{}]执行效果[{},{}]", caster.getClass().getSimpleName(), caster.getId()
                 , target.getClass().getSimpleName(), target.getId()
+                , this.getClass().getSimpleName());
+    }
+
+    @Override
+    public void onAction(FightUnit caster, Collection<FightUnit> targetList, Projectile projectile) {
+        log.info("战斗单位:[{},{}]的子弹:[{}]向战斗单位集:[{}]执行效果[{}]", caster.getClass().getSimpleName(), caster.getId()
+                , projectile.getProjectileId(), targetList.size()
                 , this.getClass().getSimpleName());
     }
 }

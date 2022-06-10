@@ -1,6 +1,5 @@
 package com.li.battle.core;
 
-import com.li.battle.ConfigHelper;
 import com.li.battle.buff.BuffFactory;
 import com.li.battle.event.EventHandlerHolder;
 import com.li.battle.projectile.ProjectileCreatorHolder;

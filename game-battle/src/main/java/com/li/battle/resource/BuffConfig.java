@@ -4,6 +4,8 @@ import com.li.battle.buff.BuffMerge;
 import com.li.battle.buff.BuffMonitorSkillCasterType;
 import com.li.battle.buff.BuffType;
 import com.li.battle.effect.Effect;
+import com.li.common.resource.anno.ResourceId;
+import com.li.common.resource.anno.ResourceObj;
 import lombok.Getter;
 
 /**
@@ -12,9 +14,11 @@ import lombok.Getter;
  * @date 2022/5/18
  */
 @Getter
+@ResourceObj
 public class BuffConfig {
 
     /** 唯一标识 **/
+    @ResourceId
     private int id;
     /** buff类型 **/
     private BuffType type;
@@ -22,16 +26,12 @@ public class BuffConfig {
     private byte tag;
     /** 免疫buff种类 **/
     private byte immuneTag;
-    /** 技能选择目标选择集（存在多个buff选择器时,按顺序选择目标至其一目标集不为空而终） **/
+    /** 技能选择目标选择集 **/
     private int selectorId;
     /** buff时长(毫秒) 0表永久 **/
     private int duration;
     /** buff刷新合并规则（更新Buff层数，等级，持续时间等数据） **/
     private BuffMerge mergeRule;
-
-    /** buff生效效果 **/
-    private Effect[] startEffects;
-
     /** buff生效效果 **/
     private Effect[] awakeEffects;
 

@@ -1,6 +1,6 @@
 package com.li.battle.selector;
 
-import com.li.battle.ConfigHelper;
+import com.li.battle.core.ConfigHelper;
 import com.li.battle.resource.SelectorConfig;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;

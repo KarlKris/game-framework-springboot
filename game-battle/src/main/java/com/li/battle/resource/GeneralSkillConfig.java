@@ -3,6 +3,8 @@ package com.li.battle.resource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.effect.Effect;
+import com.li.common.resource.anno.ResourceId;
+import com.li.common.resource.anno.ResourceObj;
 import lombok.Getter;
 
 import java.util.List;
@@ -13,9 +15,11 @@ import java.util.List;
  * @date 2022/5/17
  */
 @Getter
+@ResourceObj
 public class GeneralSkillConfig {
 
     /** 技能id **/
+    @ResourceId
     private int id;
     /** 技能施法范围 **/
     private int range;

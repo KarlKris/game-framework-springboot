@@ -10,6 +10,12 @@ public interface Projectile extends EventReceiver {
 
 
     /**
+     * 子弹id
+     * @return 子弹id
+     */
+    int getProjectileId();
+
+    /**
      * 位置更新
      */
     void updatePosition();

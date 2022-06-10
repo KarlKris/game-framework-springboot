@@ -21,9 +21,19 @@ public class SteeringBehaviourUtil {
      * @return 到达目标位置的力向量
      */
     public static Vector2D seek(MoveUnit unit, Vector2D targetPos) {
+        return seek(unit, targetPos, unit.getMaxSpeed());
+    }
+
+    /**
+     * 靠近操控行为返回一个操控目标到达目标位置的力向量
+     * @param unit 操控单位
+     * @param targetPos 目标位置向量
+     * @return 到达目标位置的力向量
+     */
+    public static Vector2D seek(MoveUnit unit, Vector2D targetPos, double maxSpeed) {
         // 首先计算预期速度,这个速度在理想化情况下达到目标位置所需的速度.
         // 是从起始位置到目标的向量,大小为最大速度
-        Vector2D desiredSpeed = targetPos.subtract(unit.getPosition()).normalize().scalarMultiply(unit.getMaxSpeed());
+        Vector2D desiredSpeed = targetPos.subtract(unit.getPosition()).normalize().scalarMultiply(maxSpeed);
         // 该方法返回的操控力,当把它加到目标当前速度向量上就得到预期的速度,所以简单的从预期速度中减去目标的当前速度
         return desiredSpeed.subtract(unit.getVelocity());
     }

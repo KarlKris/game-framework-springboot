@@ -3,6 +3,8 @@ package com.li.battle.resource;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.effect.Effect;
 import com.li.battle.trigger.core.Trigger;
+import com.li.common.resource.anno.ResourceId;
+import com.li.common.resource.anno.ResourceObj;
 import lombok.Getter;
 
 /**
@@ -11,9 +13,11 @@ import lombok.Getter;
  * @date 2022/5/26
  */
 @Getter
+@ResourceObj
 public class TriggerConfig {
 
     /** 触发器标识 **/
+    @ResourceId
     private int id;
     /** 触发器构建参数 **/
     private Trigger trigger;

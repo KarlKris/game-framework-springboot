@@ -33,8 +33,8 @@ public class BuffManager {
         // todo 判断是否需要合并
 
         BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
-        if (ArrayUtil.isNotEmpty(config.getStartEffects())) {
-            for (Effect effect : config.getStartEffects()) {
+        if (ArrayUtil.isNotEmpty(config.getAwakeEffects())) {
+            for (Effect effect : config.getAwakeEffects()) {
                 effect.onAction(buff);
             }
         }

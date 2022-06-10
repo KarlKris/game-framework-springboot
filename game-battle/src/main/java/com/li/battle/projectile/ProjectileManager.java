@@ -23,9 +23,12 @@ public class ProjectileManager {
         this.scene = scene;
     }
 
-
     public void addProjectile(Projectile projectile) {
         projectiles.add(projectile);
+    }
+
+    public void remove(long unitId) {
+        projectiles.removeIf(projectile -> projectile.getOwner() == unitId);
     }
 
     public void update() {
@@ -37,11 +40,12 @@ public class ProjectileManager {
                 continue;
             }
 
-            next.updatePosition();
             next.tryHit();
 
             if (next.checkFinish()) {
                 iterator.remove();
+            } else {
+                next.updatePosition();
             }
         }
     }

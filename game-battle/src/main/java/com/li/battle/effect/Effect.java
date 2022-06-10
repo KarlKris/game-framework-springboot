@@ -5,8 +5,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.Skill;
 import com.li.battle.core.unit.FightUnit;
+import com.li.battle.projectile.Projectile;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.trigger.TriggerReceiver;
+
+import java.util.Collection;
 
 /**
  * 效果
@@ -47,12 +50,19 @@ public interface Effect<B extends Buff> {
     void onAction(B buff);
 
     /**
+     * 由子弹引起的效果触发
+     * @param caster 施法者
+     * @param targetList 承受者列表
+     * @param projectile 子弹
+     */
+    void onAction(FightUnit caster, Collection<FightUnit> targetList, Projectile projectile);
+
+    /**
      * 战斗单位caster对战斗单位target触发效果,用于触发器技能
      * @param caster 施法者
      * @param target 承受者
      * @param receiver 触发效果的TriggerReceiver
      */
     void onAction(FightUnit caster, FightUnit target, TriggerReceiver receiver);
-
 
 }

@@ -22,4 +22,15 @@ public abstract class LinearProjectile extends AbstractProjectile {
         super(scene, projectileId, owner, skillId, position, speed, rectangle);
     }
 
+
+    @Override
+    protected void afterExecHitEffect() {
+        // 是否可拦截
+        boolean intercept = scene.battleSceneHelper().configHelper().getProjectileConfigById(projectileId).isIntercept();
+        if (!intercept) {
+            return;
+        }
+        // todo 判断是否结束子弹生命周期
+
+    }
 }

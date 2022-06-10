@@ -1,6 +1,6 @@
 package com.li.battle.core.scene;
 
-import com.li.battle.ConfigHelper;
+import com.li.battle.core.ConfigHelper;
 import com.li.battle.buff.BuffManager;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.Attribute;
@@ -11,6 +11,7 @@ import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.effect.Effect;
 import com.li.battle.event.EventDispatcher;
+import com.li.battle.projectile.ProjectileManager;
 import com.li.battle.resource.SkillConfig;
 import com.li.battle.skill.SkillManager;
 import com.li.battle.skill.SkillType;
@@ -56,6 +57,8 @@ public abstract class AbstractBattleScene implements BattleScene {
     protected final SkillManager skillManager;
     /** 触发器容器 **/
     protected final TriggerManager triggerManager;
+    /** 子弹容器 **/
+    protected final ProjectileManager projectileManager;
 
     /** 定时Future **/
     private final ScheduledFuture<?> future;
@@ -80,6 +83,7 @@ public abstract class AbstractBattleScene implements BattleScene {
         this.buffManager = new BuffManager(this);
         this.skillManager = new SkillManager(this);
         this.triggerManager = new TriggerManager(this);
+        this.projectileManager = new ProjectileManager(this);
         this.attributes = new HashMap<>();
         this.distributed = new QuadTree<>(0, new Rectangle2D(0, 0, sceneMap.getHorizontalLength(), sceneMap.getVerticalLength()));
 
@@ -94,6 +98,11 @@ public abstract class AbstractBattleScene implements BattleScene {
     @Override
     public long getSceneRound() {
         return round;
+    }
+
+    @Override
+    public SceneMap sceneMap() {
+        return sceneMap;
     }
 
     @Override
@@ -157,15 +166,25 @@ public abstract class AbstractBattleScene implements BattleScene {
             increaseRound();
             // 执行玩家操作
             executePlayerOperates();
-            // 执行事件逻辑
-            eventDispatcher.update();
-            // 执行触发器销毁逻辑
-            triggerManager.update();
+            // 执行子弹逻辑
+            projectileManager.update();
             // 开始执行buff逻辑
             buffManager.update();
+            // 执行事件逻辑
+            eventDispatcher.update();
             // 执行技能逻辑
             skillManager.update();
+            // 战斗单位移动
+            for (FightUnit fightUnit : fightUnits.values()) {
+                fightUnit.moving();
+            }
+            // 执行触发器销毁逻辑
+            triggerManager.update();
             // todo 执行战斗单元AI
+
+            if (checkDestroy()) {
+                destroy();
+            }
 
         } catch (Exception e) {
             log.error("执行场景逻辑{}出现未知异常", getClass().getSimpleName(), e);

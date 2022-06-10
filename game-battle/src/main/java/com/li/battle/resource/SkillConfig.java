@@ -2,6 +2,8 @@ package com.li.battle.resource;
 
 import com.li.battle.buff.core.Buff;
 import com.li.battle.effect.Effect;
+import com.li.common.resource.anno.ResourceId;
+import com.li.common.resource.anno.ResourceObj;
 import lombok.Getter;
 
 /**
@@ -10,9 +12,11 @@ import lombok.Getter;
  * @date 2022/5/17
  */
 @Getter
+@ResourceObj
 public class SkillConfig {
 
     /** 技能唯一标识 **/
+    @ResourceId
     private int id;
     /** 技能类型 **/
     private byte type;

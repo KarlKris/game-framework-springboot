@@ -2,6 +2,7 @@ package com.li.battle.core.scene;
 
 import com.li.battle.core.Skill;
 import com.li.battle.core.context.DefaultAlterContext;
+import com.li.battle.core.scene.map.SceneMap;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.SkillConfig;
 import com.li.battle.selector.SelectParam;
@@ -9,7 +10,9 @@ import com.li.battle.selector.SelectorResult;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillType;
 import com.li.battle.skill.executor.BattleSkillExecutor;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -24,6 +27,34 @@ public class BattleSceneReferee {
 
     public BattleSceneReferee(BattleScene scene) {
         this.scene = scene;
+    }
+
+    public CompletableFuture<Void> move(long unitId, double x, double y) {
+        if (scene.checkDestroy()) {
+            throw new RuntimeException("场景已销毁");
+        }
+
+        final FightUnit fightUnit = scene.getFightUnit(unitId);
+        if (fightUnit == null) {
+            throw new RuntimeException("战斗单位未在场景中");
+        }
+
+        if (!fightUnit.getState().canMove()) {
+            throw new RuntimeException("战斗单位无法响应移动请求");
+        }
+
+        SceneMap sceneMap = scene.sceneMap();
+        Vector2D position = fightUnit.getPosition();
+        final List<Vector2D> way = sceneMap.calculateWayByAStar(position.getX(), position.getY(), x, y);
+        if (way.isEmpty()) {
+            throw new RuntimeException("寻路失败");
+        }
+
+        return scene.addTask(() -> {
+            fightUnit.moveTo(way);
+            return null;
+        });
+
     }
 
     public CompletableFuture<Void> useSkill(long unitId, int skillId, SelectParam param) {

@@ -3,6 +3,7 @@ package com.li.battle.core.scene;
 import com.li.battle.buff.BuffManager;
 import com.li.battle.core.Attribute;
 import com.li.battle.core.BattleSceneHelper;
+import com.li.battle.core.scene.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.event.EventDispatcher;
@@ -39,7 +40,13 @@ public interface BattleScene {
     long getSceneRound();
 
     /**
-     * 向场景内的队列提交任务
+     * 获取场景地图
+     * @return 场景地图
+     */
+    SceneMap sceneMap();
+
+    /**
+     * 向场景内的队列提交任务(任何修改操作都应该通过该方法实现,保证无并发问题)
      * @param task 任务
      * @param <R> 任务结果类型
      * @return 任务结果future

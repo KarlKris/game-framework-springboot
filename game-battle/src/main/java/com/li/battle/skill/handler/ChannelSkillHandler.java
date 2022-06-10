@@ -1,6 +1,6 @@
 package com.li.battle.skill.handler;
 
-import com.li.battle.ConfigHelper;
+import com.li.battle.core.ConfigHelper;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.ChannelSkillConfig;
 import com.li.battle.resource.SelectorConfig;

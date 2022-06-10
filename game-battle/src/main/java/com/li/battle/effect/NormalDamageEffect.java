@@ -2,14 +2,14 @@ package com.li.battle.effect;
 
 import com.li.battle.buff.core.BuffModifier;
 import com.li.battle.skill.BattleSkill;
-import org.springframework.stereotype.Component;
+import lombok.Getter;
 
 /**
  * 伤害类效果
  * @author li-yuanwen
  * @date 2022/5/27
  */
-@Component
+@Getter
 public class NormalDamageEffect extends AbstractDamageEffect<BuffModifier> {
 
     /** 基础伤害 **/

@@ -2,6 +2,8 @@ package com.li.battle.core.unit;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
+import java.util.List;
+
 /**
  * 移动单位接口
  * @author li-yuanwen
@@ -45,6 +47,15 @@ public interface MoveUnit extends Unit {
      */
     void updateLocalWander(Vector2D localWander);
 
+    /**
+     * 移动到指定地点
+     * @param ways 路径
+     */
+    void moveTo(List<Vector2D> ways);
 
+    /**
+     * 执行单位移动
+     */
+    void moving();
 
 }

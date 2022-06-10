@@ -3,6 +3,7 @@ package com.li.battle.core.unit;
 import com.li.battle.core.*;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.resource.SkillConfig;
+import com.li.battle.util.SteeringBehaviourUtil;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.HashMap;
@@ -30,12 +31,16 @@ public abstract class AbstractFightUnit implements FightUnit {
     /** 当前位置 **/
     private Vector2D position;
 
-    /** 最高移速 **/
+    /** 最高移速(一回合内的移动距离) **/
     private final int maxSpeed;
     /** 当前速度 **/
     private Vector2D velocity;
     /** 上次徘徊的随机点 **/
     private Vector2D localWander;
+    /** 路径 **/
+    private List<Vector2D> ways;
+    /** 路径下标 **/
+    private int wayIndex;
 
     /** 所属场景 **/
     private BattleScene scene;
@@ -120,6 +125,39 @@ public abstract class AbstractFightUnit implements FightUnit {
     public void updateLocalWander(Vector2D localWander) {
         this.localWander = localWander;
     }
+
+    @Override
+    public void moveTo(List<Vector2D> ways) {
+        this.ways = ways;
+        this.wayIndex = 0;
+        this.state = UnitState.MOVING;
+    }
+
+    @Override
+    public void moving() {
+        if (getState() != UnitState.MOVING) {
+            return;
+        }
+        double distance = 0;
+        int maxSpeed = getMaxSpeed();
+        int size = ways.size();
+        while (distance < maxSpeed && wayIndex < size) {
+            Vector2D oldPos = this.position;
+            Vector2D target = ways.get(wayIndex);
+            this.velocity = SteeringBehaviourUtil.seek(this, target, maxSpeed - distance).add(velocity);
+            this.position = this.velocity.add(this.position);
+
+            distance += (Vector2D.distance(oldPos, position));
+            if (target.equals(this.position)) {
+                wayIndex++;
+            }
+        }
+
+        if (wayIndex >= size) {
+            this.state = UnitState.NORMAL;
+        }
+    }
+
 
     @Override
     public long getId() {
