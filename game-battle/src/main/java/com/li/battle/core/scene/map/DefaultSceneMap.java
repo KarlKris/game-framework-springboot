@@ -156,7 +156,7 @@ public class DefaultSceneMap implements SceneMap {
     /**
      * A*算法中的链表
      */
-    private final class Node {
+    private static final class Node {
 
         /** 父节点 **/
         private final Node parent;

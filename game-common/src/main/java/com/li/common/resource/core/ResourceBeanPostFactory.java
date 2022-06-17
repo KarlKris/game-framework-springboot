@@ -2,7 +2,7 @@ package com.li.common.resource.core;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.li.common.resource.anno.ResourceObj;
-import com.li.common.resource.anno.ResourceScan;
+import com.li.common.resource.anno.EnableResourceScan;
 import com.li.common.resource.storage.StorageManagerFactoryBean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopInfrastructureBean;
@@ -168,7 +168,7 @@ public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProces
             }
 
             return AnnotationAttributes.fromMap(
-                    metadata.getAnnotationAttributes(ResourceScan.class.getName(), false));
+                    metadata.getAnnotationAttributes(EnableResourceScan.class.getName(), false));
         }
         return null;
     }

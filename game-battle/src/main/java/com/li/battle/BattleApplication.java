@@ -2,7 +2,7 @@ package com.li.battle;
 
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.service.BattleService;
-import com.li.common.resource.anno.ResourceScan;
+import com.li.common.resource.anno.EnableResourceScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -12,7 +12,7 @@ import org.springframework.context.ApplicationContext;
  * @date 2022/6/7
  */
 @SpringBootApplication(scanBasePackages = {"com.li"})
-@ResourceScan(value = {"com/li/battle"}, path = "${resource.root.path}")
+@EnableResourceScan(value = {"com/li/battle"}, path = "${resource.root.path}")
 public class BattleApplication {
 
     public static void main(String[] args) {

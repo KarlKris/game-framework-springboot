@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ResourceScan {
+public @interface EnableResourceScan {
 
     /**
      * @return 资源类路径
