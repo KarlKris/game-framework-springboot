@@ -2,7 +2,7 @@ package com.li.engine.channelhandler.client;
 
 import cn.hutool.core.convert.ConvertException;
 import com.li.common.exception.SerializeFailException;
-import com.li.common.thread.SerializedExecutorService;
+import com.li.common.concurrency.SerializedExecutorService;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.push.IPushExecutor;
 import com.li.engine.service.rpc.SocketFutureManager;

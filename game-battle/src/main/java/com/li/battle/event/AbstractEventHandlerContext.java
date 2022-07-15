@@ -29,7 +29,10 @@ public abstract class AbstractEventHandlerContext implements EventHandlerContext
     @Override
     public void fireHandleEvent(Object event) {
         AbstractEventHandlerContext ctx = this.next;
-        ctx.invokeHandler(event);
+        if (ctx != null) {
+            ctx.invokeHandler(event);
+        }
+        
     }
 
     private void invokeHandler(Object event) {

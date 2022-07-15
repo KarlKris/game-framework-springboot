@@ -15,21 +15,21 @@ import lombok.Getter;
 public class BattleSkill implements IOwner {
 
     /** 技能配置 **/
-    private int skillId;
+    private final int skillId;
     /** 释放战斗单元标识 **/
-    private long caster;
+    private final long caster;
     /** 下次执行的技能阶段 **/
     private SkillStage nextStage = SkillStage.START;
     /** 目标 **/
-    private SelectorResult target;
+    private final SelectorResult target;
     /** 创建技能回合数 **/
     private final long createRound;
     /** 下一次执行技能效果的回合 **/
     private long nextRound;
     /** 技能失效的回合 **/
-    private long expireRound;
+    private final long expireRound;
     /** 选择目标相关参数 **/
-    private SelectParam param;
+    private final SelectParam param;
     /** 技能上下文 **/
     private final AbstractDamageAlterContext context;
 

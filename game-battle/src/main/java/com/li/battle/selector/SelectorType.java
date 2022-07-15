@@ -39,6 +39,9 @@ public enum SelectorType {
     /** 矩形坐标 **/
     RECTANGLE_COORDINATE,
 
+    /** 方向上(用于线性子弹类技能,位移技能) **/
+    DIRECTION,
+
 
     ;
 

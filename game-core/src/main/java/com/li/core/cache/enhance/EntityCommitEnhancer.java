@@ -2,7 +2,7 @@ package com.li.core.cache.enhance;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.li.common.exception.EnhanceException;
-import com.li.common.utils.ObjectsUtil;
+import com.li.common.utils.ObjectUtils;
 import com.li.core.dao.IEntity;
 import com.li.core.dao.anno.Commit;
 import com.li.core.dao.service.IDataPersistence;
@@ -93,7 +93,7 @@ public class EntityCommitEnhancer implements Enhancer {
             }
 
         }, method -> {
-            if (ObjectsUtil.OBJECT_METHODS.contains(method)) {
+            if (ObjectUtils.OBJECT_METHODS.contains(method)) {
                 return false;
             }
             if (Modifier.isFinal(method.getModifiers()) || Modifier.isStatic(method.getModifiers())

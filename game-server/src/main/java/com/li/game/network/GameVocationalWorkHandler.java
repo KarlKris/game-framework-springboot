@@ -2,7 +2,7 @@ package com.li.game.network;
 
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.engine.service.session.SessionManager;
-import com.li.common.thread.SerializedExecutorService;
+import com.li.common.concurrency.SerializedExecutorService;
 import com.li.network.message.InnerMessage;
 import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.network.session.ServerSession;

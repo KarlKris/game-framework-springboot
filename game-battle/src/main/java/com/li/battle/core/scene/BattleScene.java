@@ -1,15 +1,16 @@
 package com.li.battle.core.scene;
 
 import com.li.battle.buff.BuffManager;
+import com.li.battle.collision.QuadTree;
 import com.li.battle.core.Attribute;
 import com.li.battle.core.BattleSceneHelper;
 import com.li.battle.core.scene.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.event.EventDispatcher;
+import com.li.battle.projectile.ProjectileManager;
 import com.li.battle.skill.SkillManager;
 import com.li.battle.trigger.TriggerManager;
-import com.li.battle.util.QuadTree;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -131,6 +132,12 @@ public interface BattleScene {
      * @return 技能容器
      */
     SkillManager skillManager();
+
+    /**
+     * 获取子弹容器
+     * @return 子弹容器
+     */
+    ProjectileManager projectileManager();
 
 
     /**

@@ -1,8 +1,15 @@
 package com.li.battle.projectile;
 
+import com.li.battle.collision.Rectangle;
+import com.li.battle.core.scene.BattleScene;
+import com.li.battle.core.unit.FightUnit;
+import com.li.battle.core.unit.IPosition;
 import com.li.battle.resource.ProjectileConfig;
 import com.li.battle.skill.BattleSkill;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 线性子弹创建器
@@ -19,6 +26,28 @@ public class LinearProjectileCreator implements ProjectileCreator {
 
     @Override
     public Projectile newInstance(BattleSkill skill, ProjectileConfig config) {
-        return null;
+        BattleScene scene = skill.getContext().getScene();
+
+        FightUnit caster = scene.getFightUnit(skill.getCaster());
+        // todo 玩家已死亡则放弃创建子弹
+
+        List<IPosition> results = skill.getTarget().getResults();
+        if (results.isEmpty()) {
+            return null;
+        }
+
+        Vector2D targetPosition = results.get(0).getPosition();
+
+        Vector2D position = caster.getPosition();
+
+        // 实际终点
+        Vector2D end = targetPosition.subtract(position).normalize()
+                .scalarMultiply(config.getLength())
+                .add(position);
+
+        // 碰撞矩形
+        Rectangle rectangle = new Rectangle(position, end, config.getWidth() >> 1);
+
+        return new LinearProjectile(scene, config, caster.getId(), skill.getSkillId(), position, rectangle);
     }
 }

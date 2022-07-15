@@ -73,7 +73,7 @@ public class BuffManager {
         BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
         if (!buff.isExpire(curRound)) {
             if (ArrayUtil.isNotEmpty(config.getThinkEffects())) {
-                for (Effect effect : config.getThinkEffects()) {
+                for (Effect<Buff> effect : config.getThinkEffects()) {
                     effect.onAction(buff);
                 }
             }
@@ -83,7 +83,7 @@ public class BuffManager {
         } else {
             // 执行销毁效果
             if (ArrayUtil.isNotEmpty(config.getDestroyEffects())) {
-                for (Effect effect : config.getDestroyEffects()) {
+                for (Effect<Buff> effect : config.getDestroyEffects()) {
                     effect.onAction(buff);
                 }
             }

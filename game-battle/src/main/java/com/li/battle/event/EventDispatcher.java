@@ -9,7 +9,6 @@ import java.util.*;
 
 /**
  * 事件分发器
- * todo 考虑单位退出场景后相应的EventHandlerContext的删除问题
  * @author li-yuanwen
  * @date 2022/5/18
  */

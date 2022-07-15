@@ -49,10 +49,14 @@ public class DefaultEventPipeline implements EventPipeline {
         AbstractEventHandlerContext context = newContext(handler);
         if (head == null) {
             head = context;
+        } else if (tail == null) {
+            head.next = context;
+            tail = context;
         } else {
-            tail.next = context;
+            AbstractEventHandlerContext prev = tail;
+            prev.next = context;
+            tail = context;
         }
-        tail = context;
         return this;
     }
 

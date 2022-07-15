@@ -1,4 +1,4 @@
-package com.li.battle.util;
+package com.li.battle.collision;
 
 import lombok.Getter;
 

@@ -3,7 +3,7 @@ package com.li.common.resource.reader;
 import com.li.common.resource.convertor.StrConvertorHolder;
 import com.li.common.resource.resolver.Resolver;
 import com.li.common.resource.resolver.ResolverFactory;
-import com.li.common.utils.ObjectsUtil;
+import com.li.common.utils.ObjectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
@@ -431,7 +431,7 @@ public class XlsxReader extends DefaultHandler implements ResourceReader {
         }
 
         private void parseRow0() {
-            E instance = ObjectsUtil.newInstance(clz);
+            E instance = ObjectUtils.newInstance(clz);
             int indexSize = colValues.size() - 1;
             for (XlsxFieldResolver fieldHolder : fieldHolders) {
                 int index = fieldHolder.index;

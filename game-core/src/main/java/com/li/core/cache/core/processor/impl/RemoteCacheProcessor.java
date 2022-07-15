@@ -30,8 +30,7 @@ public class RemoteCacheProcessor implements CacheProcessor {
 
     @Override
     public Cache createCache(String cacheName, short maximum, short expire) {
-        CaffeineRedisCache cache = new CaffeineRedisCache(cacheName, maximum, expire);
-        cache.setDistributedCacheManager(distributedCacheManager);
+        CaffeineRedisCache cache = new CaffeineRedisCache(cacheName, maximum, expire, distributedCacheManager);
         Cache old = this.localCacheHolder.put(cacheName, cache);
         if (old != null) {
             old.clear();

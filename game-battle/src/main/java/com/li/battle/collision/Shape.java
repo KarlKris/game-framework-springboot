@@ -1,12 +1,11 @@
-package com.li.battle.util;
+package com.li.battle.collision;
 
 /**
  * 形状数据接口
  * @author li-yuanwen
  * @date 2022/6/1
  */
-public interface Shape {
-
+public interface Shape extends CollisionDetector {
 
     /**
      * 获取形状横坐标的的最左值

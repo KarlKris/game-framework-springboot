@@ -1,4 +1,4 @@
-package com.li.battle.util;
+package com.li.battle.collision;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

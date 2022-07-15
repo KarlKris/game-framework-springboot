@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 战斗场景内的裁判(用于提供对外界的接口)
+ * 战斗场景内的裁判(用于提供对外界的入口)
  * @author li-yuanwen
  * @date 2022/5/31
  */
@@ -45,7 +45,7 @@ public class BattleSceneReferee {
 
         SceneMap sceneMap = scene.sceneMap();
         Vector2D position = fightUnit.getPosition();
-        final List<Vector2D> way = sceneMap.calculateWayByAStar(position.getX(), position.getY(), x, y);
+        final List<Vector2D> way = sceneMap.findWayByAStar(position.getX(), position.getY(), x, y);
         if (way.isEmpty()) {
             throw new RuntimeException("寻路失败");
         }

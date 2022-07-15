@@ -1,7 +1,7 @@
 package com.li.core.eventbus.disruptor;
 
 
-import com.li.common.thread.SerializedExecutorService;
+import com.li.common.concurrency.SerializedExecutorService;
 import com.li.core.eventbus.event.DisruptorEvent;
 import com.li.core.eventbus.event.IdentityEvent;
 

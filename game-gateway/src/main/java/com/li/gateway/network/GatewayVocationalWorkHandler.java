@@ -3,7 +3,7 @@ package com.li.gateway.network;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.rpc.IRpcService;
-import com.li.common.thread.SerializedExecutorService;
+import com.li.common.concurrency.SerializedExecutorService;
 import com.li.network.message.OuterMessage;
 import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.network.session.PlayerSession;

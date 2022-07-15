@@ -73,7 +73,7 @@ public class DefaultSceneMap implements SceneMap {
     }
 
     @Override
-    public List<Vector2D> calculateWayByAStar(double fromX, double fromY, double toX, double toY) {
+    public List<Vector2D> findWayByAStar(double fromX, double fromY, double toX, double toY) {
         Grid fromGrid = getGrid(fromX, fromY);
         if (fromGrid == null) {
             return Collections.emptyList();

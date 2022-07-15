@@ -1,5 +1,7 @@
 package com.li.gateway.network;
 
+import com.li.common.concurrency.MultiThreadRunnableLoopGroup;
+import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.common.rpc.RemoteServerSeekService;
 import com.li.common.rpc.model.Address;
 import com.li.engine.client.NioNettyClient;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -29,7 +32,8 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Component
-public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSession> implements ResponseMessagePushProcessor<PlayerSession> {
+public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSession>
+        implements ResponseMessagePushProcessor<PlayerSession> {
 
     @Resource
     private RemoteServerSeekService remoteServerSeekService;
@@ -39,6 +43,20 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     private SocketFutureManager socketFutureManager;
     @Resource
     private MessageFactory messageFactory;
+
+    // todo
+    private final RunnableLoopGroup group = new MultiThreadRunnableLoopGroup();
+
+    @Override
+    protected Executor getExecutor(OuterMessage message, PlayerSession session) {
+        if (session.isIdentity()) {
+            if (!session.isRegisterRunnableLoop()) {
+                group.register(session);
+            }
+            return session.runnableLoop();
+        }
+        return group.next();
+    }
 
     @Override
     protected boolean forwardMessage(PlayerSession session, OuterMessage message) {

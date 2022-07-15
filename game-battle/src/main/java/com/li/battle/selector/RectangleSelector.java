@@ -2,7 +2,7 @@ package com.li.battle.selector;
 
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.SelectorConfig;
-import com.li.battle.util.Rectangle;
+import com.li.battle.collision.Rectangle;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class RectangleSelector implements Selector {
 
     @Override
     public SelectorResult select(FightUnit unit, SelectorConfig config, SelectParam param, int range) {
-        if (param.getX() == param.getDirectionX() && param.getY() == param.getDirectionY()) {
+        if (param.getX() == param.getEndX() && param.getY() == param.getEndY()) {
             throw new RuntimeException("技能释放方向非法");
         }
 
@@ -33,7 +33,7 @@ public class RectangleSelector implements Selector {
         }
 
         // 目标终点
-        Vector2D targetEnd = new Vector2D(param.getDirectionX(), param.getDirectionY());
+        Vector2D targetEnd = new Vector2D(param.getEndX(), param.getEndY());
         // 实际终点
         Vector2D end = targetEnd.subtract(start).normalize().scalarMultiply(config.getRange()).add(start);
 

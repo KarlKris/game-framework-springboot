@@ -22,10 +22,10 @@ public class TypeDescriptorUtil {
      */
     public static TypeDescriptor newInstance(Field field) {
         TypeDescriptor descriptor;
-        if (ObjectsUtil.isMap(field.getType())) {
+        if (ObjectUtils.isMap(field.getType())) {
             Pair<TypeDescriptor, TypeDescriptor> pair = parseKeyValueTypeDescriptor(field);
             descriptor = TypeDescriptor.map(field.getType(), pair.getKey(), pair.getValue());
-        } else if (ObjectsUtil.isCollection(field.getType())){
+        } else if (ObjectUtils.isCollection(field.getType())){
             descriptor = TypeDescriptor.collection(field.getType(), parseCollectionNestedTypeDescriptor(field));
         } else {
             descriptor = new TypeDescriptor(field);

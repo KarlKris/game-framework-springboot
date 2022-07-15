@@ -72,6 +72,6 @@ public interface SceneMap {
      * @param toY 终点y坐标
      * @return 路径 or 空集(无路)
      */
-    List<Vector2D> calculateWayByAStar(double fromX, double fromY, double toX, double toY);
+    List<Vector2D> findWayByAStar(double fromX, double fromY, double toX, double toY);
 
 }

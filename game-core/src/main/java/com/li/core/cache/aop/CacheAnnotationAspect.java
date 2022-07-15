@@ -3,7 +3,7 @@ package com.li.core.cache.aop;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.li.common.utils.ObjectsUtil;
+import com.li.common.utils.ObjectUtils;
 import com.li.core.cache.anno.CachedPut;
 import com.li.core.cache.anno.CachedEvict;
 import com.li.core.cache.anno.Cachedable;
@@ -211,6 +211,6 @@ public class CacheAnnotationAspect {
     private String getSpElValue(String spEl, EvaluationContext evaluationContext) throws JsonProcessingException {
         Expression expression = parser.parseExpression(spEl);
         Object expressionValue = expression.getValue(evaluationContext);
-        return ObjectsUtil.toJsonStr(objectMapper, expressionValue);
+        return ObjectUtils.toJsonStr(objectMapper, expressionValue);
     }
 }

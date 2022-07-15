@@ -1,5 +1,8 @@
 package com.li.network.session;
 
+import com.li.common.concurrency.DefaultRunnableSource;
+import com.li.common.concurrency.RunnableLoop;
+import com.li.common.concurrency.RunnableSource;
 import com.li.common.utils.IpUtils;
 import com.li.network.message.IMessage;
 import com.li.network.protocol.ChannelAttributeKeys;
@@ -12,6 +15,8 @@ import io.netty.channel.Channel;
  */
 public abstract class AbstractSession implements ISession {
 
+    private final RunnableSource source;
+
     /** session唯一标识 **/
     protected final long sessionId;
     /** 连接Channel **/
@@ -20,6 +25,7 @@ public abstract class AbstractSession implements ISession {
     AbstractSession(long sessionId, Channel channel) {
         this.sessionId = sessionId;
         this.channel = channel;
+        this.source = new DefaultRunnableSource();
     }
 
 
@@ -51,6 +57,21 @@ public abstract class AbstractSession implements ISession {
     @Override
     public Byte getSerializeType() {
         return this.channel.attr(ChannelAttributeKeys.LAST_SERIALIZE_TYPE).get();
+    }
+
+    @Override
+    public RunnableLoop runnableLoop() {
+        return source.runnableLoop();
+    }
+
+    @Override
+    public void register(RunnableLoop runnableLoop) {
+        source.register(runnableLoop);
+    }
+
+    @Override
+    public boolean isRegisterRunnableLoop() {
+        return source.isRegisterRunnableLoop();
     }
 
 }

@@ -1,13 +1,13 @@
 package com.li.battle.projectile;
 
+import com.li.battle.collision.Rectangle;
 import com.li.battle.core.Attribute;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.util.Rectangle;
+import com.li.battle.resource.ProjectileConfig;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,25 +22,23 @@ public class TrackingProjectile extends AbstractProjectile {
     /** 子弹追踪的目标 **/
     private final long target;
 
-    public TrackingProjectile(BattleScene scene, int projectileId, long owner, int skillId
-            , Vector2D position, int speed, long target, Rectangle rectangle) {
-        super(scene, projectileId, owner, skillId, position, speed, rectangle);
+    public TrackingProjectile(BattleScene scene, ProjectileConfig config, long owner, int skillId
+            , Vector2D position, long target, Rectangle rectangle) {
+        super(scene, config, owner, skillId, position, rectangle);
         this.target = target;
     }
 
     @Override
     protected List<FightUnit> filter0(List<FightUnit> units) {
         // 是否可拦截
-        boolean intercept = scene.battleSceneHelper().configHelper().getProjectileConfigById(projectileId).isIntercept();
+        boolean intercept = config.isIntercept();
         if (!intercept) {
             Optional<FightUnit> optional = units.stream().filter(unit -> unit.getId() == target).findFirst();
             return optional.map(Collections::singletonList).orElse(Collections.emptyList());
 
         }
 
-        // 可拦截,按照子弹距离排序
-        units.sort(Comparator.comparingDouble(o -> Vector2D.distance(o.getPosition(), position)));
-        return Collections.singletonList(units.get(0));
+        return units;
 
     }
 

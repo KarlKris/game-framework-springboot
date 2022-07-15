@@ -2,9 +2,8 @@ package com.li.network.session;
 
 import io.netty.channel.Channel;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
 
 /**
  * 内部连接
@@ -14,23 +13,30 @@ import java.util.Set;
 public class ServerSession extends AbstractSession {
 
     /** 依附于该Session的PlayerSession#identity **/
-    private final Set<Long> identities;
+    private final Map<Long, PlayerSession> playerSessions;
 
     public ServerSession(long sessionId, Channel channel) {
         super(sessionId, channel);
-        this.identities = new HashSet<>();
+        this.playerSessions = new HashMap<>(256);
     }
 
     @Override
     public void bindIdentity(long identity) {
-        this.identities.add(identity);
+        PlayerSession playerSession = new PlayerSession(getSessionId(), channel);
+        playerSession.bindIdentity(identity);
+        this.playerSessions.put(identity, playerSession);
     }
 
     public void logout(long identity) {
-        this.identities.remove(identity);
+        this.playerSessions.remove(identity);
     }
 
     public Set<Long> getIdentities() {
-        return Collections.unmodifiableSet(identities);
+        return Collections.unmodifiableSet(playerSessions.keySet());
     }
+
+    public PlayerSession getPlayerSession(long identity) {
+        return playerSessions.get(identity);
+    }
+
 }

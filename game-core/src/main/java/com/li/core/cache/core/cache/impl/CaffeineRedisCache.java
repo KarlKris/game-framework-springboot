@@ -23,7 +23,7 @@ public class CaffeineRedisCache extends AbstractCache {
     private DistributedCacheManager distributedCacheManager;
 
 
-    public CaffeineRedisCache(String cacheName, short maximum, short expire) {
+    public CaffeineRedisCache(String cacheName, short maximum, short expire, DistributedCacheManager distributedCacheManager) {
         super(cacheName);
         // 二级缓存时效 2倍于一级缓存(一级缓存时效应短些)
         this.expire = expire << 1;
@@ -32,9 +32,7 @@ public class CaffeineRedisCache extends AbstractCache {
                 .maximumSize(maximum)
                 .expireAfterAccess(expire, TimeUnit.SECONDS)
                 .build();
-    }
 
-    public void setDistributedCacheManager(DistributedCacheManager distributedCacheManager) {
         this.distributedCacheManager = distributedCacheManager;
     }
 

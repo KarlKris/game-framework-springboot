@@ -18,9 +18,6 @@ public class ServerConfig {
     /** Socket绑定端口号 **/
     @Value("${netty.server.port}")
     private int port;
-    /** Boss线程池线程数 **/
-    @Value("${netty.server.bossGroup.threadNum:1}")
-    private int bossGroupThreadNum;
     /** NIO线程池线程数 **/
     @Value("${netty.server.nioGroup.threadNum:16}")
     private int nioGroupThreadNum;

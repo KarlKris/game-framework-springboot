@@ -1,7 +1,7 @@
 package com.li.battle.util;
 
 /**
- * 数值变更工具类
+ * 数值变更持有类
  * @author li-yuanwen
  * @date 2022/5/24
  */

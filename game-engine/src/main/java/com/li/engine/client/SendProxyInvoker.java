@@ -4,7 +4,7 @@ import com.li.common.exception.BadRequestException;
 import com.li.common.exception.SocketException;
 import com.li.common.exception.code.ServerErrorCode;
 import com.li.common.utils.IpUtils;
-import com.li.common.utils.ObjectsUtil;
+import com.li.common.utils.ObjectUtils;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.rpc.SocketFutureManager;
@@ -53,7 +53,7 @@ public class SendProxyInvoker implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (ObjectsUtil.OBJECT_METHODS.contains(method)) {
+        if (ObjectUtils.OBJECT_METHODS.contains(method)) {
             return method.invoke(proxy, args);
         }
 

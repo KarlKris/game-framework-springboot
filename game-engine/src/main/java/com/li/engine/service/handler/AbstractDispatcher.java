@@ -1,8 +1,8 @@
 package com.li.engine.service.handler;
 
+import com.li.common.concurrency.SerializedExecutorService;
 import com.li.common.exception.SocketException;
 import com.li.common.exception.code.ServerErrorCode;
-import com.li.common.thread.SerializedExecutorService;
 import com.li.engine.protocol.MessageFactory;
 import com.li.network.message.IMessage;
 import com.li.network.message.SocketProtocol;
@@ -17,6 +17,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 /**
@@ -46,18 +47,25 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             }
             return;
         }
-        long id;
-        long identity = getProtocolIdentity(session, message);
-        if (identity > 0) {
-            // 请求源唯一标识已绑定对象,释放线程池
-            executorService.destroy(session.getSessionId());
-            id = identity;
-        } else {
-            id = session.getSessionId();
-        }
-        // 交付给线程池执行
-        executorService.submit(id, () -> dispatch0(session, message));
+//        long id;
+//        long identity = getProtocolIdentity(session, message);
+//        if (identity > 0) {
+//            // 请求源唯一标识已绑定对象,释放线程池
+//            executorService.destroy(session.getSessionId());
+//            id = identity;
+//        } else {
+//            id = session.getSessionId();
+//        }
+
+        Executor executor = getExecutor(message, session);
+        executor.execute(()-> handleMessage(session, message));
+
+//        // 交付给线程池执行
+//        executorService.submit(id, () -> handleMessage(session, message));
     }
+
+    protected abstract Executor getExecutor(M message, S session);
+
 
     /**
      * 消息分发前处理,用于判断一下信息
@@ -69,7 +77,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         return true;
     }
 
-    protected void dispatch0(S session, M message) {
+    protected void handleMessage(S session, M message) {
         if (!beforeDispatch(session, message)) {
             return;
         }

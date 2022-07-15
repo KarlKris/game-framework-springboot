@@ -28,6 +28,9 @@ public enum BattleEventType {
     /** 击杀事件 **/
     KILL,
 
+    /** 移动事件 **/
+    MOVE,
+
     ;
 
 }

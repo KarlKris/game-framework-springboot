@@ -1,9 +1,9 @@
 package com.li.battle.selector;
 
+import com.li.battle.collision.Shape;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.core.unit.IPosition;
-import com.li.battle.util.Shape;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +30,10 @@ public class ShapeSelectorResult implements SelectorResult {
     public List<IPosition> getResults() {
         // 可能产生碰撞的战斗单位集
         List<FightUnit> units = scene.distributed().retrieve(shape);
-        // todo 碰撞检测
-        return units.stream().map(unit -> (IPosition) unit).collect(Collectors.toList());
+        // 碰撞检测
+        return units.stream()
+                .filter(shape::isCollision)
+                .map(unit -> (IPosition) unit)
+                .collect(Collectors.toList());
     }
 }

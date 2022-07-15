@@ -1,6 +1,6 @@
 package com.li.engine.service.push;
 
-import com.li.common.utils.ObjectsUtil;
+import com.li.common.utils.ObjectUtils;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.*;
 import com.li.network.serialize.SerializerHolder;
@@ -28,7 +28,7 @@ public class OuterPushProxyInvoker implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (ObjectsUtil.OBJECT_METHODS.contains(method)) {
+        if (ObjectUtils.OBJECT_METHODS.contains(method)) {
             return method.invoke(proxy, args);
         }
 

@@ -1,6 +1,7 @@
 package com.li.network.session;
 
 
+import com.li.common.concurrency.RunnableSource;
 import com.li.network.message.IMessage;
 
 /**
@@ -8,7 +9,7 @@ import com.li.network.message.IMessage;
  * @author li-yuanwen
  * @date 2021/12/8
  */
-public interface ISession {
+public interface ISession extends RunnableSource {
 
 
     /**

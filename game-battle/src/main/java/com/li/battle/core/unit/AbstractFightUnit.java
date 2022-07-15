@@ -1,7 +1,9 @@
 package com.li.battle.core.unit;
 
+import com.li.battle.collision.QuadTree;
 import com.li.battle.core.*;
 import com.li.battle.core.scene.BattleScene;
+import com.li.battle.event.core.UnitMoveEvent;
 import com.li.battle.resource.SkillConfig;
 import com.li.battle.util.SteeringBehaviourUtil;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -138,6 +140,10 @@ public abstract class AbstractFightUnit implements FightUnit {
         if (getState() != UnitState.MOVING) {
             return;
         }
+
+        QuadTree<FightUnit> distributed = scene.distributed();
+        distributed.remove(this);
+
         double distance = 0;
         int maxSpeed = getMaxSpeed();
         int size = ways.size();
@@ -153,9 +159,14 @@ public abstract class AbstractFightUnit implements FightUnit {
             }
         }
 
+        distributed.insert(this);
+
         if (wayIndex >= size) {
             this.state = UnitState.NORMAL;
         }
+
+        // 抛出移动事件
+        scene.eventDispatcher().dispatch(new UnitMoveEvent(id), 0);
     }
 
 

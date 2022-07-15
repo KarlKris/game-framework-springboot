@@ -1,17 +1,21 @@
 package com.li.game.network;
 
+import com.li.common.concurrency.MultiThreadRunnableLoopGroup;
+import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.ProtocolConstant;
 import com.li.network.message.SocketProtocol;
 import com.li.network.session.ISession;
+import com.li.network.session.PlayerSession;
 import com.li.network.session.ServerSession;
 import com.li.protocol.game.login.protocol.GameServerLoginModule;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * 消息分发处理器
@@ -24,9 +28,27 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
     @Resource
     private SessionManager sessionManager;
 
+    // todo
+    private final RunnableLoopGroup group = new MultiThreadRunnableLoopGroup();
+
     @Override
     protected long getProtocolIdentity(ServerSession session, InnerMessage message) {
         return message.getIdentity();
+    }
+
+    @Override
+    protected Executor getExecutor(InnerMessage message, ServerSession session) {
+        long identity = getProtocolIdentity(session, message);
+        if (identity > 0) {
+            PlayerSession playerSession = session.getPlayerSession(identity);
+            if (playerSession != null) {
+                if (!playerSession.isRegisterRunnableLoop()) {
+                    group.register(playerSession);
+                }
+                return playerSession.runnableLoop();
+            }
+        }
+        return group.next();
     }
 
     @Override

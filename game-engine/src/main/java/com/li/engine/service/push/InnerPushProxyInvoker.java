@@ -1,6 +1,6 @@
 package com.li.engine.service.push;
 
-import com.li.common.utils.ObjectsUtil;
+import com.li.common.utils.ObjectUtils;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.*;
@@ -37,7 +37,7 @@ public class InnerPushProxyInvoker implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (ObjectsUtil.OBJECT_METHODS.contains(method)) {
+        if (ObjectUtils.OBJECT_METHODS.contains(method)) {
             return method.invoke(proxy, args);
         }
 

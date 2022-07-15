@@ -1,14 +1,17 @@
 package com.li.battle.core.scene;
 
-import com.li.battle.core.ConfigHelper;
 import com.li.battle.buff.BuffManager;
 import com.li.battle.buff.core.Buff;
+import com.li.battle.collision.QuadTree;
+import com.li.battle.collision.Rectangle2D;
 import com.li.battle.core.Attribute;
 import com.li.battle.core.BattleSceneHelper;
+import com.li.battle.core.ConfigHelper;
 import com.li.battle.core.Skill;
 import com.li.battle.core.scene.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
+import com.li.battle.core.unit.MoveUnit;
 import com.li.battle.effect.Effect;
 import com.li.battle.event.EventDispatcher;
 import com.li.battle.projectile.ProjectileManager;
@@ -16,8 +19,6 @@ import com.li.battle.resource.SkillConfig;
 import com.li.battle.skill.SkillManager;
 import com.li.battle.skill.SkillType;
 import com.li.battle.trigger.TriggerManager;
-import com.li.battle.util.QuadTree;
-import com.li.battle.util.Rectangle2D;
 import com.li.common.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -175,9 +176,7 @@ public abstract class AbstractBattleScene implements BattleScene {
             // 执行技能逻辑
             skillManager.update();
             // 战斗单位移动
-            for (FightUnit fightUnit : fightUnits.values()) {
-                fightUnit.moving();
-            }
+            fightUnits.values().forEach(MoveUnit::moving);
             // 执行触发器销毁逻辑
             triggerManager.update();
             // todo 执行战斗单元AI
@@ -237,6 +236,11 @@ public abstract class AbstractBattleScene implements BattleScene {
     @Override
     public SkillManager skillManager() {
         return skillManager;
+    }
+
+    @Override
+    public ProjectileManager projectileManager() {
+        return projectileManager;
     }
 
     @Override

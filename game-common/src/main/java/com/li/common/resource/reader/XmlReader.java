@@ -1,7 +1,7 @@
 package com.li.common.resource.reader;
 
 import com.li.common.resource.convertor.StrConvertorHolder;
-import com.li.common.utils.ObjectsUtil;
+import com.li.common.utils.ObjectUtils;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -44,7 +44,7 @@ public class XmlReader implements ResourceReader {
 
         List<E> results = new LinkedList<>();
         for (Element element : getElements(in)) {
-            E instance = ObjectsUtil.newInstance(clz);
+            E instance = ObjectUtils.newInstance(clz);
             for (XmlFieldResolver fieldHolder : fieldParser.fieldHolders) {
                 String fieldName = fieldHolder.getFieldName();
                 Attribute attribute = element.attribute(fieldName);

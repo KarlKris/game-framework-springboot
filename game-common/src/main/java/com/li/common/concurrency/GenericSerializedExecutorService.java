@@ -1,4 +1,4 @@
-package com.li.common.thread;
+package com.li.common.concurrency;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 

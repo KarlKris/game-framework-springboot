@@ -25,9 +25,15 @@ public class SelectParam {
     private double x;
     private double y;
 
-    /** 技能释放方向 **/
+    /** 技能释放终点 **/
+    private double endX;
+    private double endY;
+
+    // ------------------- 用于选定方向型技能 ----------------------------
+
+
+    /** 技能释放目标点,单位当前位置面向目标点即为方向 **/
     private double directionX;
     private double directionY;
-
 
 }
