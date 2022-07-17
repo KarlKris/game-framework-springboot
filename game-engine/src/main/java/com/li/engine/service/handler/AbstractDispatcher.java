@@ -1,6 +1,5 @@
 package com.li.engine.service.handler;
 
-import com.li.common.concurrency.SerializedExecutorService;
 import com.li.common.exception.SocketException;
 import com.li.common.exception.code.ServerErrorCode;
 import com.li.engine.protocol.MessageFactory;
@@ -36,8 +35,6 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
     protected MessageFactory messageFactory;
     @Resource
     private SocketProtocolManager socketProtocolManager;
-    @Resource
-    private SerializedExecutorService executorService;
 
     @Override
     public void dispatch(M message, S session) {
@@ -47,23 +44,18 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             }
             return;
         }
-//        long id;
-//        long identity = getProtocolIdentity(session, message);
-//        if (identity > 0) {
-//            // 请求源唯一标识已绑定对象,释放线程池
-//            executorService.destroy(session.getSessionId());
-//            id = identity;
-//        } else {
-//            id = session.getSessionId();
-//        }
 
         Executor executor = getExecutor(message, session);
         executor.execute(()-> handleMessage(session, message));
 
-//        // 交付给线程池执行
-//        executorService.submit(id, () -> handleMessage(session, message));
     }
 
+    /**
+     * 获取执行线程
+     * @param message 消息
+     * @param session session
+     * @return Executor
+     */
     protected abstract Executor getExecutor(M message, S session);
 
 
@@ -163,12 +155,13 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-        if (log.isWarnEnabled()) {
-            log.warn("关闭消息分发线程池数组");
-        }
-
-        executorService.shutdown();
+        close();
     }
+
+    /**
+     * 分发器关闭逻辑
+     */
+    protected abstract void close();
 
     /**
      * 处理需要转发的信息,由服务器性质决定是否需要具有转发消息的功能

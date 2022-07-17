@@ -1,6 +1,5 @@
 package com.li.game.network;
 
-import com.li.common.concurrency.MultiThreadRunnableLoopGroup;
 import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.session.SessionManager;
@@ -11,6 +10,7 @@ import com.li.network.session.ISession;
 import com.li.network.session.PlayerSession;
 import com.li.network.session.ServerSession;
 import com.li.protocol.game.login.protocol.GameServerLoginModule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -22,14 +22,14 @@ import java.util.concurrent.Executor;
  * @author li-yuanwen
  * @date 2021/12/13
  */
+@Slf4j
 @Component
 public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSession> {
 
     @Resource
     private SessionManager sessionManager;
-
-    // todo
-    private final RunnableLoopGroup group = new MultiThreadRunnableLoopGroup();
+    @Resource
+    private RunnableLoopGroup group;
 
     @Override
     protected long getProtocolIdentity(ServerSession session, InnerMessage message) {
@@ -49,6 +49,14 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
             }
         }
         return group.next();
+    }
+
+    @Override
+    protected void close() {
+        if (log.isInfoEnabled()) {
+            log.info("关闭业务线程池");
+        }
+        group.shutdownGracefully();
     }
 
     @Override

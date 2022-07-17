@@ -1,7 +1,8 @@
 package com.li.gateway.config;
 
-import com.li.common.concurrency.GenericSerializedExecutorService;
-import com.li.common.concurrency.SerializedExecutorService;
+import cn.hutool.core.thread.NamedThreadFactory;
+import com.li.common.concurrency.MultiThreadRunnableLoopGroup;
+import com.li.common.concurrency.RunnableLoopGroup;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,8 +14,9 @@ import org.springframework.context.annotation.Configuration;
 public class GatewayConfig {
 
     @Bean
-    public SerializedExecutorService executorService() {
-        return new GenericSerializedExecutorService((Runtime.getRuntime().availableProcessors() >> 1) << 2, "网关服业务分发线程");
+    public RunnableLoopGroup runnableLoopGroup() {
+        return new MultiThreadRunnableLoopGroup(Runtime.getRuntime().availableProcessors() << 1
+                , new NamedThreadFactory("网关服业务线程-", false));
     }
 
 }

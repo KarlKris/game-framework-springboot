@@ -1,6 +1,5 @@
 package com.li.gateway.network;
 
-import com.li.common.concurrency.MultiThreadRunnableLoopGroup;
 import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.common.rpc.RemoteServerSeekService;
 import com.li.common.rpc.model.Address;
@@ -43,9 +42,8 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     private SocketFutureManager socketFutureManager;
     @Resource
     private MessageFactory messageFactory;
-
-    // todo
-    private final RunnableLoopGroup group = new MultiThreadRunnableLoopGroup();
+    @Resource
+    private RunnableLoopGroup group;
 
     @Override
     protected Executor getExecutor(OuterMessage message, PlayerSession session) {
@@ -56,6 +54,14 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
             return session.runnableLoop();
         }
         return group.next();
+    }
+
+    @Override
+    protected void close() {
+        if (log.isInfoEnabled()) {
+            log.info("关闭业务线程池");
+        }
+        group.shutdownGracefully();
     }
 
     @Override
