@@ -1,10 +1,9 @@
 package com.li.engine.channelhandler.common.impl;
 
-import com.li.common.ApplicationContextHolder;
-import com.li.network.handler.HeartBeatHandler;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.engine.codec.WebSocketDecoder;
 import com.li.engine.codec.WebSocketEncoder;
+import com.li.network.handler.HeartBeatHandler;
 import com.li.network.handler.MessageDecoder;
 import com.li.network.handler.MessageEncoder;
 import com.li.network.message.ProtocolConstant;
@@ -21,6 +20,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +35,9 @@ import java.util.List;
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProtocolSelectorHandler extends ByteToMessageDecoder {
+
+    @Resource
+    private ApplicationContext applicationContext;
 
     @Resource
     private HttpServerCodec httpServerCodec;
@@ -141,7 +144,7 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
                     , MessageEncoder.class.getSimpleName(), this.messageEncoder);
             channelHandlerContext.pipeline().addBefore(idleStateHandlerName
                     , MessageDecoder.class.getSimpleName()
-                    , ApplicationContextHolder.getBean(MessageDecoder.class));
+                    , applicationContext.getBean(MessageDecoder.class));
 
             // 心跳
             channelHandlerContext.pipeline().addBefore(AbstractServerVocationalWorkHandler.class.getSimpleName()

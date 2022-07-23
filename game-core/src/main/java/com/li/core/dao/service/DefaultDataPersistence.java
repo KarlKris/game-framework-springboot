@@ -2,7 +2,7 @@ package com.li.core.dao.service;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 import cn.hutool.core.util.RandomUtil;
-import com.li.common.event.DataBaseCloseEvent;
+import com.li.common.shutdown.ShutdownProcessor;
 import com.li.core.dao.AbstractEntity;
 import com.li.core.dao.core.IDataAccessor;
 import com.li.core.dao.core.IPersistenceConsumer;
@@ -10,7 +10,6 @@ import com.li.core.dao.core.impl.DefaultPersistenceConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -28,7 +27,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 @Slf4j
 @Component
 @ConditionalOnBean(IDataAccessor.class)
-public class DefaultDataPersistence implements IDataPersistence, ApplicationListener<DataBaseCloseEvent> {
+public class DefaultDataPersistence implements IDataPersistence, ShutdownProcessor {
 
     /** 持久化消费者工厂 **/
     private final PersistenceConsumerFactory persistenceConsumerFactory;
@@ -73,7 +72,12 @@ public class DefaultDataPersistence implements IDataPersistence, ApplicationList
     }
 
     @Override
-    public void onApplicationEvent(DataBaseCloseEvent event) {
+    public int getOrder() {
+        return SHUT_DOWN_DATA_BASE;
+    }
+
+    @Override
+    public void shutdown() {
         log.warn("准备停止持久化线程,做最后的持久化");
 
         consumerHolder.values().forEach(IPersistenceConsumer::stop);

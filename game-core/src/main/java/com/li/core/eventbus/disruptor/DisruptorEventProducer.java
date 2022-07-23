@@ -1,6 +1,6 @@
 package com.li.core.eventbus.disruptor;
 
-import com.li.core.eventbus.event.DisruptorEvent;
+import com.li.core.eventbus.event.NamedEvent;
 import com.lmax.disruptor.RingBuffer;
 
 /**
@@ -16,7 +16,7 @@ public class DisruptorEventProducer {
         this.ringBuffer = ringBuffer;
     }
 
-    public <B> void produce(String type, B event) {
+    public <B extends NamedEvent> void produce(String type, B event) {
         // 1.ringBuffer 事件队列 下一个槽
         long sequence = ringBuffer.next();
         try {

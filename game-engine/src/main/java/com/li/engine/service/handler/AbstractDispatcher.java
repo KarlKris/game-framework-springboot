@@ -2,6 +2,7 @@ package com.li.engine.service.handler;
 
 import com.li.common.exception.SocketException;
 import com.li.common.exception.code.ServerErrorCode;
+import com.li.common.shutdown.ShutdownProcessor;
 import com.li.engine.protocol.MessageFactory;
 import com.li.network.message.IMessage;
 import com.li.network.message.SocketProtocol;
@@ -11,8 +12,6 @@ import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
 import com.li.network.session.ISession;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
@@ -26,7 +25,7 @@ import java.util.concurrent.Future;
  */
 @Slf4j
 public abstract class AbstractDispatcher<M extends IMessage, S extends ISession> implements Dispatcher<M, S>
-        , ApplicationListener<ContextClosedEvent> {
+        , ShutdownProcessor {
 
 
     @Resource
@@ -154,7 +153,12 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
     }
 
     @Override
-    public void onApplicationEvent(ContextClosedEvent event) {
+    public int getOrder() {
+        return SHUT_DOWN_THREAD_POOL;
+    }
+
+    @Override
+    public void shutdown() {
         close();
     }
 

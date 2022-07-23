@@ -1,5 +1,6 @@
 package com.li.engine.server;
 
+import com.li.common.shutdown.ShutdownProcessor;
 import com.li.common.utils.IpUtils;
 import com.li.engine.channelhandler.NioNettyServerMessageHandler;
 import io.netty.bootstrap.ServerBootstrap;
@@ -17,11 +18,16 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 基于Netty的服务端Socket Bean
@@ -34,6 +40,8 @@ public class NioNettyServerBootstrap implements ApplicationRunner
 
 
     @Resource
+    private ApplicationContext applicationContext;
+    @Resource
     private NioNettyServerMessageHandler nettyServerMessageHandler;
     @Resource
     private ServerConfig serverConfig;
@@ -44,6 +52,14 @@ public class NioNettyServerBootstrap implements ApplicationRunner
     private EventLoopGroup workers;
     /** 服务端channel **/
     private Channel channel;
+
+    private List<ShutdownProcessor> shutdownHooks = new LinkedList<>();
+
+    @PostConstruct
+    private void initialize() {
+        shutdownHooks.addAll(applicationContext.getBeansOfType(ShutdownProcessor.class).values());
+        shutdownHooks.sort(Comparator.comparingInt(ShutdownProcessor::getOrder));
+    }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -92,10 +108,15 @@ public class NioNettyServerBootstrap implements ApplicationRunner
 
     @Override
     public void onApplicationEvent(ContextClosedEvent contextClosedEvent) {
-        this.boss.shutdownGracefully();
-        this.workers.shutdownGracefully();
-        this.channel.close();
+        try {
+            this.boss.shutdownGracefully();
+            this.workers.shutdownGracefully();
+            this.channel.close();
+            log.warn("NIO Socket 服务器[{}]正常关闭", serverConfig.getPort());
+        } finally {
+            // 关闭
+            shutdownHooks.forEach(ShutdownProcessor::shutdown);
+        }
 
-        log.warn("NIO Socket 服务器[{}]正常关闭", serverConfig.getPort());
     }
 }

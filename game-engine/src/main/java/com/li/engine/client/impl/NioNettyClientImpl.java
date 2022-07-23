@@ -138,8 +138,10 @@ public class NioNettyClientImpl implements NioNettyClient {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectTimeoutMillis)
                 .handler(this.messageHandler);
 
-        ChannelFuture future = bootstrap.connect(this.address.getIp(), this.address.getPort()).sync();
-        this.channel = future.channel();
+        ChannelFuture channelFuture = bootstrap.connect(this.address.getIp(), this.address.getPort());
+        this.channel = channelFuture.channel();
+        channelFuture.sync();
+
 
         log.warn("客户端连接[{}:{}]成功", this.address.getIp(), this.address.getPort());
 

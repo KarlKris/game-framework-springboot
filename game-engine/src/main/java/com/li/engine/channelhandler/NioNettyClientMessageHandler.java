@@ -1,6 +1,5 @@
 package com.li.engine.channelhandler;
 
-import com.li.common.ApplicationContextHolder;
 import com.li.engine.channelhandler.client.ClientVocationalWorkHandler;
 import com.li.network.handler.HeartBeatHandler;
 import com.li.network.handler.MessageDecoder;
@@ -14,6 +13,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -25,6 +25,9 @@ import javax.net.ssl.SSLEngine;
 @Component
 @Slf4j
 public class NioNettyClientMessageHandler extends ChannelInitializer<SocketChannel> {
+
+    @Resource
+    private ApplicationContext applicationContext;
 
     @Autowired(required = false)
     @Qualifier("clientSslContext")
@@ -50,11 +53,11 @@ public class NioNettyClientMessageHandler extends ChannelInitializer<SocketChann
 
         // 编解码器
         pipeline.addLast(MessageEncoder.class.getSimpleName(), this.messageEncoder);
-        pipeline.addLast(MessageDecoder.class.getSimpleName(), ApplicationContextHolder.getBean(MessageDecoder.class));
+        pipeline.addLast(MessageDecoder.class.getSimpleName(), applicationContext.getBean(MessageDecoder.class));
 
         // 心跳
-        pipeline.addLast(IdleStateHandler.class.getSimpleName()
-                , ApplicationContextHolder.getBean("clientIdleStateHandler", IdleStateHandler.class));
+        IdleStateHandler stateHandler = applicationContext.getBean("clientIdleStateHandler", IdleStateHandler.class);
+        pipeline.addLast(IdleStateHandler.class.getSimpleName(), stateHandler);
         pipeline.addLast(HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
 
         // 业务

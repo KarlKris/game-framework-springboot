@@ -62,11 +62,32 @@ public class AddBuffEffect extends EffectAdapter<Buff> {
 
     @Override
     public void onAction(BattleSkill skill) {
-        // todo
-    }
+        BattleScene battleScene = skill.getContext().getScene();
+        BattleSceneHelper helper = battleScene.battleSceneHelper();
+        ConfigHelper configHelper = helper.configHelper();
+        BuffConfig config = configHelper.getBuffConfigById(buffId);
 
-    @Override
-    public void onAction(Buff buff) {
-        // todo
+        BuffFactory buffFactory = helper.buffFactory();
+
+        FightUnit unit = battleScene.getFightUnit(skill.getCaster());
+
+        SelectorConfig selectorConfig = configHelper.getSelectorConfigById(config.getSelectorId());
+        Selector selector = helper.selectorHolder().getSelectorByType(selectorConfig.getType());
+        SelectorResult result = selector.select(unit, selectorConfig, skill.getParam(), 0);
+        for (IPosition position : result.getResults()) {
+            if (!(position instanceof FightUnit)) {
+                log.warn("添加Buff效果,buffId:{} 的选择器结果非FightUnit,检查配置", buffId);
+                continue;
+            }
+
+            FightUnit target = (FightUnit) position;
+            Buff buff = buffFactory.newInstance(unit, target, config, skill.getSkillId());
+            // todo Before_Buff_Awake_Event事件
+
+            //  Buff容器内添加,同时判断是否往EventDispatcher注册
+            if (!buff.isManualExpire() && battleScene.buffManager().addBuff(buff)) {
+                buff.registerEventReceiverIfNecessary();
+            }
+        }
     }
 }

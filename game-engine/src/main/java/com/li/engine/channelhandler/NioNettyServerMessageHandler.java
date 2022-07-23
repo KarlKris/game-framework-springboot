@@ -3,7 +3,6 @@ package com.li.engine.channelhandler;
 import com.li.engine.channelhandler.common.NioNettyFilter;
 import com.li.engine.channelhandler.common.impl.ProtocolSelectorHandler;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
-import com.li.common.ApplicationContextHolder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -13,6 +12,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -28,13 +28,16 @@ import java.util.List;
 @Slf4j
 public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChannel> {
 
+    @Resource
+    private ApplicationContext applicationContext;
+
     @Autowired(required = false)
     @Qualifier("serverSslContext")
     private SslContext sslContext;
     @Resource
     private List<NioNettyFilter> filters;
     @Resource
-    private AbstractServerVocationalWorkHandler vocationalWorkHandler;
+    private AbstractServerVocationalWorkHandler<?, ?> vocationalWorkHandler;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -54,11 +57,12 @@ public class NioNettyServerMessageHandler extends ChannelInitializer<SocketChann
         }
 
         // 协议选择
-        pipeline.addLast(ProtocolSelectorHandler.class.getSimpleName(), ApplicationContextHolder.getBean(ProtocolSelectorHandler.class));
+        pipeline.addLast(ProtocolSelectorHandler.class.getSimpleName()
+                , applicationContext.getBean(ProtocolSelectorHandler.class));
 
         // 心跳检测
-        pipeline.addLast(IdleStateHandler.class.getSimpleName()
-                , ApplicationContextHolder.getBean("serverIdleStateHandler", IdleStateHandler.class));
+        IdleStateHandler stateHandler = applicationContext.getBean("serverIdleStateHandler", IdleStateHandler.class);
+        pipeline.addLast(IdleStateHandler.class.getSimpleName(), stateHandler);
 
         // 业务
         pipeline.addLast(AbstractServerVocationalWorkHandler.class.getSimpleName(), this.vocationalWorkHandler);

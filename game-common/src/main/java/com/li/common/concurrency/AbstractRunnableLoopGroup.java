@@ -12,7 +12,7 @@ import java.util.concurrent.*;
 public abstract class AbstractRunnableLoopGroup implements RunnableLoopGroup {
 
     static final long DEFAULT_SHUTDOWN_QUIET_PERIOD = 2;
-    static final long DEFAULT_SHUTDOWN_TIMEOUT = 15;
+    static final long DEFAULT_SHUTDOWN_TIMEOUT = 30;
 
 
     @Override

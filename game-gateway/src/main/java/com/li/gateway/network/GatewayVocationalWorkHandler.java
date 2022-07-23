@@ -1,9 +1,9 @@
 package com.li.gateway.network;
 
+import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.rpc.IRpcService;
-import com.li.common.concurrency.SerializedExecutorService;
 import com.li.network.message.OuterMessage;
 import com.li.network.protocol.ChannelAttributeKeys;
 import com.li.network.session.PlayerSession;
@@ -27,9 +27,9 @@ import javax.annotation.Resource;
 public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHandler<OuterMessage, PlayerSession> {
 
     @Resource
-    private SerializedExecutorService executorService;
-    @Resource
     private IRpcService rpcService;
+    @Resource
+    private RunnableLoopGroup group;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, OuterMessage outerMessage) throws Exception {
@@ -59,7 +59,10 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
         if (playerSession != null ) {
             if (playerSession.isIdentity()) {
                 long id = playerSession.getIdentity();
-                executorService.submit(id, () -> {
+                if (!playerSession.isRegisterRunnableLoop()) {
+                    group.register(playerSession);
+                }
+                playerSession.runnableLoop().submit(() -> {
                     ThreadLocalContentHolder.setIdentity(id);
                     try {
                         // 网关服需要考虑通知游戏服更新玩家断开链接
@@ -68,12 +71,8 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
                         ThreadLocalContentHolder.removeIdentity();
                     }
                 });
-                executorService.destroy(id);
             }
-
-            executorService.destroy(playerSession.getSessionId());
         }
-
 
         super.channelInactive(ctx);
     }

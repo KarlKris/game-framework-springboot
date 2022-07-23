@@ -1,17 +1,19 @@
 package com.li.engine.channelhandler.client;
 
 import cn.hutool.core.convert.ConvertException;
+import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.common.exception.SerializeFailException;
-import com.li.common.concurrency.SerializedExecutorService;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.push.IPushExecutor;
 import com.li.engine.service.rpc.SocketFutureManager;
 import com.li.engine.service.rpc.future.SocketFuture;
+import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.PushResponse;
 import com.li.network.protocol.*;
 import com.li.network.serialize.Serializer;
 import com.li.network.serialize.SerializerHolder;
+import com.li.network.session.ISession;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -41,7 +43,9 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
     @Resource
     private IPushExecutor pushExecutor;
     @Resource
-    private SerializedExecutorService executorService;
+    private SessionManager sessionManager;
+    @Resource
+    private RunnableLoopGroup group;
 
 
     @Override
@@ -73,7 +77,12 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
             socketFuture.complete(msg);
         } else {
             // 回到玩家业务线程处理
-            executorService.submit(identity, () -> {
+            ISession session = sessionManager.getIdentitySession(identity);
+            if (!session.isRegisterRunnableLoop()) {
+                group.register(session);
+            }
+
+            session.runnableLoop().submit(() -> {
                 ThreadLocalContentHolder.setIdentity(identity);
                 ThreadLocalContentHolder.setMessageSn(outerSn);
                 try {
@@ -84,7 +93,6 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
                 }
             });
         }
-
     }
 
     @Override
@@ -112,7 +120,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
     }
 
     private void handlePushMessage(InnerMessage message) {
-        executorService.submit(() -> {
+        group.next().submit(() -> {
             ProtocolMethodInvokeCtx protocolMethodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(message.getProtocol());
             if (protocolMethodInvokeCtx == null) {
                 // 无处理,即仅是中介,直接推送至外网

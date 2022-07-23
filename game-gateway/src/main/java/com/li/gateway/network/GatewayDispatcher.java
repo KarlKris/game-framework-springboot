@@ -58,10 +58,12 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
 
     @Override
     protected void close() {
-        if (log.isInfoEnabled()) {
-            log.info("关闭业务线程池");
+        try {
+            group.shutdownGracefully().get();
+            log.warn("关闭业务线程池");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        group.shutdownGracefully();
     }
 
     @Override

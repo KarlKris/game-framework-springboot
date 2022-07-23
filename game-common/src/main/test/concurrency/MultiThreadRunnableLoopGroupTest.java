@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MultiThreadRunnableLoopGroupTest {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         MultiThreadRunnableLoopGroup group = new MultiThreadRunnableLoopGroup();
 
         int num = 100;
@@ -30,6 +30,8 @@ public class MultiThreadRunnableLoopGroupTest {
             Runnable runnable = () -> System.out.println(Thread.currentThread().getName() + "-" + source.id + "-" + id.incrementAndGet());
             source.runnableLoop().submit(runnable);
         }
+
+        Thread.sleep(30000);
 
         group.shutdownGracefully();
 

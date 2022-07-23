@@ -1,5 +1,6 @@
-package com.li.core.eventbus.event;
+package com.li.core.eventbus.disruptor;
 
+import com.li.core.eventbus.event.NamedEvent;
 import lombok.Getter;
 
 /**
@@ -7,7 +8,7 @@ import lombok.Getter;
  * Disruptor 事件载体
  */
 @Getter
-public class DisruptorEvent<B> {
+public class DisruptorEvent<B extends NamedEvent> {
 
     /** 事件名称 **/
     private String name;

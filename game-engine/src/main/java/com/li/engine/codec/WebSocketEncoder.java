@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
+ * WebSocket 编码器
  * @author li-yuanwen
  * @date 2021/7/29 23:21
- * WebSocket 编码器
  **/
-@Component
 @Slf4j
+@Component
 @ChannelHandler.Sharable
 public class WebSocketEncoder extends ChannelOutboundHandlerAdapter {
 
@@ -34,7 +34,7 @@ public class WebSocketEncoder extends ChannelOutboundHandlerAdapter {
                 log.debug("服务器向WebSocket 写入[{}]协议消息", message.getProtocolHeaderIdentity());
             }
 
-            ByteBuf byteBuf = ctx.alloc().buffer();
+            ByteBuf byteBuf = ctx.alloc().ioBuffer();
             messageEncoder.encode(ctx, message, byteBuf);
 
             // 转换为二进制帧

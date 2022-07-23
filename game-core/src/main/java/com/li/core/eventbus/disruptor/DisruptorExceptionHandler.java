@@ -1,6 +1,5 @@
 package com.li.core.eventbus.disruptor;
 
-import com.li.core.eventbus.event.DisruptorEvent;
 import com.lmax.disruptor.ExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
 

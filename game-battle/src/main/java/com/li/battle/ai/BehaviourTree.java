@@ -10,7 +10,7 @@ import com.li.battle.ai.behaviour.Behaviour;
 public final class BehaviourTree {
 
     /** 行为树根节点 **/
-    private Behaviour root;
+    private final Behaviour root;
 
     BehaviourTree(Behaviour root) {
         this.root = root;

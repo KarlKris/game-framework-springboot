@@ -29,7 +29,6 @@ public class TrackingProjectileCreator implements ProjectileCreator {
         BattleScene scene = skill.getContext().getScene();
 
         FightUnit caster = scene.getFightUnit(skill.getCaster());
-        // todo 玩家已死亡则放弃创建子弹
 
         Vector2D position = caster.getPosition();
         List<IPosition> results = skill.getTarget().getResults();
@@ -45,6 +44,8 @@ public class TrackingProjectileCreator implements ProjectileCreator {
         if (targetUnit == null) {
             return null;
         }
+
+        // todo 玩家已死亡则放弃创建子弹
 
         // 实际终点
         Vector2D end = targetUnit.getPosition().subtract(position).normalize()
