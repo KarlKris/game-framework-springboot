@@ -38,7 +38,7 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
 
     private volatile int state = ST_NOT_STARTED;
 
-    private final Queue<Runnable> taskQueue;
+    private final BlockingQueue<Runnable> taskQueue;
     private final Executor executor;
 
     private volatile Thread thread;
@@ -143,7 +143,7 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
                         reject = true;
                     }
                 } catch (UnsupportedOperationException e) {
-                    // 如果任务队列不支持删除,但是我们需要线程保持正常
+                    // 如果任务队列不支持删除,我们需要线程保持正常
                 }
 
                 if (reject) {
@@ -292,11 +292,13 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
         boolean running = true;
         while (running) {
             try {
-                Runnable task = taskQueue.poll();
+                Runnable task = taskQueue.poll(1000, TimeUnit.MILLISECONDS);
                 if (task != null) {
                     safeExecute(task);
                     lastExecutionTime = nanoTime();
                 }
+            } catch (InterruptedException e) {
+                // ignore
             } finally {
                 try {
                     if (isShuttingDown() && confirmShutdown()) {

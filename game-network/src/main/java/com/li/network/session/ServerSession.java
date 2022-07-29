@@ -21,10 +21,11 @@ public class ServerSession extends AbstractSession {
     }
 
     @Override
-    public void bindIdentity(long identity) {
+    public PlayerSession bindIdentity(long identity) {
         PlayerSession playerSession = new PlayerSession(getSessionId(), channel);
         playerSession.bindIdentity(identity);
         this.playerSessions.put(identity, playerSession);
+        return playerSession;
     }
 
     public void logout(long identity) {

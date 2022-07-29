@@ -43,7 +43,7 @@ public class RpcServiceImpl implements IRpcService {
             throw new BadRequestException(ServerErrorCode.INVALID_OP);
         }
 
-        return clientFactory.connectTo(address).getSendProxy(tClass);
+        return clientFactory.newInstance(address).getSendProxy(tClass);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class RpcServiceImpl implements IRpcService {
             throw new BadRequestException(ServerErrorCode.INVALID_OP);
         }
 
-        return clientFactory.connectTo(address).getSendProxy(tClass);
+        return clientFactory.newInstance(address).getSendProxy(tClass);
     }
 
     private void checkAndThrowRemoteService() {

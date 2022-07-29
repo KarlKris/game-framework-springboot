@@ -7,8 +7,8 @@ import com.li.common.utils.IpUtils;
 import com.li.common.utils.ObjectUtils;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
-import com.li.engine.service.rpc.SocketFutureManager;
-import com.li.engine.service.rpc.future.RpcSocketFuture;
+import com.li.engine.service.rpc.InvocationManager;
+import com.li.engine.service.rpc.invocation.RpcInvocation;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.ProtocolConstant;
 import com.li.network.protocol.InBodyMethodParameter;
@@ -20,7 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author li-yuanwen
@@ -30,9 +33,9 @@ import java.util.concurrent.*;
 public class SendProxyInvoker implements InvocationHandler {
 
     /** 连接对方的Client **/
-    private final NioNettyClient client;
+    private final NettyClient client;
     /** 远程调用消息Future容器 **/
-    private final SocketFutureManager socketFutureManager;
+    private final InvocationManager invocationManager;
     /** 消息工厂 **/
     private final MessageFactory messageFactory;
     /** 超时时间(秒) **/
@@ -40,12 +43,12 @@ public class SendProxyInvoker implements InvocationHandler {
     /** 协议管理器 **/
     private final SocketProtocolManager socketProtocolManager;
 
-    public SendProxyInvoker(NioNettyClient client, SocketFutureManager socketFutureManager
+    public SendProxyInvoker(NettyClient client, InvocationManager invocationManager
             , MessageFactory messageFactory
             , SocketProtocolManager socketProtocolManager
             , int timeoutSecond) {
         this.client = client;
-        this.socketFutureManager = socketFutureManager;
+        this.invocationManager = invocationManager;
         this.messageFactory = messageFactory;
         this.timeoutSecond = timeoutSecond;
         this.socketProtocolManager = socketProtocolManager;
@@ -73,7 +76,7 @@ public class SendProxyInvoker implements InvocationHandler {
 
         final Long messageSn = ThreadLocalContentHolder.getMessageSn();
         final Long identity = ThreadLocalContentHolder.getIdentity();
-        InnerMessage message = messageFactory.toInnerMessage(socketFutureManager.nextSn()
+        InnerMessage message = messageFactory.toInnerMessage(invocationManager.nextSn()
                 , ProtocolConstant.VOCATIONAL_WORK_REQ
                 , protocolMethodCtx.getProtocol()
                 , SerializerHolder.DEFAULT_SERIALIZER.getSerializerType()
@@ -84,15 +87,16 @@ public class SendProxyInvoker implements InvocationHandler {
         try {
             Class<?> returnType = method.getReturnType();
             boolean sync = !returnType.isAssignableFrom(CompletableFuture.class);
-            CompletableFuture<Object> future = client.send(message, (msg, completableFuture)
-                            -> socketFutureManager.addSocketFuture(
-                                    new RpcSocketFuture(msg.getSn(), messageSn, identity, sync
-                                            , socketProtocolManager, completableFuture)));
+            RpcInvocation rpcInvocation = new RpcInvocation(message.getSn(), messageSn, identity, sync
+                    , socketProtocolManager, new CompletableFuture<>());
+
+            client.send(message, rpcInvocation);
+
             if (!sync) {
-                return future;
+                return rpcInvocation.getFuture();
             }
 
-            return future.get(timeoutSecond, TimeUnit.SECONDS);
+            return rpcInvocation.getFuture().get(timeoutSecond, TimeUnit.SECONDS);
         } catch (InterruptedException | TimeoutException e) {
             log.error("SendProxyInvoker超时中断", e);
             throw new SocketException(ServerErrorCode.TIME_OUT);

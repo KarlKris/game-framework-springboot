@@ -1,5 +1,6 @@
-package com.li.engine.service.rpc.future;
+package com.li.engine.service.rpc.invocation;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.li.common.ApplicationContextHolder;
 import com.li.common.exception.SocketException;
 import com.li.network.message.InnerMessage;
@@ -17,16 +18,16 @@ import java.util.concurrent.CompletableFuture;
  * @author li-yuanwen
  * @date 2021/12/11
  */
-public class RpcSocketFuture extends SocketFuture {
+public class RpcInvocation extends Invocation {
 
     /** rpc结果回调future **/
     private final CompletableFuture<Object> future;
     /** 回调结果类型 **/
     private final SocketProtocolManager socketProtocolManager;
 
-    public RpcSocketFuture(long sn, long outerSn, long identity, boolean sync
+    public RpcInvocation(long sn, Long parentSn, long identity, boolean sync
             , SocketProtocolManager socketProtocolManager, CompletableFuture<Object> future) {
-        super(sn, outerSn, identity, sync);
+        super(sn, parentSn, identity, sync);
         this.future = future;
         this.socketProtocolManager = socketProtocolManager;
     }
@@ -43,7 +44,14 @@ public class RpcSocketFuture extends SocketFuture {
             return;
         }
         ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);
-        Object result = serializer.deserialize(message.getBody(), protocolMethodCtx.getReturnClz());
+        Object result = null;
+        if (ArrayUtil.isNotEmpty(message.getBody())) {
+            result = serializer.deserialize(message.getBody(), protocolMethodCtx.getReturnClz());
+        }
         future.complete(result);
+    }
+
+    public CompletableFuture<Object> getFuture() {
+        return future;
     }
 }

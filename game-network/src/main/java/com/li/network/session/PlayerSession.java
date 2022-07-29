@@ -17,8 +17,9 @@ public class PlayerSession extends AbstractSession {
     }
 
     @Override
-    public void bindIdentity(long identity) {
+    public PlayerSession bindIdentity(long identity) {
         this.identity = identity;
+        return this;
     }
 
     /**

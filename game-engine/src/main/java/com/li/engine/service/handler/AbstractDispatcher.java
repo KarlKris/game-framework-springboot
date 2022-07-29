@@ -125,7 +125,10 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             if (result != null) {
                 if (result instanceof Future) {
                     Future<?> future = (Future<?>) result;
-                    responseBody = serializer.serialize(future.get());
+                    Object actualResult = future.get();
+                    if (actualResult != null) {
+                        responseBody = serializer.serialize(actualResult);
+                    }
                 } else {
                     responseBody = serializer.serialize(result);
                 }

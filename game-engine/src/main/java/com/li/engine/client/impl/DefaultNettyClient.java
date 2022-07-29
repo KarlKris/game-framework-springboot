@@ -3,11 +3,12 @@ package com.li.engine.client.impl;
 import com.li.common.ApplicationContextHolder;
 import com.li.common.rpc.model.Address;
 import com.li.engine.channelhandler.NioNettyClientMessageHandler;
-import com.li.engine.client.NioNettyClient;
+import com.li.engine.client.NettyClient;
 import com.li.engine.client.SendProxyInvoker;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.VocationalWorkConfig;
-import com.li.engine.service.rpc.SocketFutureManager;
+import com.li.engine.service.rpc.InvocationManager;
+import com.li.engine.service.rpc.invocation.Invocation;
 import com.li.network.anno.SocketController;
 import com.li.network.message.IMessage;
 import com.li.network.protocol.SocketProtocolManager;
@@ -23,15 +24,13 @@ import org.springframework.core.annotation.AnnotationUtils;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 /**
- * @author li-yuanwen
  * Netty Client
+ * @author li-yuanwen
  */
 @Slf4j
-public class NioNettyClientImpl implements NioNettyClient {
+public class DefaultNettyClient implements NettyClient {
 
     /** 连接目标IP地址 **/
     private final Address address;
@@ -42,7 +41,7 @@ public class NioNettyClientImpl implements NioNettyClient {
     /** ChannelInitializer **/
     private final NioNettyClientMessageHandler messageHandler;
     /** rpc消息容器 **/
-    private final SocketFutureManager socketFutureManager;
+    private final InvocationManager invocationManager;
     /** 消息工厂 **/
     private final MessageFactory messageFactory;
     /** 协议容器 **/
@@ -56,10 +55,10 @@ public class NioNettyClientImpl implements NioNettyClient {
     /** Channel **/
     private Channel channel;
 
-    public NioNettyClientImpl(Address address, int connectTimeoutMillis
+    public DefaultNettyClient(Address address, int connectTimeoutMillis
             , EventLoopGroup eventLoopGroup
             , NioNettyClientMessageHandler messageHandler
-            , SocketFutureManager socketFutureManager
+            , InvocationManager invocationManager
             , MessageFactory messageFactory
             , SocketProtocolManager socketProtocolManager
             , int timeoutSecond) {
@@ -67,38 +66,21 @@ public class NioNettyClientImpl implements NioNettyClient {
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.eventLoopGroup = eventLoopGroup;
         this.messageHandler = messageHandler;
-        this.socketFutureManager = socketFutureManager;
+        this.invocationManager = invocationManager;
         this.messageFactory = messageFactory;
         this.socketProtocolManager = socketProtocolManager;
         this.timeoutSecond = timeoutSecond;
     }
 
     @Override
-    public <T> CompletableFuture<T> send(IMessage message, BiConsumer<IMessage, CompletableFuture<T>> sendSuccessConsumer)
-            throws InterruptedException {
-
+    public void send(IMessage message, Invocation invocation) throws InterruptedException {
         if (!isConnected()) {
             connect();
         }
 
-        CompletableFuture<T> completableFuture = new CompletableFuture<>();
-
-        // 这里不是使用的writeAndFlush的原因是防止消息写完时,监听器还未添加
-        ChannelFuture channelFuture = channel.write(message);
-        channelFuture.addListener(future -> {
-            Throwable cause = future.cause();
-            if (cause == null) {
-                sendSuccessConsumer.accept(message, completableFuture);
-            }else {
-                log.error("向服务器[{}:{}]发送信息发生异常", address.getIp(), address.getPort(), cause);
-                completableFuture.completeExceptionally(cause);
-            }
-        });
-        channel.flush();
-
-        return completableFuture;
+        channel.writeAndFlush(message);
+        invocationManager.addInvocation(invocation);
     }
-
 
     @Override
     public <T> T getSendProxy(Class<T> clz) {
@@ -122,7 +104,7 @@ public class NioNettyClientImpl implements NioNettyClient {
 
             target = Proxy.newProxyInstance(clz.getClassLoader()
                     , new Class[]{clz}
-                    , new SendProxyInvoker(this, socketFutureManager, messageFactory, socketProtocolManager, timeoutSecond));
+                    , new SendProxyInvoker(this, invocationManager, messageFactory, socketProtocolManager, timeoutSecond));
 
             this.proxy.put(name, target);
         }
@@ -153,16 +135,16 @@ public class NioNettyClientImpl implements NioNettyClient {
 
 
 
-    public static NioNettyClientImpl newInstance(Address address, int connectTimeoutMillis
+    public static DefaultNettyClient newInstance(Address address, int connectTimeoutMillis
             , EventLoopGroup eventLoopGroup) {
-        SocketFutureManager socketFutureManager = ApplicationContextHolder.getBean(SocketFutureManager.class);
+        InvocationManager invocationManager = ApplicationContextHolder.getBean(InvocationManager.class);
         MessageFactory messageFactory = ApplicationContextHolder.getBean(MessageFactory.class);
         VocationalWorkConfig config = ApplicationContextHolder.getBean(VocationalWorkConfig.class);
         NioNettyClientMessageHandler messageHandler = ApplicationContextHolder.getBean(NioNettyClientMessageHandler.class);
         SocketProtocolManager socketProtocolManager = ApplicationContextHolder.getBean(SocketProtocolManager.class);
-        return new NioNettyClientImpl(address, connectTimeoutMillis
+        return new DefaultNettyClient(address, connectTimeoutMillis
                 , eventLoopGroup, messageHandler
-                , socketFutureManager, messageFactory
+                , invocationManager, messageFactory
                 , socketProtocolManager, config.getTimeoutSecond());
     }
 }

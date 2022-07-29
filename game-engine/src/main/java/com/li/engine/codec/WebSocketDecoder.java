@@ -1,58 +1,58 @@
 package com.li.engine.codec;
 
-import com.li.network.handler.MessageDecoder;
+import com.li.network.message.InnerMessage;
+import com.li.network.message.OuterMessage;
+import com.li.network.message.ProtocolConstant;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * WebSocket 消息解码器
  * @author li-yuanwen
  * @date 2021/7/29 23:06
  **/
-@Component
 @Slf4j
-@ChannelHandler.Sharable
-public class WebSocketDecoder extends ChannelInboundHandlerAdapter {
-
-    @Resource
-    private ApplicationContext applicationContext;
+public class WebSocketDecoder extends MessageToMessageDecoder<WebSocketFrame> {
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof WebSocketFrame) {
-            // ping pong 忽略
-            if (msg instanceof PingWebSocketFrame || msg instanceof PongWebSocketFrame) {
-                if (log.isDebugEnabled()) {
-                    log.debug("服务器收到了WebSocket Ping/Pong帧,忽略");
-                }
-                return;
-            }
+    protected void decode(ChannelHandlerContext ctx, WebSocketFrame msg, List<Object> out) throws Exception {
+        // WebSocketServerProtocolHandler 已处理
+//        // ping pong 忽略
+//        if (msg instanceof PingWebSocketFrame || msg instanceof PongWebSocketFrame) {
+//            if (log.isDebugEnabled()) {
+//                log.debug("服务器收到了WebSocket Ping/Pong帧,忽略");
+//            }
+//            return;
+//        }
+//
+//        // 关闭
+//        if (msg instanceof CloseWebSocketFrame) {
+//            if (log.isDebugEnabled()) {
+//                log.debug("服务器收到了WebSocket CloseWebSocketFrame 准备关闭连接");
+//            }
+//            ctx.close();
+//            return;
+//        }
 
-            // 关闭
-            if (msg instanceof CloseWebSocketFrame) {
-                if (log.isDebugEnabled()) {
-                    log.debug("服务器收到了WebSocket CloseWebSocketFrame 准备关闭连接");
-                }
-                ctx.close();
-                return;
-            }
-
-            ByteBuf byteBuf = ((WebSocketFrame) msg).content();
-            applicationContext.getBean(MessageDecoder.class).channelRead(ctx, byteBuf);
-        }else {
-            super.channelRead(ctx, msg);
+        ByteBuf buf = msg.content();
+        short protocolHeaderIdentity = ProtocolConstant.getProtocolHeaderIdentity(buf);
+        if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
+            InnerMessage innerMessage = InnerMessage.readIn(buf);
+            ctx.fireChannelRead(innerMessage);
+        } else if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_OUTER_HEADER_IDENTITY) {
+            OuterMessage outerMessage = OuterMessage.readIn(buf);
+            ctx.fireChannelRead(outerMessage);
+        } else {
+            log.warn("收到协议头[{}],暂不支持该协议", protocolHeaderIdentity);
+            ctx.close();
         }
-
-
     }
+
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

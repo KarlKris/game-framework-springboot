@@ -18,6 +18,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -53,8 +54,6 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
     private WebSocketServerProtocolHandler webSocketServerProtocolHandler;
     @Resource
     private WebSocketEncoder webSocketEncoder;
-    @Resource
-    private WebSocketDecoder webSocketDecoder;
 
 
     @Resource
@@ -62,6 +61,9 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
     @Resource
     private HeartBeatHandler heartBeatHandler;
 
+
+    @Resource
+    private EventExecutorGroup defaultEventExecutorGroup;
 
     /** WEBSOCKET 握手数据包头 **/
     public final static short WEBSOCKET_HANDSHAKE_PREFIX = ('G' << 8) + 'E';
@@ -92,39 +94,40 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
             String idleStateHandlerName = IdleStateHandler.class.getSimpleName();
 
             // HttpServerCodec：将请求和应答消息解码为HTTP消息
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , HttpServerCodec.class.getSimpleName(), this.httpServerCodec);
 
             // HttpObjectAggregator：将HTTP消息的多个部分合成一条完整的HTTP消息
             // netty是基于分段请求的，HttpObjectAggregator的作用是将请求分段再聚合,参数是聚合字节的最大长度
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , HttpObjectAggregator.class.getSimpleName(), this.httpObjectAggregator);
 
             // 主要用于处理大数据流，
             // 比如一个1G大小的文件如果你直接传输肯定会撑暴jvm内存的,增加之后就不用考虑这个问题了
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , ChunkedWriteHandler.class.getSimpleName(), this.chunkedWriteHandler);
 
             // 针对websocket帧进行聚合解码
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , WebSocketFrameAggregator.class.getSimpleName(), this.webSocketFrameAggregator);
 
             // websocket数据压缩
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , WebSocketServerCompressionHandler.class.getSimpleName(), this.webSocketServerCompressionHandler);
 
             // websocket连接处理
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , WebSocketServerProtocolHandler.class.getSimpleName(), this.webSocketServerProtocolHandler);
 
             // 编解码器
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            WebSocketDecoder webSocketDecoder = applicationContext.getBean(WebSocketDecoder.class);
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , WebSocketEncoder.class.getSimpleName(), this.webSocketEncoder);
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
-                    , WebSocketDecoder.class.getSimpleName(), this.webSocketDecoder);
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
+                    , WebSocketDecoder.class.getSimpleName(), webSocketDecoder);
 
             // 心跳
-            channelHandlerContext.pipeline().addBefore(AbstractServerVocationalWorkHandler.class.getSimpleName()
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, AbstractServerVocationalWorkHandler.class.getSimpleName()
                     , HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
 
             // 移除自身,完成协议选择
@@ -140,14 +143,14 @@ public class ProtocolSelectorHandler extends ByteToMessageDecoder {
             String idleStateHandlerName = IdleStateHandler.class.getSimpleName();
 
             // 编解码器
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , MessageEncoder.class.getSimpleName(), this.messageEncoder);
-            channelHandlerContext.pipeline().addBefore(idleStateHandlerName
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, idleStateHandlerName
                     , MessageDecoder.class.getSimpleName()
                     , applicationContext.getBean(MessageDecoder.class));
 
             // 心跳
-            channelHandlerContext.pipeline().addBefore(AbstractServerVocationalWorkHandler.class.getSimpleName()
+            channelHandlerContext.pipeline().addBefore(defaultEventExecutorGroup, AbstractServerVocationalWorkHandler.class.getSimpleName()
                     , HeartBeatHandler.class.getSimpleName(), this.heartBeatHandler);
 
             // 移除自身,完成协议选择

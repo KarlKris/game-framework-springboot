@@ -26,7 +26,7 @@ public class SessionManager {
     private final AtomicLong sessionIdGenerator = new AtomicLong(0);
 
     /** Identity2Session 字典 **/
-    private final ConcurrentHashMap<Long, ISession> identities = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, PlayerSession> identities = new ConcurrentHashMap<>();
 
     /** 为Channel注册PlayerSession **/
     public PlayerSession registerPlayerSession(Channel channel) {
@@ -92,9 +92,9 @@ public class SessionManager {
             log.debug("session[{}]绑定某个身份[{}]", session.getSessionId(), identity);
         }
 
-        session.bindIdentity(identity);
+        PlayerSession playerSession = session.bindIdentity(identity);
 
-        return this.identities.put(identity, session);
+        return this.identities.put(identity, playerSession);
 
     }
 

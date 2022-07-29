@@ -3,13 +3,13 @@ package com.li.gateway.network;
 import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.common.rpc.RemoteServerSeekService;
 import com.li.common.rpc.model.Address;
-import com.li.engine.client.NioNettyClient;
+import com.li.engine.client.NettyClient;
 import com.li.engine.client.NioNettyClientFactory;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.push.ResponseMessagePushProcessor;
-import com.li.engine.service.rpc.SocketFutureManager;
-import com.li.engine.service.rpc.future.ForwardSocketFuture;
+import com.li.engine.service.rpc.InvocationManager;
+import com.li.engine.service.rpc.invocation.ForwardInvocation;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.OuterMessage;
@@ -39,7 +39,7 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     @Resource
     private NioNettyClientFactory clientFactory;
     @Resource
-    private SocketFutureManager socketFutureManager;
+    private InvocationManager invocationManager;
     @Resource
     private MessageFactory messageFactory;
     @Resource
@@ -88,17 +88,17 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
             return false;
         }
 
-        long nextSn = socketFutureManager.nextSn();
+        long nextSn = invocationManager.nextSn();
         InnerMessage innerMessage = messageFactory.convertToRequestInnerMessage(nextSn, message, session);
         final long identity = getProtocolIdentity(session, message);
 
-        NioNettyClient client = clientFactory.connectTo(address);
+        NettyClient client = clientFactory.newInstance(address);
+
+        ForwardInvocation forwardInvocation = new ForwardInvocation(innerMessage.getSn()
+                , message.getSn(), identity, session, messageFactory);
 
         try {
-            client.send(innerMessage
-                    , (msg, completableFuture)
-                            -> socketFutureManager.addSocketFuture(new ForwardSocketFuture(msg.getSn()
-                            , message.getSn(), identity, session, messageFactory)));
+            client.send(innerMessage, forwardInvocation);
             return true;
         } catch (InterruptedException e) {
             log.error("消息转发至[{}]发生未知异常", address, e);

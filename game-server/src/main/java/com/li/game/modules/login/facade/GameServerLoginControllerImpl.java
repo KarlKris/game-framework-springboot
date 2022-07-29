@@ -73,10 +73,11 @@ public class GameServerLoginControllerImpl implements GameServerLoginController 
 
 
     @Override
-    public void logout(ServerSession session, long identity) {
+    public CompletableFuture<Void> logout(ServerSession session, long identity) {
         session.logout(identity);
         sessionManager.logout(identity);
         accountService.logout(identity);
+        return CompletableFuture.completedFuture(null);
     }
 
     private boolean checkChannel(int channel) {

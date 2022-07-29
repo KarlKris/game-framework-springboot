@@ -1,14 +1,15 @@
 package com.li.engine.client;
 
+import cn.hutool.core.thread.NamedThreadFactory;
 import com.li.common.rpc.model.Address;
-import com.li.engine.client.impl.NioNettyClientImpl;
+import com.li.common.shutdown.ShutdownProcessor;
+import com.li.engine.client.impl.DefaultNettyClient;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,12 +17,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author li-yuanwen
  * NioNettyClient 工厂
  */
-@Component
 @Slf4j
-public class NioNettyClientFactory {
+@Component
+public class NioNettyClientFactory implements ShutdownProcessor {
 
     /** 客户端连接管理 **/
-    private final Map<Address, NioNettyClient> clients = new ConcurrentHashMap<>(8);
+    private final Map<Address, NettyClient> clients = new ConcurrentHashMap<>(8);
 
     /** 客户端连接超时毫秒配置 **/
     @Value("${netty.client.connect.timout.mills:3000}")
@@ -47,24 +48,26 @@ public class NioNettyClientFactory {
 
             // 设置线程数量
             int i = Runtime.getRuntime().availableProcessors();
-            this.eventLoopGroup = new NioEventLoopGroup(Math.min(i, threadNum));
+            this.eventLoopGroup = new NioEventLoopGroup(Math.min(i, threadNum)
+                    , new NamedThreadFactory("Netty-Client-Thread", false));
         }
 
     }
 
+    @Override
+    public int getOrder() {
+        return ShutdownProcessor.SHUT_DOWN_CLIENT_POOL;
+    }
 
-    @PreDestroy
-    private void destroy() {
+    @Override
+    public void shutdown() {
         if (this.eventLoopGroup != null) {
-
-            if (log.isDebugEnabled()) {
-                log.debug("关闭客户端共享IO线程组");
-            }
-
             this.eventLoopGroup.shutdownGracefully();
+            log.warn("关闭客户端共享IO线程组");
+            clients.clear();
         }
-
     }
+
 
 
     /**
@@ -72,10 +75,10 @@ public class NioNettyClientFactory {
      * @param address ip地址
      * @return 客户端
      */
-    public NioNettyClient connectTo(Address address) {
+    public NettyClient newInstance(Address address) {
         return this.clients.computeIfAbsent(address, addr -> {
             checkAndInitEventLoopGroup();
-            return NioNettyClientImpl.newInstance(addr
+            return DefaultNettyClient.newInstance(addr
                     , connectTimeoutMills
                     , eventLoopGroup);
         });

@@ -1,6 +1,6 @@
 package com.li.engine.service.rpc;
 
-import com.li.engine.service.rpc.future.SocketFuture;
+import com.li.engine.service.rpc.invocation.Invocation;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,13 +12,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date 2021/12/10
  */
 @Component
-public class SocketFutureManager {
+public class InvocationManager {
 
     /** 消息序号生成器 **/
     private final AtomicLong snGenerator = new AtomicLong(0);
 
     /** 消息序号回复Session **/
-    private final ConcurrentHashMap<Long, SocketFuture> futureHolder = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, Invocation> invocationHolder = new ConcurrentHashMap<>();
 
     /** 获取下一个消息序号 **/
     public long nextSn() {
@@ -26,11 +26,11 @@ public class SocketFutureManager {
     }
 
     /**
-     * 添加远程调用消息Future
-     * @param socketFuture 远程调用消息Future
+     * 添加远程调用消息Invocation
+     * @param invocation 远程调用消息Invocation
      */
-    public void addSocketFuture(SocketFuture socketFuture) {
-        this.futureHolder.put(socketFuture.getSn(), socketFuture);
+    public void addInvocation(Invocation invocation) {
+        this.invocationHolder.put(invocation.getSn(), invocation);
     }
 
     /**
@@ -38,8 +38,8 @@ public class SocketFutureManager {
      * @param sn 远程调用消息Future序号
      * @return 远程调用消息Future or null
      */
-    public SocketFuture removeSocketFuture(long sn) {
-        return this.futureHolder.remove(sn);
+    public Invocation removeSocketFuture(long sn) {
+        return this.invocationHolder.remove(sn);
     }
 
 }

@@ -42,6 +42,10 @@ public class ProtocolMethodCtx {
         this.returnClz = clz;
     }
 
+    public Class<?> getReturnClz() {
+        return returnClz;
+    }
+
     /** 方法是否需要身份标识 **/
     boolean identity() {
         for (MethodParameter parameter : params) {

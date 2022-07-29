@@ -18,9 +18,12 @@ public class ServerConfig {
     /** Socket绑定端口号 **/
     @Value("${netty.server.port}")
     private int port;
-    /** NIO线程池线程数 **/
-    @Value("${netty.server.nioGroup.threadNum:16}")
-    private int nioGroupThreadNum;
+    /** NIO I/O线程池线程数 **/
+    @Value("${netty.server.ioThreadNum:16}")
+    private int ioThreadNum;
+    /** NIO handler线程池线程数 **/
+    @Value("${netty.server.handlerThreadNum:8}")
+    private int handlerThreadNum;
     /** TCP参数SO_BACKLOG **/
     @Value("${netty.server.tcp.backlog:1024}")
     private int backLog;

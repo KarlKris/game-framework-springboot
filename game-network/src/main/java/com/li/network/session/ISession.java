@@ -51,7 +51,8 @@ public interface ISession extends RunnableSource {
     /**
      * 绑定身份标识
      * @param identity 身份标识
+     * @return PlayerSession
      */
-    void bindIdentity(long identity);
+    PlayerSession bindIdentity(long identity);
 
 }

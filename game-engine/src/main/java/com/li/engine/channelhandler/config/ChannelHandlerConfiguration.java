@@ -1,5 +1,6 @@
 package com.li.engine.channelhandler.config;
 
+import com.li.engine.codec.WebSocketDecoder;
 import com.li.network.handler.MessageDecoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -98,6 +99,7 @@ public class ChannelHandlerConfiguration {
         WebSocketServerProtocolConfig config = WebSocketServerProtocolConfig.newBuilder()
                 .allowExtensions(true)
                 .websocketPath(this.contextPath)
+                .handleCloseFrames(true)
                 .build();
         return new WebSocketServerProtocolHandler(config);
     }
@@ -110,5 +112,11 @@ public class ChannelHandlerConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public MessageDecoder messageDecoder() {
         return new MessageDecoder(maxMessageLength, 2, 4);
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WebSocketDecoder webSocketDecoder() {
+        return new WebSocketDecoder();
     }
 }

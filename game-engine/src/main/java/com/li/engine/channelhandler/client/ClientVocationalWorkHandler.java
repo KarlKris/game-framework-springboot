@@ -1,12 +1,13 @@
 package com.li.engine.channelhandler.client;
 
 import cn.hutool.core.convert.ConvertException;
+import com.li.common.concurrency.RunnableLoop;
 import com.li.common.concurrency.RunnableLoopGroup;
 import com.li.common.exception.SerializeFailException;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.push.IPushExecutor;
-import com.li.engine.service.rpc.SocketFutureManager;
-import com.li.engine.service.rpc.future.SocketFuture;
+import com.li.engine.service.rpc.InvocationManager;
+import com.li.engine.service.rpc.invocation.Invocation;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.PushResponse;
@@ -39,7 +40,7 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
     @Resource
     private SocketProtocolManager socketProtocolManager;
     @Resource
-    private SocketFutureManager socketFutureManager;
+    private InvocationManager invocationManager;
     @Resource
     private IPushExecutor pushExecutor;
     @Resource
@@ -65,28 +66,35 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
             return;
         }
 
-        SocketFuture socketFuture = socketFutureManager.removeSocketFuture(msg.getSn());
-        if (socketFuture == null) {
+        Invocation invocation = invocationManager.removeSocketFuture(msg.getSn());
+        if (invocation == null) {
             log.warn("客户端收到过期信息,序号[{}],忽略", msg.getSn());
             return;
         }
 
-        long outerSn = socketFuture.getOuterSn();
-        long identity = socketFuture.getIdentity();
-        if (socketFuture.isSync()) {
-            socketFuture.complete(msg);
+        Long parentSn = invocation.getParentSn();
+        long identity = invocation.getIdentity();
+        if (invocation.isSync()) {
+            invocation.complete(msg);
         } else {
-            // 回到玩家业务线程处理
-            ISession session = sessionManager.getIdentitySession(identity);
-            if (!session.isRegisterRunnableLoop()) {
-                group.register(session);
+            RunnableLoop runnableLoop = null;
+            if (identity > 0) {
+                // 回到玩家业务线程处理
+                ISession session = sessionManager.getIdentitySession(identity);
+                if (session != null) {
+                    runnableLoop = session.runnableLoop();
+                } else {
+                    runnableLoop = group.next();
+                }
+            } else {
+                runnableLoop = group.next();
             }
 
-            session.runnableLoop().submit(() -> {
+            runnableLoop.submit(() -> {
                 ThreadLocalContentHolder.setIdentity(identity);
-                ThreadLocalContentHolder.setMessageSn(outerSn);
+                ThreadLocalContentHolder.setMessageSn(parentSn);
                 try {
-                    socketFuture.complete(msg);
+                    invocation.complete(msg);
                 } finally {
                     ThreadLocalContentHolder.removeIdentity();
                     ThreadLocalContentHolder.removeMessageSn();

@@ -46,6 +46,6 @@ public interface GameServerLoginController {
      * @param identity 玩家标识
      */
     @SocketMethod(id = GameServerLoginModule.LOGOUT)
-    void logout(@Session ServerSession session, @Identity long identity);
+    CompletableFuture<Void> logout(@Session ServerSession session, @Identity long identity);
 
 }

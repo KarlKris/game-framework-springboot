@@ -36,9 +36,9 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
             return OuterMessage.readIn(buf);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("收到协议头[{}],暂不支持该协议", protocolHeaderIdentity);
-        }
+        log.warn("收到协议头[{}],暂不支持该协议", protocolHeaderIdentity);
+
+        ctx.close();
 
         return null;
     }

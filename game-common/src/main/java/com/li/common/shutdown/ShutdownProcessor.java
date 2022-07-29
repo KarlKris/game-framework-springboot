@@ -7,9 +7,11 @@ package com.li.common.shutdown;
  */
 public interface ShutdownProcessor {
 
-    int SHUT_DOWN_THREAD_POOL = 1;
-    int SHUT_DOWN_DISRUPTOR = 2;
-    int SHUT_DOWN_DATA_BASE = 3;
+    int SHUT_DOWN_HANDLER = 1;
+    int SHUT_DOWN_THREAD_POOL = 2;
+    int SHUT_DOWN_CLIENT_POOL = 3;
+    int SHUT_DOWN_DISRUPTOR = 4;
+    int SHUT_DOWN_DATA_BASE = 5;
 
 
     /**

@@ -1,4 +1,4 @@
-package com.li.engine.service.rpc.future;
+package com.li.engine.service.rpc.invocation;
 
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.session.SessionManager;
@@ -13,15 +13,15 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2021/12/10
  */
 @Slf4j
-public class ForwardSocketFuture extends SocketFuture {
+public class ForwardInvocation extends Invocation {
 
     /** 源目标 **/
     private final ISession session;
     /** 消息工厂 **/
     private final MessageFactory messageFactory;
 
-    public ForwardSocketFuture(long sn, long outerSn, long identity, ISession session, MessageFactory messageFactory) {
-        super(sn, outerSn, identity, false);
+    public ForwardInvocation(long sn, Long parentSn, long identity, ISession session, MessageFactory messageFactory) {
+        super(sn, parentSn, identity, false);
         this.session = session;
         this.messageFactory = messageFactory;
     }
@@ -32,7 +32,7 @@ public class ForwardSocketFuture extends SocketFuture {
             log.debug("转发响应消息[{}]至[{}]", message.getSn(), session.getIp());
         }
 
-        OuterMessage outerMessage = messageFactory.convertToResponseOuterMessage(getOuterSn(), message, session);
+        OuterMessage outerMessage = messageFactory.convertToResponseOuterMessage(getParentSn(), message, session);
 
         SessionManager.writeAndFlush(session, outerMessage);
     }

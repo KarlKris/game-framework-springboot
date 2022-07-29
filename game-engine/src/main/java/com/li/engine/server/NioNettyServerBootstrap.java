@@ -5,10 +5,7 @@ import com.li.common.utils.IpUtils;
 import com.li.engine.channelhandler.NioNettyServerMessageHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -47,13 +44,14 @@ public class NioNettyServerBootstrap implements ApplicationRunner
     private ServerConfig serverConfig;
 
 
-    /** NIO 线程组 **/
+    /** Reactor Acceptor线程 **/
     private EventLoopGroup boss;
+    /** Reactor io线程池 **/
     private EventLoopGroup workers;
     /** 服务端channel **/
     private Channel channel;
 
-    private List<ShutdownProcessor> shutdownHooks = new LinkedList<>();
+    private final List<ShutdownProcessor> shutdownHooks = new LinkedList<>();
 
     @PostConstruct
     private void initialize() {
@@ -61,14 +59,18 @@ public class NioNettyServerBootstrap implements ApplicationRunner
         shutdownHooks.sort(Comparator.comparingInt(ShutdownProcessor::getOrder));
     }
 
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        this.boss = createLoopGroup(1, "Netty-Boss-Thread");
-        this.workers = createLoopGroup(serverConfig.getNioGroupThreadNum(), "Netty-Worker-Thread");
+        // 使用Reactor主从多线程模型,一个Acceptor连接线程,I/O读写线程池,Handler线程池(NioNettyServerMessageHandler)
+        this.boss = createLoopGroup(1, "Netty-Acceptor-Thread");
+        this.workers = createLoopGroup(serverConfig.getIoThreadNum(), "Netty-IO-Thread");
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(this.boss, this.workers)
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
+                // 发送队列流控
+                .option(ChannelOption.WRITE_BUFFER_WATER_MARK, WriteBufferWaterMark.DEFAULT)
                 // ChannelOption.SO_BACKLOG对应的是tcp/ip协议listen函数中的backlog参数
                 // 函数listen(int socketfd,int backlog)用来初始化服务端可连接队列
                 // 服务端处理客户端连接请求是顺序处理的，所以同一时间只能处理一个客户端连接
