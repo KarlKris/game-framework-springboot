@@ -147,11 +147,6 @@ public class ProtocolUtil {
      * @return /
      */
     public static List<ProtocolMethodCtx> getMethodCtxBySocketPush(Class<?> targetClass) {
-        // 非接口忽略
-        if (!targetClass.isInterface()) {
-            return Collections.emptyList();
-        }
-
         SocketPush socketPush = AnnotationUtils.findAnnotation(targetClass, SocketPush.class);
         if (socketPush == null) {
             return Collections.emptyList();

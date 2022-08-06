@@ -1,0 +1,14 @@
+# redis cluster 配置
+clusterServersConfig:
+  nodeAddresses:  [
+      redis://192.168.40.128:6391,
+      redis://192.168.40.128:6392,
+      redis://192.168.40.128:6393,
+      redis://192.168.40.128:6394,
+      redis://192.168.40.128:6395,
+      redis://192.168.40.128:6396
+  ]
+# 线程数
+threads:  4
+# netty 线程数
+nettyThreads: 8

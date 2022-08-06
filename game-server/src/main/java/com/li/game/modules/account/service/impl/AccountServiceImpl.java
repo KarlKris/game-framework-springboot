@@ -1,13 +1,11 @@
 package com.li.game.modules.account.service.impl;
 
-import com.google.common.hash.BloomFilter;
-import com.google.common.hash.Funnels;
-import com.li.engine.channelhandler.common.FirewallService;
+import com.google.common.hash.*;
 import com.li.common.exception.BadRequestException;
-import com.li.core.cache.anno.CachedEvict;
+import com.li.core.cache.anno.*;
 import com.li.core.cache.config.CachedType;
-import com.li.game.modules.account.manager.Account;
-import com.li.game.modules.account.manager.AccountManager;
+import com.li.engine.channelhandler.common.FirewallService;
+import com.li.game.modules.account.manager.*;
 import com.li.game.modules.account.service.AccountService;
 import com.li.protocol.common.cache.CacheNameConstants;
 import com.li.protocol.game.account.protocol.ServerAccountResultCode;
@@ -16,8 +14,7 @@ import com.li.protocol.game.login.protocol.GameServerLoginResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import javax.annotation.*;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -66,6 +63,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Cachedable(type = CachedType.REMOTE, name = CacheNameConstants.IDENTITY_TO_ACCOUNT_VO, key = "#identity")
     public AccountVo transform(long identity) {
         Account account = checkAccountAndThrow(identity);
         return new AccountVo(account.getAccountName(), account.getLevel());

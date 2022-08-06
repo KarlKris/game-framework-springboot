@@ -16,8 +16,8 @@ public class ChatController {
     @FXML
     private TextArea chatBox;
 
-    public void addMessage(long senderId, String msg) {
-        Platform.runLater(() -> chatBox.appendText(DateUtil.date() + "  " + senderId + "  :  " +  msg + "\n"));
+    public void addMessage(String sender, String msg) {
+        Platform.runLater(() -> chatBox.appendText(DateUtil.date() + "  " + sender + "  :  " +  msg + "\n"));
     }
 
     public void clearMessage() {

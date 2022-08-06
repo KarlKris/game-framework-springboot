@@ -1,15 +1,12 @@
 package com.li.core.cache;
 
+import com.li.core.cache.anno.*;
 import com.li.core.cache.config.CachedType;
 import com.li.core.cache.core.cache.Cache;
 import com.li.core.cache.core.manager.CacheManager;
-import com.li.core.cache.enhance.EnhanceEntity;
-import com.li.core.cache.enhance.Enhancer;
-import com.li.core.dao.AbstractEntity;
-import com.li.core.dao.AbstractRegionEntity;
-import com.li.core.dao.EntityBuilder;
-import com.li.core.dao.core.DataFinder;
-import com.li.core.dao.core.IDataAccessor;
+import com.li.core.cache.enhance.*;
+import com.li.core.dao.*;
+import com.li.core.dao.core.*;
 import com.li.core.dao.service.IDataPersistence;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author li-yuanwen
@@ -53,6 +48,7 @@ public class CacheService implements EntityCacheService, RegionEntityCacheServic
     // --------------------- EntityCacheService 实现 ----------------------------------
 
     @Override
+    @Cachedable(name = "#tClass.getName()", key = "#id")
     public <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T loadEntity(PK id, Class<T> tClass) {
         T entity = dataPersistence.findById(id, tClass);
         if (entity == null) {
@@ -64,6 +60,7 @@ public class CacheService implements EntityCacheService, RegionEntityCacheServic
     }
 
     @Override
+    @Cachedable(name = "#tClass.getName()", key = "#id")
     public <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T loadOrCreate(PK id, Class<T> tClass, EntityBuilder<PK, T> entityBuilder) {
         T entity = loadEntity(id, tClass);
         if (entity == null) {
@@ -76,6 +73,7 @@ public class CacheService implements EntityCacheService, RegionEntityCacheServic
     }
 
     @Override
+    @CachedPut(name = "#entity.getClass().getName()", key = "#entity.getId()")
     public <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T createEntity(T entity) {
         T originEntity = unwrapIfNecessary(entity);
         dataPersistence.commit(originEntity);
@@ -83,6 +81,7 @@ public class CacheService implements EntityCacheService, RegionEntityCacheServic
     }
 
     @Override
+    @CachedEvict(name = "#entity.getClass().getName()", key = "#entity.getId()")
     public <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> void remove(T entity) {
         T originEntity = unwrapIfNecessary(entity);
         originEntity.setDeleteStatus();
@@ -96,6 +95,7 @@ public class CacheService implements EntityCacheService, RegionEntityCacheServic
     private static final String ALL_BY_OWNER_HQL = "select e.id from {0} as e where e.owner = {1}";
 
     @Override
+    @Cachedable(name = "#tClass.getName()", key = "#owner")
     public <PK extends Comparable<PK> & Serializable
             , FK extends Comparable<FK> & Serializable
             , T extends AbstractRegionEntity<PK, FK>

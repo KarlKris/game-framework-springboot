@@ -2,7 +2,6 @@ package com.li.game.modules.account.facade;
 
 import com.li.game.modules.account.service.AccountService;
 import com.li.protocol.game.account.protocol.ServerAccountController;
-import com.li.protocol.game.account.vo.AccountVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +18,6 @@ public class ServerAccountControllerImpl implements ServerAccountController {
     @Resource
     private AccountService accountService;
 
-    @Override
-    public AccountVo getShowVo(long identity) {
-        return accountService.transform(identity);
-    }
 
     @Override
     public void levelUp(long identity) {

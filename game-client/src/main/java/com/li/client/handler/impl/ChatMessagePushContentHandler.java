@@ -21,7 +21,7 @@ public class ChatMessagePushContentHandler extends AbstractProtocolResponseBodyH
 
     @Override
     protected void handle0(ChatContent responseBody) {
-        chatController.addMessage(responseBody.getSenderId(), responseBody.getMsg());
+        chatController.addMessage(responseBody.getAccountVo().getName(), responseBody.getMsg());
     }
 
     @Override

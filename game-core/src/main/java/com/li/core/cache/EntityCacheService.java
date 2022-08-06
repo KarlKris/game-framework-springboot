@@ -1,10 +1,6 @@
 package com.li.core.cache;
 
-import com.li.core.cache.anno.CachedEvict;
-import com.li.core.cache.anno.CachedPut;
-import com.li.core.cache.anno.Cachedable;
-import com.li.core.dao.AbstractEntity;
-import com.li.core.dao.EntityBuilder;
+import com.li.core.dao.*;
 
 import java.io.Serializable;
 
@@ -23,7 +19,6 @@ public interface EntityCacheService {
      * @param <T> 实体类型
      * @return 实体
      */
-    @Cachedable(name = "#tClass.getName()", key = "#id")
     <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T loadEntity(PK id, Class<T> tClass);
 
 
@@ -36,7 +31,6 @@ public interface EntityCacheService {
      * @param <T> 实体类型
      * @return 实体
      */
-    @Cachedable(name = "#tClass.getName()", key = "#id")
     <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T loadOrCreate(PK id, Class<T> tClass
             , EntityBuilder<PK, T> entityBuilder);
 
@@ -47,7 +41,6 @@ public interface EntityCacheService {
      * @param <T> 实体类型
      * @return 数据库实体
      */
-    @CachedPut(name = "#entity.getClass().getName()", key = "#entity.getId()")
     <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> T createEntity(T entity);
 
     /**
@@ -56,7 +49,6 @@ public interface EntityCacheService {
      * @param <PK> 主键类型
      * @param <T> 实体类型
      */
-    @CachedEvict(name = "#entity.getClass().getName()", key = "#entity.getId()")
     <PK extends Comparable<PK> & Serializable, T extends AbstractEntity<PK>> void remove(T entity);
 
 }

@@ -2,20 +2,13 @@ package com.li.engine.channelhandler.common.impl;
 
 import com.li.common.rpc.ServerInfoUpdateService;
 import com.li.common.utils.IpUtils;
-import com.li.engine.channelhandler.common.FirewallService;
-import com.li.engine.channelhandler.common.NioNettyFilter;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import com.li.engine.channelhandler.common.*;
+import io.netty.channel.*;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.PatternMatchUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
@@ -161,8 +154,7 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
             }
 
             // 释放
-            ByteBuf byteBuf = (ByteBuf) msg;
-            ReferenceCountUtil.release(byteBuf);
+            ReferenceCountUtil.release(msg);
 
             ctx.close();
             return;

@@ -1,10 +1,6 @@
 package com.li.protocol.game.account.vo;
 
-import com.li.network.anno.SocketResponse;
-import com.li.protocol.game.account.protocol.ServerAccountModule;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * @author li-yuanwen
@@ -14,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@SocketResponse(module = ServerAccountModule.MODULE, id = ServerAccountModule.GET_SHOW_VO)
 public class AccountVo {
 
     /** 账号名 **/

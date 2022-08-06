@@ -1,6 +1,5 @@
 package com.li.core.cache;
 
-import com.li.core.cache.anno.Cachedable;
 import com.li.core.dao.AbstractRegionEntity;
 
 import java.io.Serializable;
@@ -24,7 +23,6 @@ public interface RegionEntityCacheService {
      * @param <R> 区域缓存类型
      * @return 区域缓存
      */
-    @Cachedable(name = "#tClass.getName()", key = "#owner")
     <PK extends Comparable<PK> & Serializable
             , FK extends Comparable<FK> & Serializable
             , T extends AbstractRegionEntity<PK, FK>

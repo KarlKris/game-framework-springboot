@@ -25,10 +25,9 @@ public class ChatServiceImpl implements ChatService {
     private ChatPush chatPush;
 
     @Override
-    public void send(long identity, String msg) {
+    public void send(long identity, ChatContent content) {
         Collection<Long> onlineIdentities =
                 sessionManager.getOnlineIdentities();
-        ChatContent content = ChatContent.of(identity, msg);
         chatPush.pushMessage(onlineIdentities, content);
     }
 }

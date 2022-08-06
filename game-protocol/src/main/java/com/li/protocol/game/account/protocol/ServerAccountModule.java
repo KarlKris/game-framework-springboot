@@ -10,10 +10,6 @@ public interface ServerAccountModule {
     /** 模块号 **/
     short MODULE = 1004;
 
-
-    /** 获取账号展示VO **/
-    byte GET_SHOW_VO = 1;
-
     /** 升级 **/
-    byte LEVEL_UP = 2;
+    byte LEVEL_UP = 1;
 }

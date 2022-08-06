@@ -1,8 +1,6 @@
 package com.li.network.handler;
 
-import com.li.network.message.InnerMessage;
-import com.li.network.message.OuterMessage;
-import com.li.network.message.ProtocolConstant;
+import com.li.network.message.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -27,6 +25,9 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
             return null;
         }
 
+        // 释放in,否则会ByteBuf泄露,因为decode中
+//        ReferenceCountUtil.release(in);
+
         short protocolHeaderIdentity = ProtocolConstant.getProtocolHeaderIdentity(buf);
         if (protocolHeaderIdentity == ProtocolConstant.PROTOCOL_INNER_HEADER_IDENTITY) {
             return InnerMessage.readIn(buf);
@@ -41,5 +42,11 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
         ctx.close();
 
         return null;
+    }
+
+    @Override
+    protected ByteBuf extractFrame(ChannelHandlerContext ctx, ByteBuf buffer, int index, int length) {
+        // 重写,不增加ByteBuf引用
+        return buffer.slice(index, length);
     }
 }

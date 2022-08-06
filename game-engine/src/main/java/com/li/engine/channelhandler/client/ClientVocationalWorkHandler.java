@@ -128,17 +128,16 @@ public class ClientVocationalWorkHandler extends SimpleChannelInboundHandler<Inn
     }
 
     private void handlePushMessage(InnerMessage message) {
+        ProtocolMethodInvokeCtx protocolMethodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(message.getProtocol());
+        if (protocolMethodInvokeCtx == null) {
+            // 无处理,即仅是中介,直接推送至外网
+            Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
+            PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
+
+            pushExecutor.pushToOuter(pushResponse, message.getProtocol());
+            return;
+        }
         group.next().submit(() -> {
-            ProtocolMethodInvokeCtx protocolMethodInvokeCtx = socketProtocolManager.getMethodInvokeCtx(message.getProtocol());
-            if (protocolMethodInvokeCtx == null) {
-                // 无处理,即仅是中介,直接推送至外网
-                Serializer serializer = serializerHolder.getSerializer(message.getSerializeType());
-                PushResponse pushResponse = serializer.deserialize(message.getBody(), PushResponse.class);
-
-                pushExecutor.pushToOuter(pushResponse, message.getProtocol());
-                return;
-            }
-
             // 查询序列化/反序列化方式
             byte serializeType = message.getSerializeType();
             Serializer serializer = serializerHolder.getSerializer(serializeType);

@@ -18,7 +18,7 @@
         <aspectj.version>1.9.7</aspectj.version>
         <caffeine.version>2.9.0</caffeine.version>
         <javassist.version>3.27.0-GA</javassist.version>
-        <redisson.starter.version>3.14.1</redisson.starter.version>
+        <redisson.starter.version>3.16.5</redisson.starter.version>
         <pool.version>2.6.2</pool.version>
     </properties>
 

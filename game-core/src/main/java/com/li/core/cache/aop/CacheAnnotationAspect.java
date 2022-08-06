@@ -65,6 +65,7 @@ public class CacheAnnotationAspect {
     /** 缓存移除 **/
     @Before("cachedRemovePointcut()")
     public void beforeRemoveInvoke(JoinPoint jp) throws NoSuchMethodException, JsonProcessingException {
+        
         Method targetMethod = getTargetMethod(jp);
         CachedEvict cachedEvict = AnnotationUtils.findAnnotation(targetMethod, CachedEvict.class);
 
@@ -74,6 +75,10 @@ public class CacheAnnotationAspect {
             Object[] args = jp.getArgs();
             evaluationContext = bindParam(targetMethod, args);
             cacheName = getSpElValue(cacheName, evaluationContext);
+        }
+
+        if (log.isInfoEnabled()) {
+            log.info("被注解@CachedEvict修饰方法:{}, 缓存名称:{} 执行前", targetMethod.getName(), cacheName);
         }
 
         // 移除缓存
@@ -106,6 +111,10 @@ public class CacheAnnotationAspect {
             cacheName = getSpElValue(cacheName, evaluationContext);
         }
 
+        if (log.isInfoEnabled()) {
+            log.info("被注解@CachedPut修饰方法:{}, 缓存名称:{} 执行后", targetMethod.getName(), cacheName);
+        }
+
         Cache cache = cacheManager.getCache(cachedPut.type(), cacheName);
         if (cache == null) {
             cache = cacheManager.createCache(cachedPut.type(), cacheName, cachedPut.maximum(), cachedPut.expire());
@@ -122,6 +131,8 @@ public class CacheAnnotationAspect {
         }
 
         cache.put(key, result);
+
+
     }
 
     /** 查询缓存 **/
@@ -136,6 +147,10 @@ public class CacheAnnotationAspect {
             Object[] args = joinPoint.getArgs();
             evaluationContext = bindParam(targetMethod, args);
             cacheName = getSpElValue(cacheName, evaluationContext);
+        }
+
+        if (log.isInfoEnabled()) {
+            log.info("被注解@Cachedable修饰方法:{}, 缓存名称:{} 执行前", targetMethod.getName(), cacheName);
         }
 
         String keySpEl = cachedable.key();
@@ -157,6 +172,11 @@ public class CacheAnnotationAspect {
         Class<?> returnType = targetMethod.getReturnType();
         if ((result = cache.get(key, returnType)) == null) {
             try {
+
+                if (log.isInfoEnabled()) {
+                    log.info("被注解@Cachedable修饰方法:{}, 不存在缓存名称:{}, 执行方法", targetMethod.getName(), cacheName);
+                }
+
                 result = joinPoint.proceed();
                 if (cachedable.nullCache() || result != null) {
                     cache.put(key, result);
@@ -164,6 +184,10 @@ public class CacheAnnotationAspect {
                 return result;
             } catch (Throwable throwable) {
                 log.error("执行方法[{}],方法参数[{}]出现未知异常", targetMethod.getName(), joinPoint.getArgs(), throwable);
+            }
+        } else {
+            if (log.isInfoEnabled()) {
+                log.info("被注解@Cachedable修饰方法:{}, 存在缓存名称:{}", targetMethod.getName(), cacheName);
             }
         }
 

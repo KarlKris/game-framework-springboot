@@ -3,10 +3,7 @@ package com.li.core.cache.anno;
 import com.li.core.cache.config.CacheConstants;
 import com.li.core.cache.config.CachedType;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 用于某个方法，希望这个方法的返回值添加缓存，此方法被调用的时候，如果有缓存，此方法不执行
@@ -14,6 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 public @interface Cachedable {
 
     /** 缓存类型 **/
@@ -26,7 +24,7 @@ public @interface Cachedable {
     String name();
 
     /**
-     * 缓存内容标识
+     * 缓存内容标识 支持SpEl表达式
      * @return 缓存内容标识
      */
     String key();

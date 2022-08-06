@@ -1,12 +1,8 @@
 package com.li.core.cache.anno;
 
-import com.li.core.cache.config.CacheConstants;
-import com.li.core.cache.config.CachedType;
+import com.li.core.cache.config.*;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 用于某个方法，每次被调用，此方法都执行，并把结果更新到PutCache配置的地方，一般用于缓存更新
@@ -14,6 +10,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 public @interface CachedPut {
 
     /** 缓存类型 **/
