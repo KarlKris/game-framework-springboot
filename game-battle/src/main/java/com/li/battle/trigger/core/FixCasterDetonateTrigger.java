@@ -19,7 +19,7 @@ public class FixCasterDetonateTrigger extends AbstractDetonateTrigger {
     }
 
     @Override
-    protected void try0(long casterId, long target, SkillExecutedEvent event, TriggerSuccessCallback callback) {
+    protected void try0(long casterId, SkillExecutedEvent event, TriggerSuccessCallback callback) {
         // 引爆成功
         if (++curNum >= num) {
             // 自身的引爆目标

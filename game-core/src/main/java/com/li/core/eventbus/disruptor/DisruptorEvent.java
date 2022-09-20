@@ -16,18 +16,10 @@ public class DisruptorEvent<B extends NamedEvent> {
     /** 事件内容 **/
     private B body;
 
-    /** 事件产生的时间 **/
-    private long time;
-
     public void fillData(String name, B body) {
         this.name = name;
         this.body = body;
-        this.time = System.currentTimeMillis();
-    }
 
-
-    public int calculateHandleTime() {
-        return (int) (System.currentTimeMillis() - this.time);
     }
 
 }

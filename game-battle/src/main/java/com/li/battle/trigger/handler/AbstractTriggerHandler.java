@@ -42,7 +42,7 @@ public abstract class AbstractTriggerHandler<E extends BattleEvent> extends Abst
         }
 
         Trigger trigger = receiver.getTrigger();
-        trigger.tryTrigger(receiver.getUnitId(), receiver.getTarget(), event, triggerId -> {
+        trigger.tryTrigger(receiver.getUnitId(), event, triggerId -> {
             // 触发成功,更新CD
             receiver.afterExecuteEffect();
             // 执行效果

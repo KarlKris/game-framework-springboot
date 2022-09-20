@@ -3,6 +3,7 @@ package com.li.client.stat;
 import com.li.client.controller.StatController;
 import com.li.network.message.SocketProtocol;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -19,6 +20,8 @@ public class EfficiencyStatistic {
 
     @Resource
     private StatController statController;
+
+    private StopWatch watch = new StopWatch();
 
     /** 请求消息序号生成器 **/
     private final AtomicLong snGenerator = new AtomicLong(0);
@@ -63,20 +66,20 @@ public class EfficiencyStatistic {
 
         /** 协议 **/
         private final SocketProtocol protocol;
-        /** 协议发送时间 **/
-        private final long time = System.currentTimeMillis();
         /** 请求消息序号 **/
         private final long sn;
 
         public SingleProtocolStat(SocketProtocol protocol, long sn) {
             this.protocol = protocol;
             this.sn = sn;
+            watch.start(protocol.toString());
         }
 
 
         /** 协议结算，获取耗时 **/
         public long settle() {
-            return System.currentTimeMillis() - time;
+            watch.stop();
+            return watch.getLastTaskTimeMillis();
         }
 
         public SocketProtocol getProtocol() {

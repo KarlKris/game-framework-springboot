@@ -25,21 +25,7 @@ public class EventDispatcher implements WorkHandler<DisruptorEvent<?>> {
 
     @Override
     public void onEvent(DisruptorEvent<?> event) throws Exception {
-        if (log.isDebugEnabled()) {
-            int time = event.calculateHandleTime();
-            if (time > 500) {
-                log.debug("Disruptor 队列 事件[{}]开始处理前耗时[{}], 超过0.5s", event.getName(), time);
-            }
-        }
-
         dispatch(event);
-
-        if (log.isDebugEnabled()) {
-            int time = event.calculateHandleTime();
-            if (time > 500) {
-                log.debug("Disruptor 队列 事件[{}]处理耗时[{}], 超过0.5s", event.getName(), time);
-            }
-        }
     }
 
     public void dispatch(DisruptorEvent<?> event) {

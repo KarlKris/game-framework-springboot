@@ -1,5 +1,6 @@
 package com.li.battle.core.unit;
 
+import com.li.battle.buff.core.Buff;
 import com.li.battle.core.Attribute;
 import com.li.battle.core.Skill;
 import com.li.battle.core.scene.BattleScene;
@@ -61,5 +62,18 @@ public interface FightUnit extends MoveUnit {
      * @param skillId 技能id
      */
     void coolDownSkill(int skillId);
+
+
+    /**
+     * 添加buff
+     * @param buff buff
+     */
+    void addBuff(Buff buff);
+
+    /**
+     * 移除身上的buff
+     * @param buff
+     */
+    void removeBuff(Buff buff);
 
 }

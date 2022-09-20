@@ -1,4 +1,4 @@
-﻿package com.li.battle.selector;
+package com.li.battle.selector;
 
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.SelectorConfig;

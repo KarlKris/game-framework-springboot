@@ -17,6 +17,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FixTargetDetonateTrigger extends AbstractDetonateTrigger {
 
+    /** 当前挂载的目标 **/
+    private long targetUnitId;
+
     public FixTargetDetonateTrigger(int[] skillIds, int num) {
         super(skillIds, num);
     }
@@ -27,7 +30,7 @@ public class FixTargetDetonateTrigger extends AbstractDetonateTrigger {
     }
 
     @Override
-    protected void try0(long casterId, long target, SkillExecutedEvent event, TriggerSuccessCallback callback) {
+    protected void try0(long casterId, SkillExecutedEvent event, TriggerSuccessCallback callback) {
         // 查看挂载目标
         SelectorResult selectorResult = event.getSkill().getTarget();
         for (IPosition position : selectorResult.getResults()) {
@@ -35,7 +38,8 @@ public class FixTargetDetonateTrigger extends AbstractDetonateTrigger {
                 continue;
             }
             FightUnit unit = (FightUnit) position;
-            if (unit.getId() != target) {
+            if (unit.getId() != targetUnitId) {
+                curNum = 1;
                 continue;
             }
             // 引爆成功

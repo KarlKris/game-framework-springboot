@@ -3,8 +3,7 @@ package com.li.engine.client.impl;
 import com.li.common.ApplicationContextHolder;
 import com.li.common.rpc.model.Address;
 import com.li.engine.channelhandler.NioNettyClientMessageHandler;
-import com.li.engine.client.NettyClient;
-import com.li.engine.client.SendProxyInvoker;
+import com.li.engine.client.*;
 import com.li.engine.protocol.MessageFactory;
 import com.li.engine.service.VocationalWorkConfig;
 import com.li.engine.service.rpc.InvocationManager;
@@ -13,17 +12,13 @@ import com.li.network.anno.SocketController;
 import com.li.network.message.IMessage;
 import com.li.network.protocol.SocketProtocolManager;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Netty Client
@@ -116,6 +111,7 @@ public class DefaultNettyClient implements NettyClient {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(this.eventLoopGroup)
                 .channel(NioSocketChannel.class)
+                .option(ChannelOption.WRITE_BUFFER_WATER_MARK, WriteBufferWaterMark.DEFAULT)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectTimeoutMillis)
                 .handler(this.messageHandler);

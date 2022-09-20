@@ -163,6 +163,24 @@ public class FirewallAndIpFilter extends ChannelInboundHandlerAdapter implements
     }
 
     @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        if (!ctx.channel().isWritable()) {
+            log.warn("channel 不可写, 放弃读");
+            ctx.channel().config().setAutoRead(false);
+        }
+        super.channelReadComplete(ctx);
+    }
+
+    @Override
+    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+        if (ctx.channel().isWritable()) {
+            log.warn("channel 可写, 开始读");
+            ctx.channel().config().setAutoRead(true);
+        }
+        super.channelWritabilityChanged(ctx);
+    }
+
+    @Override
     public void open() {
         this.open = true;
     }

@@ -12,7 +12,7 @@ import com.li.battle.util.AttributeValueAlter;
 import lombok.Getter;
 
 /**
- * 修改属性效果
+ * 修改属性效果(不得修改血量)
  * @author li-yuanwen
  * @date 2022/5/23
  */
@@ -32,7 +32,7 @@ public class ModifyAttributeEffect extends EffectAdapter<BuffModifier> {
 
     @Override
     public void onAction(BattleSkill skill) {
-        for (IPosition unit : skill.getTarget().getResults()) {
+        for (IPosition unit : skill.getFinalTargets()) {
             if (unit instanceof FightUnit) {
                 FightUnit u = (FightUnit) unit;
                 u.modifyAttribute(attribute

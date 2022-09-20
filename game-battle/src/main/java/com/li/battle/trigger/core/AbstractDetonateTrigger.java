@@ -30,7 +30,7 @@ public abstract class AbstractDetonateTrigger implements Trigger {
     }
 
     @Override
-    public void tryTrigger(long casterId, long target, BattleEvent event, TriggerSuccessCallback callback) {
+    public void tryTrigger(long casterId,  BattleEvent event, TriggerSuccessCallback callback) {
         // 触发器释放方与事件来源方不一致,忽略
         if (casterId != event.getSource()) {
             return;
@@ -43,16 +43,15 @@ public abstract class AbstractDetonateTrigger implements Trigger {
             }
 
             // 子类实现具体的逻辑判断
-            try0(casterId, target, e, callback);
+            try0(casterId, e, callback);
         }
     }
 
     /**
      * 子类实现具体的逻辑判断
      * @param casterId 触发器施法者
-     * @param target 触发器目标
      * @param event 技能执行事件
      * @param callback 成功回调接口
      */
-    protected abstract void try0(long casterId, long target, SkillExecutedEvent event, TriggerSuccessCallback callback);
+    protected abstract void try0(long casterId,  SkillExecutedEvent event, TriggerSuccessCallback callback);
 }

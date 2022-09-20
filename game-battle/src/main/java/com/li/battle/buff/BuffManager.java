@@ -7,8 +7,7 @@ import com.li.battle.core.unit.FightUnit;
 import com.li.battle.effect.Effect;
 import com.li.battle.resource.BuffConfig;
 
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * Buff管理
@@ -24,6 +23,8 @@ public class BuffManager {
     /** 待处理的buff队列 **/
     private final PriorityQueue<Buff> queue = new PriorityQueue<>(Comparator.comparingLong(Buff::getNextRound));
 
+    // todo 记录玩家身上的buff
+
 
     public BuffManager(BattleScene scene) {
         this.scene = scene;
@@ -32,9 +33,9 @@ public class BuffManager {
     public boolean addBuff(Buff buff) {
         // todo 判断是否需要合并
 
-        BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
+        BuffConfig config = buff.getConfig();
         if (ArrayUtil.isNotEmpty(config.getAwakeEffects())) {
-            for (Effect effect : config.getAwakeEffects()) {
+            for (Effect<Buff> effect : config.getAwakeEffects()) {
                 effect.onAction(buff);
             }
         }
@@ -51,10 +52,14 @@ public class BuffManager {
     /**
      * 判断目标是否免疫buff
      * @param target buff挂载目标
+     * @param caster buff释放者
      * @param buffTag buffTag
      * @return true 免疫
      */
-    public boolean isImmuneTag(FightUnit target, byte buffTag) {
+    public boolean isImmuneTag(FightUnit target, long caster, byte buffTag) {
+        if (caster == target.getId()) {
+            return false;
+        }
         // todo
         return false;
     }

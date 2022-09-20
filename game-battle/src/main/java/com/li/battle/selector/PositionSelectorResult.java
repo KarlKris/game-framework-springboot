@@ -1,4 +1,4 @@
-﻿package com.li.battle.selector;
+package com.li.battle.selector;
 
 import com.li.battle.core.unit.IPosition;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;

@@ -27,8 +27,6 @@ public class BuffConfig {
     private byte tag;
     /** 免疫buff种类 **/
     private byte immuneTag;
-    /** 技能选择目标选择集 **/
-    private int selectorId;
     /** buff时长(毫秒) 0表永久 **/
     private int duration;
     /** buff刷新合并规则（更新Buff层数，等级，持续时间等数据） **/

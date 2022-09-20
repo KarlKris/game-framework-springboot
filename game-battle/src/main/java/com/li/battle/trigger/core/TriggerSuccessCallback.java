@@ -10,7 +10,7 @@ public interface TriggerSuccessCallback {
 
     /**
      * 成功触发后回调
-     * @param detonateOwnerId 引爆目标标识
+     * @param detonateOwnerId 触发目标标识
      */
     void callback(long detonateOwnerId);
 

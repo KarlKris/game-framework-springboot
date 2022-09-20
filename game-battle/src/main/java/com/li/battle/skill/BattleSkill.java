@@ -2,9 +2,11 @@ package com.li.battle.skill;
 
 import com.li.battle.core.IOwner;
 import com.li.battle.core.context.AbstractDamageAlterContext;
-import com.li.battle.selector.SelectParam;
-import com.li.battle.selector.SelectorResult;
+import com.li.battle.core.unit.*;
+import com.li.battle.selector.*;
 import lombok.Getter;
+
+import java.util.*;
 
 /**
  * 场景中存在的技能上下文
@@ -52,6 +54,25 @@ public class BattleSkill implements IOwner {
 
     public boolean isExpire(long curRound) {
         return expireRound != 0 && curRound > expireRound;
+    }
+
+
+    public List<IPosition> getFinalTargets() {
+        List<IPosition> results = target.getResults();
+        // todo 应该根据技能来判断需不需要过滤自己
+
+        Iterator<IPosition> iterator = results.iterator();
+        while (iterator.hasNext()) {
+            IPosition next = iterator.next();
+            if (next instanceof FightUnit) {
+                FightUnit unit = (FightUnit) next;
+                // 过滤目标中包含自己
+                if (unit.getId() == caster) {
+                    iterator.remove();
+                }
+            }
+        }
+        return results;
     }
 
     @Override
