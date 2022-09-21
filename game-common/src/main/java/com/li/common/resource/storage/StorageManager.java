@@ -4,11 +4,10 @@ import com.li.common.resource.anno.ResourceObj;
 import com.li.common.resource.core.ResourceDefinition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.*;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,6 +43,14 @@ public class StorageManager implements ApplicationContextAware {
         getResourceStorage(definition.getClz()).validate();
     }
 
+    public ResourceStorage<?, ?> getResourceStorage(String clzName) {
+        for (Map.Entry<Class<?>, ResourceStorage<?, ?>> entry : storages.entrySet()) {
+            if (entry.getKey().getSimpleName().equals(clzName)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
 
     public ResourceStorage<?, ?> getResourceStorage(Class<?> clz) {
         ResourceStorage<?, ?> storage = storages.get(clz);

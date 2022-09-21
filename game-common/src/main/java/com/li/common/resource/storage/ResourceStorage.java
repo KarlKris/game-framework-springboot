@@ -42,10 +42,16 @@ public interface ResourceStorage<K, V> {
     List<V> getIndexResources(String indexName, Object indexKey);
 
     /**
-     * 获取所有资源
+     * 获取所有正式资源
      * @return 所有资源
      */
     Collection<V> getAll();
+
+    /**
+     * 获取所有临时资源(临时资源不存在时,用正式资源)
+     * @return 所有资源
+     */
+    Collection<V> getTempAll();
 
     /**
      * 加载资源(此时并不会覆盖原数据,需要调用#validate()来检验，通过后覆盖原数据)
@@ -53,14 +59,32 @@ public interface ResourceStorage<K, V> {
     void load();
 
     /**
-     * 验证资源合法性,通过后覆盖原数据
+     * 验证资源合法性
+     * @throws RuntimeException 验证失败时抛出
      */
-    void validate();
+    void validate() throws RuntimeException;
+
+    /**
+     * 验证成功
+     */
+    void validateSuccessfully();
+
+    /**
+     * 验证失败
+     */
+    void validateFailure();
 
     /**
      * 添加变更监听器
      * @param listener 监听器
      */
     void addListener(StorageChangeListener listener);
+
+
+    /**
+     * 获取完整的资源路径
+     * @return
+     */
+    String getLocation();
 
 }

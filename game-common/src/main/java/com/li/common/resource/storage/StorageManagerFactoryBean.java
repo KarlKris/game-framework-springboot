@@ -75,6 +75,10 @@ public class StorageManagerFactoryBean implements FactoryBean<StorageManager>, A
             String message = MessageFormatter.format("验证资源[{}]失败", stringBuilder).getMessage();
             throw new RuntimeException(message);
         }
+        // 验证成功
+        for (ResourceDefinition definition : definitions) {
+            storageManager.getResourceStorage(definition.getClz()).validateSuccessfully();
+        }
     }
 
 

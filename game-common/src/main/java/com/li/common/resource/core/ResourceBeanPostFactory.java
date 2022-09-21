@@ -43,7 +43,10 @@ import java.util.Set;
 @Component
 public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, PriorityOrdered {
 
-    private final Set<Integer> registriesPostProcessed = new HashSet<>();
+    /** 资源根路径 **/
+    public static String RESOURCE_PATH;
+
+    private final Set<Integer> registriesPostProcessed = new HashSet<>(2);
 
     /** 默认资源匹配符 */
     protected static final String DEFAULT_RESOURCE_PATTERN = "/**/*.class";
@@ -99,6 +102,8 @@ public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProces
         ManagedList<ResourceDefinition> resourceDefinitions = new ManagedList<>();
         // 文件路径,支持${}
         String rootPath = attributes.getString("path");
+        RESOURCE_PATH = environment.resolvePlaceholders(rootPath);
+
         for (String basePackage : basePackages) {
             for (String resourceClass : getResources(basePackage) ){
                 Class<?> clz = null;
@@ -112,7 +117,7 @@ public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProces
                     continue;
                 }
 
-                ResourceDefinition resourceDefinition = parseResourceDefinition(clz, rootPath);
+                ResourceDefinition resourceDefinition = parseResourceDefinition(clz, RESOURCE_PATH);
                 if (resourceDefinition != null) {
                     resourceDefinitions.add(resourceDefinition);
                 }
@@ -209,7 +214,7 @@ public class ResourceBeanPostFactory implements BeanDefinitionRegistryPostProces
         if (obj == null) {
             return null;
         }
-        return new ResourceDefinition(clz, environment.resolvePlaceholders(rootPath));
+        return new ResourceDefinition(clz, rootPath);
     }
 
     private void registerBeanDefinition(BeanDefinitionRegistry registry, BeanDefinition beanDefinition) {

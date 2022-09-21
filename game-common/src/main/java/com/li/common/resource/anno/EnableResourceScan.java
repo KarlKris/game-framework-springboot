@@ -21,6 +21,6 @@ public @interface EnableResourceScan {
     /**
      * @return 资源表根路径 支持Spring ${}标签
      */
-    String path();
+    String path() default "${resource.root.path}";
 
 }

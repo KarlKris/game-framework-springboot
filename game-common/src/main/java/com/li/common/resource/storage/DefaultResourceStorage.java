@@ -88,12 +88,20 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
     @Override
     public Collection<V> getAll() {
         if (data == null) {
-            if (temp == null) {
-                return Collections.emptyList();
-            }
             return Collections.unmodifiableCollection(temp.values.values());
         }
         return Collections.unmodifiableCollection(data.values.values());
+    }
+
+    @Override
+    public Collection<V> getTempAll() {
+        if (temp == null) {
+            if (data == null) {
+                return Collections.emptyList();
+            }
+            return Collections.unmodifiableCollection(data.values.values());
+        }
+        return Collections.unmodifiableCollection(temp.values.values());
     }
 
     @Override
@@ -103,16 +111,39 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
 
     @Override
     public void validate() {
-       if (resourceDefinition.haveForeignKey()) {
-           resourceDefinition.getForeignKeyFields().forEach(field -> foreignKeyValidate0(getClz(), field));
+       if (!resourceDefinition.haveForeignKey()) {
+           return;
        }
-       this.data = this.temp;
-       this.temp = null;
+       // 校验外键
+       resourceDefinition.getForeignKeyFields().forEach(field -> foreignKeyValidate0(getClz(), field));
+    }
+
+    @Override
+    public void validateSuccessfully() {
+        if (this.temp == null) {
+            throw new IllegalArgumentException("资源:" + resourceDefinition.getClz().getSimpleName() + "没有load数据");
+        }
+
+        this.data = this.temp;
+        this.temp = null;
+
+        // 通知监听器
+        notifyChange();
+    }
+
+    @Override
+    public void validateFailure() {
+        this.temp = null;
     }
 
     @Override
     public void addListener(StorageChangeListener listener) {
         listeners.add(listener);
+    }
+
+    @Override
+    public String getLocation() {
+        return path;
     }
 
     // -------------- 私有方法 --------------------------------
@@ -156,8 +187,6 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
                 }
             }
         }
-        // 通知监听器
-        notifyChange();
     }
 
     /** 资源类Class **/
@@ -202,13 +231,13 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
         }
         Resolver foreignKeyResolver = ResolverFactory.createFieldResolver(foreignKeyField);
         ResourceStorage<?, ?> foreignKeyStorage = storageManager.getResourceStorage(annotation.foreignKeyClz());
-        Collection<?> list = foreignKeyStorage.getAll();
+        Collection<?> list = foreignKeyStorage.getTempAll();
         Set<Object> foreignKeyValueSet = new HashSet<>(list.size());
         for (Object obj : list) {
             foreignKeyValueSet.add(foreignKeyResolver.resolve(obj));
         }
         ResourceStorage<?, ?> storage = storageManager.getResourceStorage(clz);
-        for (Object obj : storage.getAll()) {
+        for (Object obj : storage.getTempAll()) {
             Object value = resolver.resolve(obj);
             if (!foreignKeyValueSet.contains(value)) {
                 String message = MessageFormatter.arrayFormat("资源类Class:{} 属性名:{} 值:{} 所对应的外键类Class:{} 属性名:{} 中不存在"
