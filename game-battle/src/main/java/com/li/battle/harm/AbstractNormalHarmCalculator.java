@@ -21,7 +21,7 @@ public abstract class AbstractNormalHarmCalculator implements HarmCalculator<Nor
 
         // 暴击
         int crit = (int) attacker.getAttributeValue(Attribute.CRIT);
-        if (RandomUtil.randomInt(Const.HUNDRED) <= crit) {
+        if (RandomUtil.randomInt(Const.HUNDRED) < crit) {
             dmg = dmg * (int) attacker.getAttributeValue(Attribute.CRITIC_DAMAGE) / Const.HUNDRED;
         }
 
