@@ -1,30 +1,23 @@
 package com.li.battle.core.scene;
 
 import com.li.battle.buff.BuffManager;
-import com.li.battle.buff.core.Buff;
-import com.li.battle.collision.QuadTree;
-import com.li.battle.collision.Rectangle2D;
-import com.li.battle.core.Attribute;
-import com.li.battle.core.BattleSceneHelper;
-import com.li.battle.core.ConfigHelper;
-import com.li.battle.core.Skill;
-import com.li.battle.core.scene.map.SceneMap;
+import com.li.battle.collision.*;
+import com.li.battle.core.*;
+import com.li.battle.core.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
-import com.li.battle.core.unit.FightUnit;
-import com.li.battle.core.unit.MoveUnit;
-import com.li.battle.effect.Effect;
+import com.li.battle.core.unit.*;
+import com.li.battle.effect.*;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.PassiveEffectSource;
 import com.li.battle.event.EventDispatcher;
 import com.li.battle.projectile.ProjectileManager;
 import com.li.battle.resource.SkillConfig;
-import com.li.battle.skill.SkillManager;
-import com.li.battle.skill.SkillType;
+import com.li.battle.skill.*;
 import com.li.battle.trigger.TriggerManager;
 import com.li.common.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -116,11 +109,13 @@ public abstract class AbstractBattleScene implements BattleScene {
             unit.enterScene(this);
             // 释放被动技能
             ConfigHelper configHelper = battleSceneHelper().configHelper();
+            EffectExecutor effectExecutor = battleSceneHelper().effectExecutor();
             for (Skill skill : unit.getSkills()) {
                 SkillConfig config = configHelper.getSkillConfigById(skill.getSkillId());
                 if (SkillType.belongTo(config.getType(), SkillType.PASSIVE_SKILL)) {
-                    for (Effect<Buff> effect : config.getInitEffects()) {
-                        effect.onAction(unit, skill);
+                    PassiveEffectSource source = new PassiveEffectSource(unit, skill);
+                    for (EffectParam effectParam : config.getInitEffects()) {
+                        effectExecutor.execute(source, effectParam);
                     }
                     skill.afterSkillExecuted(config, this);
                 }

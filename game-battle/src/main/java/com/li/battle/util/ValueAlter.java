@@ -16,8 +16,12 @@ public class ValueAlter {
     private boolean canImpairValue;
 
     public ValueAlter(long value) {
+        this(value, true);
+    }
+
+    public ValueAlter(long value, boolean canImpairValue) {
         this.value = value;
-        this.canImpairValue = true;
+        this.canImpairValue = canImpairValue;
     }
 
     public void incrementValue(long value) {

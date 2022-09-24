@@ -1,8 +1,6 @@
 package com.li.battle.core.unit;
 
-import com.li.battle.buff.core.Buff;
-import com.li.battle.core.Attribute;
-import com.li.battle.core.Skill;
+import com.li.battle.core.*;
 import com.li.battle.core.scene.BattleScene;
 
 import java.util.List;
@@ -13,19 +11,16 @@ import java.util.List;
  */
 public interface FightUnit extends MoveUnit {
 
-
     /**
      * 进入场景
      * @param scene 场景
      */
     void enterScene(BattleScene scene);
 
-
     /**
      * 离开场景
      */
     void leaveScene();
-
 
     /**
      * 获取属性值
@@ -41,13 +36,11 @@ public interface FightUnit extends MoveUnit {
      */
     void modifyAttribute(Attribute attribute, Long value);
 
-
     /**
      * 获取单元所有技能信息
      * @return 单元所有技能信息
      */
     List<Skill> getSkills();
-
 
     /**
      * 获取特定的技能信息
@@ -56,24 +49,16 @@ public interface FightUnit extends MoveUnit {
      */
     Skill getSkillById(int skillId);
 
-
     /**
      * 技能执行后进CD
      * @param skillId 技能id
      */
     void coolDownSkill(int skillId);
 
-
     /**
-     * 添加buff
-     * @param buff buff
+     * 是否死亡
+     * @return true hp<=0
      */
-    void addBuff(Buff buff);
-
-    /**
-     * 移除身上的buff
-     * @param buff
-     */
-    void removeBuff(Buff buff);
+    boolean isDead();
 
 }

@@ -1,10 +1,8 @@
 package com.li.battle.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.li.battle.buff.core.Buff;
-import com.li.battle.effect.Effect;
-import com.li.common.resource.anno.ResourceId;
-import com.li.common.resource.anno.ResourceObj;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.common.resource.anno.*;
 import lombok.Getter;
 
 import java.util.List;
@@ -26,21 +24,19 @@ public class GeneralSkillConfig {
     /** 技能选择目标选择集 **/
     private List<Integer> selectorIds;
     /** 技能起手阶段效果 **/
-    private Effect<Buff>[] startEffects;
+    private EffectParam[] startEffects;
     /** 前摇时长(毫秒) **/
     private int frontRockingTime;
     /** 前摇阶段是否可打断 **/
     private boolean frontInterrupted;
     /** 施法阶段效果 **/
-    private Effect<Buff>[] spellEffects;
+    private EffectParam[] spellEffects;
     /** 后摇时长(毫秒) **/
     private int backRockingTime;
     /** 后摇阶段是否可打断 **/
     private boolean backInterrupted;
     /** 结束阶段效果 **/
-    private Effect<Buff>[] finishEffects;
-    /** 子弹命中效果 **/
-    private Effect<Buff>[] hitEffects;
+    private EffectParam[] finishEffects;
 
     @JsonIgnore
     public int getDurationTime() {

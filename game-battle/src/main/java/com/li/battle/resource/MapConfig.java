@@ -1,6 +1,6 @@
 package com.li.battle.resource;
 
-import com.li.battle.core.scene.map.Point;
+import com.li.battle.core.map.Point;
 import com.li.common.resource.anno.ResourceId;
 import com.li.common.resource.anno.ResourceObj;
 import lombok.Getter;

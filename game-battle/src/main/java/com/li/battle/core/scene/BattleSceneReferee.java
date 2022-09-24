@@ -1,14 +1,11 @@
 package com.li.battle.core.scene;
 
 import com.li.battle.core.Skill;
-import com.li.battle.core.context.DefaultAlterContext;
-import com.li.battle.core.scene.map.SceneMap;
+import com.li.battle.core.map.SceneMap;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.SkillConfig;
-import com.li.battle.selector.SelectParam;
-import com.li.battle.selector.SelectorResult;
-import com.li.battle.skill.BattleSkill;
-import com.li.battle.skill.SkillType;
+import com.li.battle.selector.*;
+import com.li.battle.skill.*;
 import com.li.battle.skill.executor.BattleSkillExecutor;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
@@ -87,15 +84,15 @@ public class BattleSceneReferee {
             throw new RuntimeException("战斗单位技能：" + skillId + " 技能正在CD中");
         }
 
-        final DefaultAlterContext context = new DefaultAlterContext(scene);
+
         return scene.addTask(() -> {
-            // 选择目标并验证目标
+            // todo 选择目标并验证目标
             BattleSkillExecutor skillExecutor = scene.battleSceneHelper().battleSkillExecutor();
             SelectorResult result = skillExecutor.select(fightUnit, config, param);
             int duration = skillExecutor.calculateSkillDuration(config);
             // 构建BattleSkill
             BattleSkill battleSkill = new BattleSkill(skillId, unitId, result
-                    , duration / scene.getRoundPeriod(), param, context);
+                    , duration / scene.getRoundPeriod(), param, scene);
             scene.skillManager().addBattleSkill(battleSkill);
             return null;
         });

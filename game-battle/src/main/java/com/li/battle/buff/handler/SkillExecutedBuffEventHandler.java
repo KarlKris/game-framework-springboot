@@ -2,12 +2,12 @@ package com.li.battle.buff.handler;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.buff.core.Buff;
-import com.li.battle.core.unit.FightUnit;
-import com.li.battle.core.unit.IPosition;
-import com.li.battle.effect.Effect;
+import com.li.battle.core.unit.*;
+import com.li.battle.effect.*;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.BuffEffectSource;
 import com.li.battle.event.EventHandlerContext;
-import com.li.battle.event.core.BattleEventType;
-import com.li.battle.event.core.SkillExecutedEvent;
+import com.li.battle.event.core.*;
 import com.li.battle.resource.BuffConfig;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ public class SkillExecutedBuffEventHandler extends AbstractBuffHandler<Buff, Ski
         }
         // buff挂载人
         boolean sameParent = false;
-        for (IPosition position : event.getSkill().getTarget().getResults()) {
+        for (IPosition position : event.getSkill().getFinalTargets()) {
             if (!(position instanceof FightUnit)) {
                 continue;
             }
@@ -45,8 +45,10 @@ public class SkillExecutedBuffEventHandler extends AbstractBuffHandler<Buff, Ski
             return;
         }
         // 执行效果
-        for (Effect<Buff> effect : config.getExecutedEffects()) {
-            effect.onAction(receiver);
+        EffectExecutor effectExecutor = receiver.battleScene().battleSceneHelper().effectExecutor();
+        BuffEffectSource source = new BuffEffectSource(receiver);
+        for (EffectParam effectParam : config.getExecutedEffects()) {
+            effectExecutor.execute(source, effectParam);
         }
 
     }

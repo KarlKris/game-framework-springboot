@@ -2,16 +2,13 @@ package com.li.battle.buff.core;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.buff.handler.SkillExecutedBuffEventHandler;
-import com.li.battle.core.context.AbstractContext;
 import com.li.battle.core.scene.BattleScene;
-import com.li.battle.event.EventHandlerHolder;
-import com.li.battle.event.EventPipeline;
+import com.li.battle.event.*;
 import com.li.battle.event.handler.EventHandler;
 import com.li.battle.resource.BuffConfig;
 import lombok.Getter;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 所有buff的基类，包含各类成员函数和基本接口
@@ -28,6 +25,8 @@ public abstract class AbstractBuff implements Buff {
     protected final long parent;
     /** buff由哪个技能创建 **/
     protected final int skillId;
+    /** 关联的战斗场景 **/
+    protected final BattleScene scene;
 
     /** buff层数 **/
     protected int layer;
@@ -37,17 +36,19 @@ public abstract class AbstractBuff implements Buff {
     protected long nextRound;
     /** buff失效回合数=创建时回合数 + (buff时长(毫秒) / 回合执行间隔时长(毫秒)) 0表永久 **/
     protected long expireRound;
+    /** 上下文数据 **/
+    protected BuffContext buffContext;
 
 
-    public AbstractBuff(BuffConfig config, long caster, long parent, int skillId, AbstractContext context) {
+    public AbstractBuff(BuffConfig config, long caster, long parent, int skillId, BattleScene scene) {
         this.config = config;
         this.caster = caster;
         this.parent = parent;
         this.skillId = skillId;
+        this.scene = scene;
 
         this.layer = 1;
         this.level = 1;
-        BattleScene scene = context.getScene();
         this.nextRound = scene.getSceneRound() + config.getThinkInterval() / scene.getRoundPeriod();
         int duration = config.getDuration();
         if (duration > 0) {
@@ -82,7 +83,7 @@ public abstract class AbstractBuff implements Buff {
             // 改为永久
             this.expireRound = 0;
         } else if (this.expireRound > 0){
-            this.expireRound += (duration / getContext().getScene().getRoundPeriod());
+            this.expireRound += (duration / scene.getRoundPeriod());
         }
     }
 
@@ -137,9 +138,17 @@ public abstract class AbstractBuff implements Buff {
     }
 
     @Override
-    public void registerEventReceiverIfNecessary() {
+    public BattleScene battleScene() {
+        return scene;
+    }
 
-        BattleScene scene = getContext().getScene();
+    @Override
+    public BuffContext buffContext() {
+        return buffContext;
+    }
+
+    @Override
+    public void registerEventReceiverIfNecessary() {
         EventHandlerHolder eventHandlerHolder = scene.battleSceneHelper().eventHandlerHolder();
         List<EventHandler> handlers = new LinkedList<>();
         // 根据BuffConfig添加Handler

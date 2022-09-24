@@ -4,7 +4,7 @@ import com.li.battle.buff.BuffManager;
 import com.li.battle.collision.QuadTree;
 import com.li.battle.core.Attribute;
 import com.li.battle.core.BattleSceneHelper;
-import com.li.battle.core.scene.map.SceneMap;
+import com.li.battle.core.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.event.EventDispatcher;

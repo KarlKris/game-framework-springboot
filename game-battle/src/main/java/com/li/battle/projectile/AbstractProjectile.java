@@ -1,19 +1,17 @@
 package com.li.battle.projectile;
 
 import cn.hutool.core.lang.Pair;
-import com.li.battle.buff.core.Buff;
-import com.li.battle.collision.QuadTree;
-import com.li.battle.collision.Rectangle;
+import com.li.battle.collision.*;
 import com.li.battle.core.CampType;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.effect.Effect;
-import com.li.battle.resource.GeneralSkillConfig;
-import com.li.battle.resource.ProjectileConfig;
+import com.li.battle.effect.EffectExecutor;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.ProjectileEffectSource;
+import com.li.battle.resource.*;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -22,14 +20,14 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractProjectile implements Projectile {
 
-    /** 关联的场景 **/
-    protected final BattleScene scene;
     /** 子弹相关配置Id **/
     protected final ProjectileConfig config;
     /** 子弹创建者 **/
     protected final long owner;
     /** 子弹关联的技能 **/
     protected final int skillId;
+    /** 子弹关联的buffId **/
+    protected final int buffId;
     /** 子弹当前位置 **/
     protected Vector2D position;
     /** 子弹碰撞范围,同步子弹位置变更 **/
@@ -38,13 +36,16 @@ public abstract class AbstractProjectile implements Projectile {
     protected final long createRound;
     /** 子弹销毁标识 **/
     protected boolean destroy;
+    /** 关联的战斗数据**/
+    protected final BattleScene scene;
 
 
-    AbstractProjectile(BattleScene scene, ProjectileConfig config, long owner, int skillId, Vector2D position, Rectangle rectangle) {
+    AbstractProjectile(BattleScene scene, ProjectileConfig config, long owner, int skillId, int buffId, Vector2D position, Rectangle rectangle) {
         this.scene = scene;
         this.config = config;
         this.owner = owner;
         this.skillId = skillId;
+        this.buffId = buffId;
         this.position = position;
         this.rectangle = rectangle;
         this.createRound = scene.getSceneRound();
@@ -95,10 +96,11 @@ public abstract class AbstractProjectile implements Projectile {
         List<FightUnit> hitUnits = collisionCheck(collider, filter(units));
         if (!hitUnits.isEmpty()) {
             // 执行命中效果
-            FightUnit caster = scene.getFightUnit(owner);
-            GeneralSkillConfig config = scene.battleSceneHelper().configHelper().getGeneralSkillConfigById(skillId);
-            for (Effect<Buff> effect : config.getHitEffects()) {
-                effect.onAction(caster, hitUnits, this);
+            ProjectileEffectSource effectSource = new ProjectileEffectSource(this, hitUnits);
+            BuffConfig buffConfig = scene.battleSceneHelper().configHelper().getBuffConfigById(buffId);
+            EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
+            for (EffectParam effectParam : buffConfig.getHitEffects()) {
+                effectExecutor.execute(effectSource, effectParam);
             }
             afterExecHitEffect();
         }
@@ -171,6 +173,16 @@ public abstract class AbstractProjectile implements Projectile {
     @Override
     public void makeExpire() {
         destroy();
+    }
+
+    @Override
+    public BattleScene battleScene() {
+        return scene;
+    }
+
+    @Override
+    public int getSkillId() {
+        return skillId;
     }
 
     @Override

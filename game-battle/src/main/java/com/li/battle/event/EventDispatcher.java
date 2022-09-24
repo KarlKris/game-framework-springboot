@@ -56,6 +56,14 @@ public class EventDispatcher {
         }
     }
 
+    /**
+     * 分发事件
+     * @param event 事件
+     */
+    public void dispatch(BattleEvent event) {
+        dispatch(event, 0);
+    }
+
 
     /**
      * 分发事件

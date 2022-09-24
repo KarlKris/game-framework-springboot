@@ -1,6 +1,6 @@
 package com.li.battle.event.core;
 
-import com.li.battle.util.AttributeValueAlter;
+import com.li.battle.effect.source.EffectSource;
 import lombok.Getter;
 
 /**
@@ -11,15 +11,15 @@ import lombok.Getter;
 @Getter
 public class BeforeDamageEvent implements BattleEvent {
 
-    /** 伤害量 **/
-    private final AttributeValueAlter damage;
+    /** 伤害来源 **/
+    private final EffectSource effectSource;
     /** 伤害制造者唯一标识 **/
     private final long maker;
     /** 伤害目标唯一标识 **/
     private final long target;
 
-    public BeforeDamageEvent(AttributeValueAlter damage, long maker, long target) {
-        this.damage = damage;
+    public BeforeDamageEvent(EffectSource source, long maker, long target) {
+        this.effectSource = source;
         this.maker = maker;
         this.target = target;
     }

@@ -1,7 +1,8 @@
 package com.li.battle.core;
 
-import com.li.battle.buff.BuffFactory;
+import com.li.battle.effect.EffectExecutor;
 import com.li.battle.event.EventHandlerHolder;
+import com.li.battle.harm.HarmExecutor;
 import com.li.battle.projectile.ProjectileCreatorHolder;
 import com.li.battle.selector.SelectorHolder;
 import com.li.battle.skill.executor.BattleSkillExecutor;
@@ -22,13 +23,15 @@ public class BattleSceneHelper {
     @Resource
     private SelectorHolder selectorHolder;
     @Resource
-    private BuffFactory bufferFactory;
-    @Resource
     private EventHandlerHolder eventHandlerHolder;
     @Resource
     private BattleSkillExecutor battleSkillExecutor;
     @Resource
     private ProjectileCreatorHolder projectileCreatorHolder;
+    @Resource
+    private EffectExecutor effectExecutor;
+    @Resource
+    private HarmExecutor harmExecutor;
 
 
     public ConfigHelper configHelper() {
@@ -37,10 +40,6 @@ public class BattleSceneHelper {
 
     public SelectorHolder selectorHolder() {
         return selectorHolder;
-    }
-
-    public BuffFactory buffFactory() {
-        return bufferFactory;
     }
 
     public EventHandlerHolder eventHandlerHolder() {
@@ -53,5 +52,13 @@ public class BattleSceneHelper {
 
     public ProjectileCreatorHolder projectileCreatorHolder() {
         return projectileCreatorHolder;
+    }
+
+    public EffectExecutor effectExecutor() {
+        return effectExecutor;
+    }
+
+    public HarmExecutor harmExecutor() {
+        return harmExecutor;
     }
 }

@@ -1,5 +1,6 @@
 package com.li.battle.projectile;
 
+import com.li.battle.core.scene.BattleScene;
 import com.li.battle.event.EventReceiver;
 
 /**
@@ -30,6 +31,21 @@ public interface Projectile extends EventReceiver {
      * @return true 结束
      */
     boolean checkFinish();
+
+
+    /**
+     * 子弹所在的场景
+     * @return 场景
+     */
+    BattleScene battleScene();
+
+
+    /**
+     * 获取关联的技能id
+     * @return 技能id
+     */
+    int getSkillId();
+
 
 
 }

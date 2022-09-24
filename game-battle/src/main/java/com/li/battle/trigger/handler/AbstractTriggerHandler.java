@@ -1,9 +1,10 @@
 package com.li.battle.trigger.handler;
 
-import com.li.battle.buff.core.Buff;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.effect.Effect;
+import com.li.battle.effect.*;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.TriggerReceiverEffectSource;
 import com.li.battle.event.EventHandlerContext;
 import com.li.battle.event.core.BattleEvent;
 import com.li.battle.event.handler.AbstractEventHandler;
@@ -45,12 +46,14 @@ public abstract class AbstractTriggerHandler<E extends BattleEvent> extends Abst
         trigger.tryTrigger(receiver.getUnitId(), event, triggerId -> {
             // 触发成功,更新CD
             receiver.afterExecuteEffect();
-            // 执行效果
-            BattleScene scene = receiver.getScene();
-            FightUnit caster = scene.getFightUnit(receiver.getUnitId());
+
+            BattleScene scene = receiver.battleScene();
+            EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
             FightUnit target = scene.getFightUnit(triggerId);
-            for (Effect<Buff> effect : receiver.getConfig().getTriggerEffects()) {
-                effect.onAction(caster, target, receiver);
+            TriggerReceiverEffectSource effectSource = new TriggerReceiverEffectSource(receiver, target);
+            // 执行效果
+            for (EffectParam effectParam : receiver.getConfig().getTriggerEffects()) {
+                effectExecutor.execute(effectSource, effectParam);
             }
         });
 

@@ -4,7 +4,9 @@ import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.effect.Effect;
+import com.li.battle.effect.*;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.*;
 import com.li.battle.resource.BuffConfig;
 
 import java.util.*;
@@ -35,8 +37,10 @@ public class BuffManager {
 
         BuffConfig config = buff.getConfig();
         if (ArrayUtil.isNotEmpty(config.getAwakeEffects())) {
-            for (Effect<Buff> effect : config.getAwakeEffects()) {
-                effect.onAction(buff);
+            EffectExecutor effectExecutor = buff.battleScene().battleSceneHelper().effectExecutor();
+            BuffEffectSource source = new BuffEffectSource(buff);
+            for (EffectParam effectParam : config.getAwakeEffects()) {
+                effectExecutor.execute(source, effectParam);
             }
         }
 
@@ -78,8 +82,10 @@ public class BuffManager {
         BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
         if (!buff.isExpire(curRound)) {
             if (ArrayUtil.isNotEmpty(config.getThinkEffects())) {
-                for (Effect<Buff> effect : config.getThinkEffects()) {
-                    effect.onAction(buff);
+                EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
+                BuffEffectSource source = new BuffEffectSource(buff);
+                for (EffectParam effectParam : config.getThinkEffects()) {
+                    effectExecutor.execute(source, effectParam);
                 }
             }
 
@@ -88,8 +94,10 @@ public class BuffManager {
         } else {
             // 执行销毁效果
             if (ArrayUtil.isNotEmpty(config.getDestroyEffects())) {
-                for (Effect<Buff> effect : config.getDestroyEffects()) {
-                    effect.onAction(buff);
+                EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
+                BuffEffectSource source = new BuffEffectSource(buff);
+                for (EffectParam effectParam : config.getDestroyEffects()) {
+                    effectExecutor.execute(source, effectParam);
                 }
             }
         }

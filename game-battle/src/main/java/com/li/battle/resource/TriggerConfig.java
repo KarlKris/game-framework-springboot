@@ -1,10 +1,8 @@
 package com.li.battle.resource;
 
-import com.li.battle.buff.core.Buff;
-import com.li.battle.effect.Effect;
+import com.li.battle.effect.domain.EffectParam;
 import com.li.battle.trigger.core.Trigger;
-import com.li.common.resource.anno.ResourceId;
-import com.li.common.resource.anno.ResourceObj;
+import com.li.common.resource.anno.*;
 import lombok.Getter;
 
 /**
@@ -26,9 +24,9 @@ public class TriggerConfig {
     /** 触发器CD,即触发一次后等待x毫秒才能再次触发 **/
     private int coolDown;
     /** 触发器触发后执行的效果 **/
-    private Effect<Buff>[] triggerEffects;
+    private EffectParam[] triggerEffects;
     /** 触发器未触发后过时时执行的效果 **/
-    private Effect<Buff>[] destroyEffects;
+    private EffectParam[] destroyEffects;
 
 
 

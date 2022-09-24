@@ -50,9 +50,9 @@ public abstract class AbstractFightUnit implements FightUnit {
     // 属性一分为三 个人基础属性,战斗中因各种效果而修改的属性值,场景全局属性变更
 
     /** 基础属性 **/
-    private final Map<Attribute, Long> baseAttributes;
+    private final Map<Attribute, Long> coreAttributes;
     /** 场景内属性变更值 **/
-    private final Map<Attribute, Long> increaseAttributes;
+    private final Map<Attribute, Long> externalAttributes;
 
 
     /** 技能信息 **/
@@ -60,7 +60,7 @@ public abstract class AbstractFightUnit implements FightUnit {
 
 
     public AbstractFightUnit(long id, UnitType type, CampType campType, double radius, int maxSpeed
-            , Vector2D position, Map<Attribute, Long> baseAttributes, List<Skill> skills) {
+            , Vector2D position, Map<Attribute, Long> coreAttributes, List<Skill> skills) {
         this.id = id;
         this.type = type;
         this.campType = campType;
@@ -68,8 +68,8 @@ public abstract class AbstractFightUnit implements FightUnit {
         this.maxSpeed = maxSpeed;
         this.position = position;
 
-        this.baseAttributes = baseAttributes;
-        this.increaseAttributes = new HashMap<>(16);
+        this.coreAttributes = coreAttributes;
+        this.externalAttributes = new HashMap<>(16);
         this.skills = skills;
 
         this.state = UnitState.NORMAL;
@@ -88,14 +88,22 @@ public abstract class AbstractFightUnit implements FightUnit {
 
     @Override
     public long getAttributeValue(Attribute attribute) {
-        return baseAttributes.getOrDefault(attribute, 0L)
-                + increaseAttributes.getOrDefault(attribute, 0L)
-                + scene.getGlobalAttribute(attribute);
+        long coreValue = coreAttributes.getOrDefault(attribute, 0L);
+        long externalValue = externalAttributes.getOrDefault(attribute, 0L);
+        long globalValue = scene.getGlobalAttribute(attribute);
+
+        long value = coreValue + externalValue + globalValue;
+        return value == 0 ? attribute.getDefaultValue() : value;
     }
 
     @Override
     public void modifyAttribute(Attribute attribute, Long value) {
-        this.increaseAttributes.merge(attribute, value, Long::sum);
+        this.externalAttributes.merge(attribute, value, Long::sum);
+    }
+
+    @Override
+    public boolean isDead() {
+        return getAttributeValue(Attribute.CUR_HP) <= 0;
     }
 
     @Override
@@ -229,6 +237,6 @@ public abstract class AbstractFightUnit implements FightUnit {
     @Override
     public void leaveScene() {
         this.scene = null;
-        this.increaseAttributes.clear();
+        this.externalAttributes.clear();
     }
 }

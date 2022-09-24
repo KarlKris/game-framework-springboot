@@ -1,12 +1,8 @@
 package com.li.battle.resource;
 
-import com.li.battle.buff.BuffMerge;
-import com.li.battle.buff.BuffMonitorSkillCasterType;
-import com.li.battle.buff.BuffType;
-import com.li.battle.buff.core.Buff;
-import com.li.battle.effect.Effect;
-import com.li.common.resource.anno.ResourceId;
-import com.li.common.resource.anno.ResourceObj;
+import com.li.battle.buff.*;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.common.resource.anno.*;
 import lombok.Getter;
 
 /**
@@ -32,45 +28,49 @@ public class BuffConfig {
     /** buff刷新合并规则（更新Buff层数，等级，持续时间等数据） **/
     private BuffMerge mergeRule;
     /** buff生效效果 **/
-    private Effect<Buff>[] awakeEffects;
+    private EffectParam[] awakeEffects;
 
     /** buff触发间隔(毫秒) **/
     private int thinkInterval;
     /** buff间隔持续效果 **/
-    private Effect<Buff>[] thinkEffects;
+    private EffectParam[] thinkEffects;
 
     /** buff移除效果 **/
-    private Effect<Buff>[] removeEffects;
+    private EffectParam[] removeEffects;
     /** buff销毁效果 **/
-    private Effect<Buff>[] destroyEffects;
+    private EffectParam[] destroyEffects;
 
     /** buff改变运动状态时效果 **/
-    private Effect<Buff>[] motionUpdateEffects;
+    private EffectParam[] motionUpdateEffects;
     /** buff打断运动时效果 **/
-    private Effect<Buff>[] motionInterruptEffects;
+    private EffectParam[] motionInterruptEffects;
 
     /** 某个主动技能执行成功时效果 **/
-    private Effect<Buff>[] executedEffects;
+    private EffectParam[] executedEffects;
     /** 监听的主动技能id **/
     private int[] skillIds;
     /** 技能施法人类型 **/
     private BuffMonitorSkillCasterType monitorSkillCasterType;
 
     /** 我方给目标造成伤害前触发效果 **/
-    private Effect<Buff>[] beforeDamageEffects;
+    private EffectParam[] beforeDamageEffects;
     /** 我方给目标造成伤害后触发效果 **/
-    private Effect<Buff>[] afterDamageEffects;
+    private EffectParam[] afterDamageEffects;
 
     /** 我方受到伤害前触发效果 **/
-    private Effect<Buff>[] beforeTakeDamageEffects;
+    private EffectParam[] beforeTakeDamageEffects;
     /** 我方受到伤害后触发效果 **/
-    private Effect<Buff>[] afterTakeDamageEffects;
+    private EffectParam[] afterTakeDamageEffects;
 
     /** 我方死亡前触发效果 **/
-    private Effect<Buff>[] beforeDeadEffects;
+    private EffectParam[] beforeDeadEffects;
     /** 我方死亡后触发效果 **/
-    private Effect<Buff>[] afterDeadEffects;
+    private EffectParam[] afterDeadEffects;
 
     /** 我方击杀目标后触发 **/
-    private Effect<Buff>[] afterKillEffects;
+    private EffectParam[] afterKillEffects;
+
+    /** 子弹命中效果(子弹只能由buff来创建) **/
+    private EffectParam[] hitEffects;
+
 }

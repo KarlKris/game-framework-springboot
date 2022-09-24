@@ -1,9 +1,7 @@
 package com.li.battle.resource;
 
-import com.li.battle.buff.core.Buff;
-import com.li.battle.effect.Effect;
-import com.li.common.resource.anno.ResourceId;
-import com.li.common.resource.anno.ResourceObj;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.common.resource.anno.*;
 import lombok.Getter;
 
 /**
@@ -19,8 +17,8 @@ public class ToggleSkillConfig {
     @ResourceId
     private int id;
     /** 开启技能时效果 **/
-    private Effect<Buff>[] onEffects;
+    private EffectParam[] onEffects;
     /** 关闭技能时效果 **/
-    private Effect<Buff>[] offEffects;
+    private EffectParam[] offEffects;
 
 }

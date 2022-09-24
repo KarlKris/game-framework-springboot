@@ -2,16 +2,15 @@ package com.li.battle.trigger;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.core.scene.BattleScene;
-import com.li.battle.event.EventHandlerHolder;
-import com.li.battle.event.EventPipeline;
-import com.li.battle.event.EventReceiver;
+import com.li.battle.event.*;
 import com.li.battle.resource.TriggerConfig;
 import com.li.battle.trigger.core.Trigger;
 import com.li.battle.trigger.handler.AbstractTriggerHandler;
 import lombok.Getter;
 
 /**
- * 触发器事件接收者
+ * todo 还需要类似提莫的蘑菇的指定地点的触发器（目前只有指点单位或任意单位）
+ * 触发器
  * @author li-yuanwen
  * @date 2022/5/26
  */
@@ -104,6 +103,9 @@ public class TriggerReceiver implements EventReceiver {
             // 注册
             scene.eventDispatcher().register(this);
         }
+    }
 
+    public BattleScene battleScene() {
+        return scene;
     }
 }

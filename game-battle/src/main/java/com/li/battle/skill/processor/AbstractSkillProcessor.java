@@ -1,10 +1,11 @@
 package com.li.battle.skill.processor;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.battle.buff.core.Buff;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.effect.Effect;
+import com.li.battle.effect.*;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.SkillEffectSource;
 import com.li.battle.skill.BattleSkill;
 
 /**
@@ -17,21 +18,23 @@ public abstract class AbstractSkillProcessor<T> implements SkillProcessor<T> {
 
     /**
      * 判断效果是否可执行
-     * @param effects 效果
+     * @param effectParams 效果
      * @return true
      */
-    protected boolean isExecutable(Effect<Buff>[] effects) {
-        return ArrayUtil.isNotEmpty(effects);
+    protected boolean isExecutable(EffectParam[] effectParams) {
+        return ArrayUtil.isNotEmpty(effectParams);
     }
 
     /**
      * 执行效果
      * @param skill 技能
-     * @param effects 效果
+     * @param effectParams 效果
      */
-    protected void process0(BattleSkill skill, Effect<Buff>[] effects) {
-        for (Effect<Buff> effect : effects) {
-            effect.onAction(skill);
+    protected void process0(BattleSkill skill, EffectParam[] effectParams) {
+        SkillEffectSource source = new SkillEffectSource(skill);
+        EffectExecutor effectExecutor = skill.getScene().battleSceneHelper().effectExecutor();
+        for (EffectParam effectParam : effectParams) {
+            effectExecutor.execute(source, effectParam);
         }
     }
 
@@ -42,7 +45,7 @@ public abstract class AbstractSkillProcessor<T> implements SkillProcessor<T> {
      */
     protected void makeSkillStartCoolDown(BattleSkill skill) {
         // 技能进CD
-        BattleScene scene = skill.getContext().getScene();
+        BattleScene scene = skill.getScene();
         FightUnit fightUnit = scene.getFightUnit(skill.getCaster());
         fightUnit.coolDownSkill(skill.getSkillId());
     }

@@ -7,8 +7,10 @@ package com.li.battle.core;
  */
 public interface Const {
 
+    /** 1万 **/
+    int TEN_THOUSAND = 10000;
 
-    /** 加成基数 **/
-    int ADDITION_CARDINALITY = 1000;
+    /** 100 **/
+    int HUNDRED = 100;
 
 }

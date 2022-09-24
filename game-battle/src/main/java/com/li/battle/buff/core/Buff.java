@@ -1,6 +1,6 @@
 package com.li.battle.buff.core;
 
-import com.li.battle.core.context.AbstractContext;
+import com.li.battle.core.scene.BattleScene;
 import com.li.battle.event.EventReceiver;
 import com.li.battle.resource.BuffConfig;
 
@@ -114,10 +114,17 @@ public interface Buff extends EventReceiver {
     boolean isExpire(long curRound);
 
     /**
-     * 获取buff创建上下文
-     * @return buff创建上下文
+     * 关联的战斗场景
+     * @return 战斗场景
      */
-    AbstractContext getContext();
+    BattleScene battleScene();
+
+    /**
+     * Buff创建时候的一些上下文数据，它是一个不确定的项
+     * 通过外部传入各种自定义的数据，然后在Buff逻辑中使用这些自定义数据
+     * @return 上下文数据
+     */
+    BuffContext buffContext();
 
 
 }

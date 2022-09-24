@@ -22,9 +22,9 @@ public class TrackingProjectile extends AbstractProjectile {
     /** 子弹追踪的目标 **/
     private final long target;
 
-    public TrackingProjectile(BattleScene scene, ProjectileConfig config, long owner, int skillId
+    public TrackingProjectile(BattleScene scene, ProjectileConfig config, long owner, int skillId, int buffId
             , Vector2D position, long target, Rectangle rectangle) {
-        super(scene, config, owner, skillId, position, rectangle);
+        super(scene, config, owner, skillId, buffId, position, rectangle);
         this.target = target;
     }
 

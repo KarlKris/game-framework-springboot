@@ -1,12 +1,11 @@
 package com.li.battle.trigger;
 
-import com.li.battle.buff.core.Buff;
 import com.li.battle.core.scene.BattleScene;
-import com.li.battle.core.unit.FightUnit;
-import com.li.battle.effect.Effect;
+import com.li.battle.effect.*;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.TriggerReceiverEffectSource;
 
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.*;
 
 /**
  * 触发器管理
@@ -49,10 +48,10 @@ public class TriggerManager {
             return;
         }
 
-        FightUnit caster = scene.getFightUnit(receiver.getUnitId());
-        FightUnit target = scene.getFightUnit(receiver.getTarget());
-        for (Effect<Buff> effect :  receiver.getConfig().getDestroyEffects()) {
-            effect.onAction(caster, target, receiver);
+        TriggerReceiverEffectSource source = new TriggerReceiverEffectSource(receiver, null);
+        EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
+        for (EffectParam effectParam :  receiver.getConfig().getDestroyEffects()) {
+            effectExecutor.execute(source, effectParam);
         }
     }
 }

@@ -2,10 +2,9 @@ package com.li.battle.projectile;
 
 import com.li.battle.collision.Rectangle;
 import com.li.battle.core.scene.BattleScene;
-import com.li.battle.core.unit.FightUnit;
-import com.li.battle.core.unit.IPosition;
+import com.li.battle.core.unit.*;
+import com.li.battle.effect.source.EffectSource;
 import com.li.battle.resource.ProjectileConfig;
-import com.li.battle.skill.BattleSkill;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.springframework.stereotype.Component;
 
@@ -25,22 +24,18 @@ public class TrackingProjectileCreator implements ProjectileCreator {
     }
 
     @Override
-    public Projectile newInstance(BattleSkill skill, ProjectileConfig config) {
-        BattleScene scene = skill.getContext().getScene();
+    public Projectile newInstance(EffectSource source, ProjectileConfig config) {
+        BattleScene scene = source.battleScene();
 
-        FightUnit caster = scene.getFightUnit(skill.getCaster());
+        FightUnit caster = source.getCaster();
 
         Vector2D position = caster.getPosition();
-        List<IPosition> results = skill.getTarget().getResults();
+        List<FightUnit> results = source.getTargetUnits();
         if (results.isEmpty()) {
             return null;
         }
 
-        FightUnit targetUnit = results.stream()
-                .filter(p -> p instanceof FightUnit)
-                .map(p -> (FightUnit) p)
-                .findFirst().orElse(null);
-
+        FightUnit targetUnit = results.get(0);
         if (targetUnit == null) {
             return null;
         }
@@ -54,6 +49,7 @@ public class TrackingProjectileCreator implements ProjectileCreator {
         // 碰撞矩形
         Rectangle rectangle = new Rectangle(position, end, config.getWidth() >> 1);
 
-        return new TrackingProjectile(scene, config, caster.getId(), skill.getSkillId(), position, targetUnit.getId(), rectangle);
+        return new TrackingProjectile(scene, config, caster.getId(), source.getSkillId()
+                , source.getBuffId(), position, targetUnit.getId(), rectangle);
     }
 }

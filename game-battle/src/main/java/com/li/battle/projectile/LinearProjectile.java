@@ -20,9 +20,9 @@ public class LinearProjectile extends AbstractProjectile {
     /** 子弹初始位置 **/
     private final Vector2D start;
 
-    public LinearProjectile(BattleScene scene, ProjectileConfig config, long owner, int skillId
+    public LinearProjectile(BattleScene scene, ProjectileConfig config, long owner, int skillId, int buffId
             , Vector2D position, Rectangle rectangle) {
-        super(scene, config, owner, skillId, position, rectangle);
+        super(scene, config, owner, skillId, buffId, position, rectangle);
         this.start = position;
     }
 

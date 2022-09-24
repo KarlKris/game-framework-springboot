@@ -1,7 +1,7 @@
 package com.li.battle.skill;
 
 import com.li.battle.core.IOwner;
-import com.li.battle.core.context.AbstractDamageAlterContext;
+import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.*;
 import com.li.battle.selector.*;
 import lombok.Getter;
@@ -32,16 +32,16 @@ public class BattleSkill implements IOwner {
     private final long expireRound;
     /** 选择目标相关参数 **/
     private final SelectParam param;
-    /** 技能上下文 **/
-    private final AbstractDamageAlterContext context;
+    /** 关联的战斗场景 **/
+    private final BattleScene scene;
 
-    public BattleSkill(int skillId, long caster, SelectorResult target, int durationRound, SelectParam param, AbstractDamageAlterContext context) {
+    public BattleSkill(int skillId, long caster, SelectorResult target, int durationRound, SelectParam param,  BattleScene scene) {
         this.skillId = skillId;
         this.caster = caster;
         this.target = target;
-        this.context = context;
+        this.scene = scene;
         this.param = param;
-        this.createRound = context.getScene().getSceneRound();
+        this.createRound = scene.getSceneRound();
         this.nextRound = createRound;
         this.expireRound = createRound + durationRound;
 

@@ -1,7 +1,7 @@
 package com.li.battle.projectile;
 
+import com.li.battle.effect.source.EffectSource;
 import com.li.battle.resource.ProjectileConfig;
-import com.li.battle.skill.BattleSkill;
 
 /**
  * 子弹创建
@@ -20,10 +20,10 @@ public interface ProjectileCreator {
 
     /**
      * 创建子弹
-     * @param skill 技能
+     * @param source 效果源
      * @param config 子弹配置
      * @return 子弹
      */
-    Projectile newInstance(BattleSkill skill, ProjectileConfig config);
+    Projectile newInstance(EffectSource source, ProjectileConfig config);
 
 }
