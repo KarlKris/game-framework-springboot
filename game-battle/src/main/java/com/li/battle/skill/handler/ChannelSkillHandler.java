@@ -10,7 +10,7 @@ import com.li.battle.selector.SelectorHolder;
 import com.li.battle.selector.SelectorResult;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillType;
-import com.li.battle.skill.processor.SkillProcessor;
+import com.li.battle.skill.processor.SkillStageProcessor;
 import com.li.battle.skill.processor.SkillProcessorHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -40,9 +40,9 @@ public class ChannelSkillHandler implements SkillHandler {
     @Override
     public void handle(BattleSkill skill) {
         ChannelSkillConfig skillConfig = configHelper.getChannelSkillConfigById(skill.getSkillId());
-        SkillProcessor<ChannelSkillConfig> skillProcessor
-                = (SkillProcessor<ChannelSkillConfig>) skillProcessorHolder.getSkillProcessor(skill.getNextStage());
-        skillProcessor.process(skill, skillConfig);
+        SkillStageProcessor<ChannelSkillConfig> skillStageProcessor
+                = (SkillStageProcessor<ChannelSkillConfig>) skillProcessorHolder.getSkillProcessor(skill.getNextStage());
+        skillStageProcessor.process(skill, skillConfig);
     }
 
     @Override

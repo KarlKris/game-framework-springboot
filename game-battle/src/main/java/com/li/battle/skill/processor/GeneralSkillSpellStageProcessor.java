@@ -6,22 +6,22 @@ import com.li.battle.skill.SkillStage;
 import org.springframework.stereotype.Component;
 
 /**
- * 一次性技能结束阶段技能效果执行器
+ * 一次性技能施法阶段技能效果执行器
  * @author li-yuanwen
  * @date 2022/5/20
  */
 @Component
-public class GeneralSkillFinishProcessor extends AbstractSkillProcessor<GeneralSkillConfig> {
+public class GeneralSkillSpellStageProcessor extends AbstractSkillStageProcessor<GeneralSkillConfig> {
 
     @Override
-    public SkillStage getSkillType() {
-        return SkillStage.FINISH;
+    public SkillStage getSkillSatge() {
+        return SkillStage.SPELL;
     }
 
     @Override
     public void process(BattleSkill skill, GeneralSkillConfig config) {
-        if (isExecutable(config.getFinishEffects())) {
-            process0(skill, config.getFinishEffects());
+        if (isExecutable(config.getSpellEffects())) {
+            process0(skill, config.getSpellEffects());
         }
     }
 }

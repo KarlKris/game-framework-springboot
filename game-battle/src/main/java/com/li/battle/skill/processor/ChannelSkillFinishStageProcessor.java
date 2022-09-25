@@ -9,10 +9,10 @@ import com.li.battle.skill.SkillStage;
  * @author li-yuanwen
  * @date 2022/5/20
  */
-public class ChannelSkillFinishProcessor extends AbstractSkillProcessor<ChannelSkillConfig> {
+public class ChannelSkillFinishStageProcessor extends AbstractSkillStageProcessor<ChannelSkillConfig> {
 
     @Override
-    public SkillStage getSkillType() {
+    public SkillStage getSkillSatge() {
         return SkillStage.CHANNEL_FINISH;
     }
 

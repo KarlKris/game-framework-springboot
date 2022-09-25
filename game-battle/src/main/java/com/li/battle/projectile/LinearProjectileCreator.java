@@ -47,6 +47,6 @@ public class LinearProjectileCreator implements ProjectileCreator {
         // 碰撞矩形
         Rectangle rectangle = new Rectangle(position, end, config.getWidth() >> 1);
 
-        return new LinearProjectile(scene, config, caster.getId(), source.getSkillId(), position, rectangle);
+        return new LinearProjectile(scene, config, caster.getId(), source.getSkillId(), source.getBuffId(), position, rectangle);
     }
 }

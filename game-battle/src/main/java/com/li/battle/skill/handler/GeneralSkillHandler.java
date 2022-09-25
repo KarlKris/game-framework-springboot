@@ -10,7 +10,7 @@ import com.li.battle.selector.SelectorHolder;
 import com.li.battle.selector.SelectorResult;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillType;
-import com.li.battle.skill.processor.SkillProcessor;
+import com.li.battle.skill.processor.SkillStageProcessor;
 import com.li.battle.skill.processor.SkillProcessorHolder;
 import com.li.common.resource.anno.ResourceInject;
 import com.li.common.resource.storage.ResourceStorage;
@@ -46,9 +46,9 @@ public class GeneralSkillHandler implements SkillHandler {
     @Override
     public void handle(BattleSkill skill) {
         GeneralSkillConfig skillConfig = storage.getResource(skill.getSkillId());
-        SkillProcessor<GeneralSkillConfig> skillProcessor
-                = (SkillProcessor<GeneralSkillConfig>) skillProcessorHolder.getSkillProcessor(skill.getNextStage());
-        skillProcessor.process(skill, skillConfig);
+        SkillStageProcessor<GeneralSkillConfig> skillStageProcessor
+                = (SkillStageProcessor<GeneralSkillConfig>) skillProcessorHolder.getSkillProcessor(skill.getNextStage());
+        skillStageProcessor.process(skill, skillConfig);
     }
 
     @Override

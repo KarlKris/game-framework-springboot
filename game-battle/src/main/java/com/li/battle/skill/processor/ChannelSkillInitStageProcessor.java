@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
  * @date 2022/5/20
  */
 @Component
-public class ChannelSkillInitProcessor extends AbstractSkillProcessor<ChannelSkillConfig> {
+public class ChannelSkillInitStageProcessor extends AbstractSkillStageProcessor<ChannelSkillConfig> {
 
     @Override
-    public SkillStage getSkillType() {
+    public SkillStage getSkillSatge() {
         return SkillStage.CHANNEL_INIT;
     }
 

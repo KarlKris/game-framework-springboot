@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
  * @date 2022/5/19
  */
 @Component
-public class GeneralSkillStartProcessor extends AbstractSkillProcessor<GeneralSkillConfig> {
+public class GeneralSkillStartStageProcessor extends AbstractSkillStageProcessor<GeneralSkillConfig> {
 
 
     @Override
-    public SkillStage getSkillType() {
+    public SkillStage getSkillSatge() {
         return SkillStage.START;
     }
 

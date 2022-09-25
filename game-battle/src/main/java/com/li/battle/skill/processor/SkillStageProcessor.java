@@ -8,14 +8,14 @@ import com.li.battle.skill.SkillStage;
  * @author li-yuanwen
  * @date 2022/5/19
  */
-public interface SkillProcessor<T> {
+public interface SkillStageProcessor<T> {
 
 
     /**
      * 负责的技能阶段
      * @return 技能阶段
      */
-    SkillStage getSkillType();
+    SkillStage getSkillSatge();
 
 
     /**

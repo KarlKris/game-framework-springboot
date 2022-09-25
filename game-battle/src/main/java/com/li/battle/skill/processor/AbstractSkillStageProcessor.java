@@ -13,7 +13,7 @@ import com.li.battle.skill.BattleSkill;
  * @author li-yuanwen
  * @date 2022/5/30
  */
-public abstract class AbstractSkillProcessor<T> implements SkillProcessor<T> {
+public abstract class AbstractSkillStageProcessor<T> implements SkillStageProcessor<T> {
 
 
     /**

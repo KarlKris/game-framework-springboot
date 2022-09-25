@@ -23,20 +23,20 @@ public class SkillProcessorHolder {
     private ApplicationContext applicationContext;
 
 
-    private final Map<SkillStage, SkillProcessor<?>> processorHolder = new EnumMap<>(SkillStage.class);
+    private final Map<SkillStage, SkillStageProcessor<?>> processorHolder = new EnumMap<>(SkillStage.class);
 
     @PostConstruct
     private void initialize() {
-        for (SkillProcessor<?> processor : applicationContext.getBeansOfType(SkillProcessor.class).values()) {
-            SkillProcessor<?> old = processorHolder.put(processor.getSkillType(), processor);
+        for (SkillStageProcessor<?> processor : applicationContext.getBeansOfType(SkillStageProcessor.class).values()) {
+            SkillStageProcessor<?> old = processorHolder.put(processor.getSkillSatge(), processor);
             if (old != null) {
-                throw new BeanInitializationException("存在多个相同技能阶段效果执行器:" + processor.getSkillType().name());
+                throw new BeanInitializationException("存在多个相同技能阶段效果执行器:" + processor.getSkillSatge().name());
             }
         }
     }
 
 
-    public SkillProcessor<?> getSkillProcessor(SkillStage skillStage) {
+    public SkillStageProcessor<?> getSkillProcessor(SkillStage skillStage) {
         return processorHolder.get(skillStage);
     }
 

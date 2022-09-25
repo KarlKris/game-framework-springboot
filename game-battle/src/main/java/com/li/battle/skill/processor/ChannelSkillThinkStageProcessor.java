@@ -6,22 +6,22 @@ import com.li.battle.skill.SkillStage;
 import org.springframework.stereotype.Component;
 
 /**
- * 持续型技能引导开始阶段技能效果执行器
+ * 持续型技能引导施法阶段技能效果执行器
  * @author li-yuanwen
  * @date 2022/5/20
  */
 @Component
-public class ChannelSkillStartProcessor extends AbstractSkillProcessor<ChannelSkillConfig> {
+public class ChannelSkillThinkStageProcessor extends AbstractSkillStageProcessor<ChannelSkillConfig> {
 
     @Override
-    public SkillStage getSkillType() {
-        return SkillStage.CHANNEL_START;
+    public SkillStage getSkillSatge() {
+        return SkillStage.CHANNEL_THINK;
     }
 
     @Override
     public void process(BattleSkill skill, ChannelSkillConfig config) {
-        if (isExecutable(config.getStartEffects())) {
-            process0(skill, config.getStartEffects());
+        if (isExecutable(config.getThinkEffects())) {
+            process0(skill, config.getThinkEffects());
         }
         skill.updateSkillStage(SkillStage.CHANNEL_THINK);
     }
