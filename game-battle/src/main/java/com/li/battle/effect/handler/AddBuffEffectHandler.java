@@ -46,7 +46,7 @@ public class AddBuffEffectHandler extends AbstractEffectParamHandler<AddBuffEffe
                 continue;
             }
 
-            Buff buff = new NormalBuff(config, unit.getId(), target.getId(), source.getSkillId(), battleScene);
+            Buff buff = new NormalBuff(battleScene.getNextId(), config, unit.getId(), target.getId(), source.getSkillId(), battleScene);
 
             // Before_Buff_Awake_Event事件
             BeforeBuffAwakeEvent event = new BeforeBuffAwakeEvent(buff);

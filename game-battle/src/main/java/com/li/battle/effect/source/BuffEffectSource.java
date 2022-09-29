@@ -14,7 +14,7 @@ import java.util.*;
 public class BuffEffectSource extends AbstractEffectSource {
 
     /** buff **/
-    private final Buff buff;
+    protected final Buff buff;
 
     public BuffEffectSource(Buff buff) {
         this.buff = buff;
@@ -51,8 +51,13 @@ public class BuffEffectSource extends AbstractEffectSource {
         return buff.getBuffId();
     }
 
+    public Buff getBuff() {
+        return buff;
+    }
+
     private FightUnit getParentFightUnit() {
         return buff.battleScene().getFightUnit(buff.getParent());
     }
+
 
 }

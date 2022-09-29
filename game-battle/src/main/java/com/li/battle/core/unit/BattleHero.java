@@ -14,15 +14,12 @@ import java.util.Map;
  * @author li-yuanwen
  * @date 2022/7/23
  */
-public abstract class BattleHero extends AbstractFightUnit {
+public class BattleHero extends AbstractFightUnit {
 
     public BattleHero(long id, UnitType type, CampType campType, double radius, int maxSpeed
             , Vector2D position, Map<Attribute, Long> baseAttributes, List<Skill> skills) {
         super(id, type, campType, radius, maxSpeed, position, baseAttributes, skills);
     }
-
-
-
 
 
 }

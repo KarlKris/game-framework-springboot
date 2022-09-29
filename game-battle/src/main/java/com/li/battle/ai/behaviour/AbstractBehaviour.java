@@ -1,6 +1,7 @@
 package com.li.battle.ai.behaviour;
 
 import com.li.battle.ai.Status;
+import com.li.battle.ai.blackboard.BlackBoard;
 
 /**
  * 基础节点对象,规定API调用契约
@@ -13,33 +14,33 @@ public abstract class AbstractBehaviour implements Behaviour {
     private Status status;
 
     @Override
-    public final Status tick() {
+    public final Status tick(BlackBoard board) {
         // 行为第一次调用
         if (status != Status.RUNNING) {
-            onInitialize();
+            onInitialize(board);
         }
         // 更新状态
-        status = update();
+        status = update(board);
         // 行为结束
         if (status != Status.RUNNING) {
-            onTerminate(status);
+            onTerminate(board, status);
         }
 
         return status;
     }
 
     @Override
-    public void onInitialize() {
+    public void onInitialize(BlackBoard board) {
         // 默认空方法
     }
 
     @Override
-    public void onTerminate(Status status) {
+    public void onTerminate(BlackBoard board, Status status) {
         // 默认空方法
     }
 
     @Override
-    public final Status getCurStatus() {
+    public final Status getStatus() {
         return status;
     }
 }

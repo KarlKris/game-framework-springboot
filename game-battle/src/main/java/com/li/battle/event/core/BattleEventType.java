@@ -22,9 +22,6 @@ public enum BattleEventType {
     /** 死亡前事件 **/
     BEFORE_DEAD,
 
-    /** 死亡后事件 **/
-    AFTER_DEAD,
-
     /** 击杀事件 **/
     KILL,
 

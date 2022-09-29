@@ -15,7 +15,7 @@ public class TriggerEffectParam implements EffectParam {
     private int triggerId;
 
     @Override
-    public EffectType type() {
+    public EffectType getType() {
         return EffectType.TRIGGER;
     }
 }

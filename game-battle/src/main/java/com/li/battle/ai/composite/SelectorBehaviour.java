@@ -2,6 +2,7 @@ package com.li.battle.ai.composite;
 
 import com.li.battle.ai.Status;
 import com.li.battle.ai.behaviour.Behaviour;
+import com.li.battle.ai.blackboard.BlackBoard;
 
 import java.util.Iterator;
 
@@ -10,10 +11,10 @@ import java.util.Iterator;
  * @author li-yuanwen
  * @date 2022/1/25
  */
-public class SelectorComposite extends AbstractComposite {
+public class SelectorBehaviour extends AbstractComposite {
 
     @Override
-    public final Status update() {
+    public final Status update(BlackBoard board) {
         Iterator<Behaviour> iterator =
                 getChildren().iterator();
 
@@ -23,7 +24,7 @@ public class SelectorComposite extends AbstractComposite {
 
         while (true) {
             Behaviour behaviour = iterator.next();
-            Status status = behaviour.tick();
+            Status status = behaviour.tick(board);
 
             if (status != Status.FAILURE) {
                 return status;

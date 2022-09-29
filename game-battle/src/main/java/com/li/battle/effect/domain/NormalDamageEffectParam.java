@@ -22,12 +22,12 @@ public class NormalDamageEffectParam extends AbstractDamageEffectParam {
     private HarmType t;
 
     @Override
-    public HarmType harmType() {
+    public HarmType getHarmType() {
         return t;
     }
 
     @Override
-    public EffectType type() {
+    public EffectType getType() {
         return EffectType.NORMAL_DAMAGE;
     }
 }

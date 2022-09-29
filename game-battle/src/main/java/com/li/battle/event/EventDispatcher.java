@@ -29,11 +29,11 @@ public class EventDispatcher {
     }
 
     /**
-     * 注册事件接收者
-     * @param receiver 事件接收者
+     * 注册事件链
+     * @param eventPipeline 事件链
      */
-    public void register(EventReceiver receiver) {
-        EventPipeline eventPipeline = receiver.eventPipeline();
+    public void register(EventPipeline eventPipeline) {
+        EventReceiver receiver = eventPipeline.eventReceiver();
         EventHandlerContext context = eventPipeline.firstEventHandlerContext();
         for (BattleEventType type : eventPipeline.getEventTypes()) {
             List<EventHandlerContext> contexts = contextHolder.computeIfAbsent(type, k -> new LinkedList<>());

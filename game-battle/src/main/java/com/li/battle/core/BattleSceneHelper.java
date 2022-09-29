@@ -6,6 +6,7 @@ import com.li.battle.harm.HarmExecutor;
 import com.li.battle.projectile.ProjectileCreatorHolder;
 import com.li.battle.selector.SelectorHolder;
 import com.li.battle.skill.executor.BattleSkillExecutor;
+import com.li.battle.trigger.TriggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -32,6 +33,8 @@ public class BattleSceneHelper {
     private EffectExecutor effectExecutor;
     @Resource
     private HarmExecutor harmExecutor;
+    @Resource
+    private TriggerFactory triggerFactory;
 
 
     public ConfigHelper configHelper() {
@@ -60,5 +63,9 @@ public class BattleSceneHelper {
 
     public HarmExecutor harmExecutor() {
         return harmExecutor;
+    }
+
+    public TriggerFactory triggerFactory() {
+        return triggerFactory;
     }
 }

@@ -1,12 +1,14 @@
 package com.li.battle.core.scene;
 
+import com.li.battle.ai.BehaviourTree;
+import com.li.battle.ai.starter.FightUnitAiStarter;
 import com.li.battle.buff.BuffManager;
 import com.li.battle.collision.*;
 import com.li.battle.core.*;
 import com.li.battle.core.map.SceneMap;
 import com.li.battle.core.task.PlayerOperateTask;
 import com.li.battle.core.unit.*;
-import com.li.battle.effect.*;
+import com.li.battle.effect.EffectExecutor;
 import com.li.battle.effect.domain.EffectParam;
 import com.li.battle.effect.source.PassiveEffectSource;
 import com.li.battle.event.EventDispatcher;
@@ -53,6 +55,8 @@ public abstract class AbstractBattleScene implements BattleScene {
     protected final TriggerManager triggerManager;
     /** 子弹容器 **/
     protected final ProjectileManager projectileManager;
+    /** 场景内唯一id生成器 **/
+    private long idGenerator = 0;
 
     /** 定时Future **/
     private final ScheduledFuture<?> future;
@@ -63,6 +67,9 @@ public abstract class AbstractBattleScene implements BattleScene {
     private final Map<Attribute, Long> attributes;
     /** 场景内战斗单位的分布图(用于优化碰撞检测列表) **/
     private final QuadTree<FightUnit> distributed;
+
+    /** ai **/
+    private final Map<Long, BehaviourTree> ai = new LinkedHashMap<>();
 
     public AbstractBattleScene(long sceneId, SceneMap sceneMap
             , ScheduledExecutorService executorService
@@ -107,6 +114,9 @@ public abstract class AbstractBattleScene implements BattleScene {
                 return false;
             }
             unit.enterScene(this);
+            ai.put(unit.getId(), FightUnitAiStarter.unitAi(unit));
+            distributed().insert(unit);
+
             // 释放被动技能
             ConfigHelper configHelper = battleSceneHelper().configHelper();
             EffectExecutor effectExecutor = battleSceneHelper().effectExecutor();
@@ -141,13 +151,14 @@ public abstract class AbstractBattleScene implements BattleScene {
                 eventDispatcher.unregister(unitId);
 
                 distributed.remove(unit);
+                ai.remove(unitId);
             }
             return null;
         });
     }
 
     @Override
-    public void destroy() {
+    public final void destroy() {
         destroy = true;
         if (future == null || future.isCancelled()) {
             return;
@@ -160,8 +171,17 @@ public abstract class AbstractBattleScene implements BattleScene {
         try {
             // 更新回合数
             increaseRound();
+
+            if (log.isDebugEnabled()) {
+                log.debug("------------------战斗场景开始第[{}]帧逻辑-------------------------", round);
+            }
+
+            // 执行ai逻辑
+            executeAi();
             // 执行玩家操作
             executePlayerOperates();
+            // 战斗单位移动
+            getUnits().forEach(MoveUnit::moving);
             // 执行子弹逻辑
             projectileManager.update();
             // 开始执行buff逻辑
@@ -170,11 +190,8 @@ public abstract class AbstractBattleScene implements BattleScene {
             eventDispatcher.update();
             // 执行技能逻辑
             skillManager.update();
-            // 战斗单位移动
-            fightUnits.values().forEach(MoveUnit::moving);
             // 执行触发器销毁逻辑
             triggerManager.update();
-            // todo 执行战斗单元AI
 
             if (checkDestroy()) {
                 destroy();
@@ -185,6 +202,12 @@ public abstract class AbstractBattleScene implements BattleScene {
         }
     }
 
+    /** 执行ai **/
+    protected void executeAi() {
+        for (BehaviourTree tree : ai.values()) {
+            tree.start();
+        }
+    }
 
     /** 执行玩家操作 **/
     protected void executePlayerOperates() {
@@ -246,6 +269,11 @@ public abstract class AbstractBattleScene implements BattleScene {
     @Override
     public QuadTree<FightUnit> distributed() {
         return distributed;
+    }
+
+    @Override
+    public long getNextId() {
+        return ++idGenerator;
     }
 
     @Override

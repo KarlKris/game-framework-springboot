@@ -22,7 +22,7 @@ import java.util.Map;
 @Component
 public class JsonStrConvertor implements StrConvertor {
 
-    private final TypeFactory typeFactory = TypeFactory.defaultInstance();
+    private static final TypeFactory TYPE_FACTORY = TypeFactory.defaultInstance();
 
     @Resource
     private ObjectMapper objectMapper;
@@ -36,22 +36,25 @@ public class JsonStrConvertor implements StrConvertor {
     public Object convert(String content, TypeDescriptor targetDescriptor) {
         try {
             JavaType javaType = null;
+            if (String.class.isAssignableFrom(targetDescriptor.getType())) {
+                return content;
+            }
             if (targetDescriptor.isCollection()) {
-                javaType = typeFactory.constructCollectionType( (Class<? extends Collection>) targetDescriptor.getType()
+                javaType = TYPE_FACTORY.constructCollectionType( (Class<? extends Collection>) targetDescriptor.getType()
                         , targetDescriptor.getElementTypeDescriptor().getType());
             } else if(targetDescriptor.isArray()) {
                 TypeDescriptor elementType = targetDescriptor.getElementTypeDescriptor();
                 if (elementType.isPrimitive()) {
-                    javaType = typeFactory.constructType(targetDescriptor.getObjectType());
+                    javaType = TYPE_FACTORY.constructType(targetDescriptor.getObjectType());
                 } else {
-                    javaType = typeFactory.constructArrayType(elementType.getType());
+                    javaType = TYPE_FACTORY.constructArrayType(elementType.getType());
                 }
             } else if(targetDescriptor.isMap()){
-                javaType = typeFactory.constructMapType((Class<? extends Map>) targetDescriptor.getType()
+                javaType = TYPE_FACTORY.constructMapType((Class<? extends Map>) targetDescriptor.getType()
                         , targetDescriptor.getMapKeyTypeDescriptor().getType()
                         , targetDescriptor.getMapValueTypeDescriptor().getType());
             } else {
-                javaType = typeFactory.constructType(targetDescriptor.getType());
+                javaType = TYPE_FACTORY.constructType(targetDescriptor.getType());
             }
 
             if (javaType.isEnumType()) {

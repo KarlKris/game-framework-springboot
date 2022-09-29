@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class SkillExecutedBuffEventHandler extends AbstractBuffHandler<Buff, SkillExecutedEvent> {
 
     @Override
-    protected void handle0(EventHandlerContext context, Buff receiver, SkillExecutedEvent event) {
+    protected void doHandle(EventHandlerContext context, Buff receiver, SkillExecutedEvent event) {
         BuffConfig config = receiver.getConfig();
         if (!ArrayUtil.contains(config.getSkillIds(), event.getSkill().getSkillId())) {
             return;

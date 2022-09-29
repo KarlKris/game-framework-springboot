@@ -17,6 +17,10 @@ public class Skill {
     /** 下次执行技能的回合数 **/
     private long nextRound;
 
+    public Skill(int skillId, long nextRound) {
+        this.skillId = skillId;
+        this.nextRound = nextRound;
+    }
 
     public void afterSkillExecuted(SkillConfig config, BattleScene scene) {
         nextRound = scene.getSceneRound() + config.getCoolDown() / scene.getRoundPeriod();

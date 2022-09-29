@@ -4,16 +4,16 @@ import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.FightUnit;
-import com.li.battle.effect.*;
+import com.li.battle.effect.EffectExecutor;
 import com.li.battle.effect.domain.EffectParam;
-import com.li.battle.effect.source.*;
+import com.li.battle.effect.source.BuffEffectSource;
 import com.li.battle.resource.BuffConfig;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
 /**
  * Buff管理
- * todo 考虑单位退出场景后相应的Buff删除问题
  * @author li-yuanwen
  * @date 2022/5/18
  */
@@ -25,15 +25,25 @@ public class BuffManager {
     /** 待处理的buff队列 **/
     private final PriorityQueue<Buff> queue = new PriorityQueue<>(Comparator.comparingLong(Buff::getNextRound));
 
-    // todo 记录玩家身上的buff
-
-
     public BuffManager(BattleScene scene) {
         this.scene = scene;
     }
 
     public boolean addBuff(Buff buff) {
-        // todo 判断是否需要合并
+        // 判断是否需要合并
+        if (buff.getConfig().getMergeRule().isMergeable()) {
+            FightUnit unit = scene.getFightUnit(buff.getParent());
+            int buffId = buff.getBuffId();
+            List<Buff> buffs = unit.getBuffById(buffId);
+            if (!CollectionUtils.isEmpty(buffs)) {
+                final long caster = buff.getCaster();
+                Optional<Buff> optional = buffs.stream().filter(b -> b.getCaster() == caster).findFirst();
+                if (optional.isPresent()) {
+                    optional.get().onBuffRefresh(buff);
+                    return true;
+                }
+            }
+        }
 
         BuffConfig config = buff.getConfig();
         if (ArrayUtil.isNotEmpty(config.getAwakeEffects())) {
@@ -60,11 +70,20 @@ public class BuffManager {
      * @param buffTag buffTag
      * @return true 免疫
      */
-    public boolean isImmuneTag(FightUnit target, long caster, byte buffTag) {
+    public boolean isImmuneTag(FightUnit target, long caster, int buffTag) {
         if (caster == target.getId()) {
             return false;
         }
-        // todo
+        // 遍历目标身上的所有buff
+        for (Buff buff : target.getAllBuffs()) {
+            if (buff.isManualExpire()) {
+                continue;
+            }
+            int b = buff.getConfig().getImmuneTag() & buffTag;
+            if (b > 0) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -87,10 +106,18 @@ public class BuffManager {
                 for (EffectParam effectParam : config.getThinkEffects()) {
                     effectExecutor.execute(source, effectParam);
                 }
+                long nextRound = Math.max(buff.getNextRound() + config.getThinkInterval() / scene.getRoundPeriod(), curRound + 1);
+                buff.updateNextRound(nextRound);
+            } else {
+                if (buff.getExpireRound() == 0) {
+                    buff.updateNextRound(curRound + 1);
+                } else {
+                    buff.updateNextRound(buff.getExpireRound());
+                }
             }
 
-            buff.updateNextRound(buff.getNextRound() + config.getThinkInterval() / scene.getRoundPeriod());
             queue.offer(buff);
+
         } else {
             // 执行销毁效果
             if (ArrayUtil.isNotEmpty(config.getDestroyEffects())) {
@@ -100,6 +127,8 @@ public class BuffManager {
                     effectExecutor.execute(source, effectParam);
                 }
             }
+            // 移除单位身上的buff
+            scene.getFightUnit(buff.getParent()).removeBuff(buff);
         }
 
     }

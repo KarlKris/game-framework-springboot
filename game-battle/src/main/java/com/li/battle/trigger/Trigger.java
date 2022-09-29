@@ -4,18 +4,16 @@ import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.event.*;
 import com.li.battle.resource.TriggerConfig;
-import com.li.battle.trigger.core.Trigger;
 import com.li.battle.trigger.handler.AbstractTriggerHandler;
 import lombok.Getter;
 
 /**
- * todo 还需要类似提莫的蘑菇的指定地点的触发器（目前只有指点单位或任意单位）
  * 触发器
  * @author li-yuanwen
  * @date 2022/5/26
  */
 @Getter
-public class TriggerReceiver implements EventReceiver {
+public class Trigger implements EventReceiver {
 
     /** 生成触发器的单位标识 **/
     private final long unitId;
@@ -23,12 +21,10 @@ public class TriggerReceiver implements EventReceiver {
     private final int skillId;
     /** 关联的BuffId **/
     private final int buffId;
-    /** 关联的trigger单位目标，若==unitId，则随意单位触发,否则只能指定单位触发 **/
-    private final long target;
+    /** 挂载的trigger单位目标 **/
+    private final long parent;
     /** 触发器配置 **/
     private final TriggerConfig config;
-    /** 触发器 **/
-    private final Trigger trigger;
     /** 可以触发的回合数(在这之后可触发) **/
     private long nextTriggerRound;
     /** 失效回合数 **/
@@ -36,17 +32,19 @@ public class TriggerReceiver implements EventReceiver {
     /** 关联的战斗场景 **/
     private final BattleScene scene;
 
-    public TriggerReceiver(long unitId, long target, int skillId, int buffId, TriggerConfig config, BattleScene scene) {
+    public Trigger(long unitId, long parent, int skillId, int buffId, TriggerConfig config, BattleScene scene) {
         this.unitId = unitId;
-        this.target = target;
+        this.parent = parent;
         this.skillId = skillId;
         this.buffId = buffId;
         this.config = config;
         this.scene = scene;
 
-        this.trigger = config.getTrigger().copy();
         this.nextTriggerRound = scene.getSceneRound();
-        this.expireRound = nextTriggerRound + config.getDuration() / scene.getRoundPeriod();
+        if (config.getDuration() > 0) {
+            this.expireRound = nextTriggerRound + config.getDuration() / scene.getRoundPeriod();
+        }
+
     }
 
     public void afterExecuteEffect() {
@@ -61,7 +59,7 @@ public class TriggerReceiver implements EventReceiver {
 
     @Override
     public boolean isInvalid(long curRound) {
-        return curRound >= expireRound;
+        return expireRound != 0 && curRound >= expireRound;
     }
 
     @Override
@@ -71,10 +69,6 @@ public class TriggerReceiver implements EventReceiver {
 
     public boolean isManualInvalid() {
         return expireRound < 0;
-    }
-
-    public <T extends Trigger> T getTrigger() {
-        return (T) trigger;
     }
 
     public TriggerConfig getConfig() {
@@ -91,17 +85,17 @@ public class TriggerReceiver implements EventReceiver {
 
     @Override
     public void registerEventReceiverIfNecessary() {
-        TriggerType triggerType = trigger.getType();
-        Class<? extends AbstractTriggerHandler<?>>[] handlersClz = triggerType.getHandlersClz();
+        TriggerType triggerType = config.getParam().getType();
+        Class<? extends AbstractTriggerHandler<?, ?>>[] handlersClz = triggerType.getHandlersClz();
         if (ArrayUtil.isNotEmpty(handlersClz)) {
             EventHandlerHolder eventHandlerHolder = scene.battleSceneHelper().eventHandlerHolder();
-            EventPipeline eventPipeline = eventPipeline();
-            for (Class<? extends AbstractTriggerHandler<?>> clz : handlersClz) {
+            EventPipeline eventPipeline = newEventPipeline();
+            for (Class<? extends AbstractTriggerHandler<?, ?>> clz : handlersClz) {
                 eventPipeline.addHandler(eventHandlerHolder.getEventHandler(clz));
             }
 
             // 注册
-            scene.eventDispatcher().register(this);
+            scene.eventDispatcher().register(eventPipeline);
         }
     }
 

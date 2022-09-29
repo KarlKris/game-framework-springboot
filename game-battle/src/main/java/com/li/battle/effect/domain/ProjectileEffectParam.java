@@ -15,7 +15,7 @@ public class ProjectileEffectParam implements EffectParam {
     private int projectileId;
 
     @Override
-    public EffectType type() {
+    public EffectType getType() {
         return EffectType.PROJECTILE;
     }
 }

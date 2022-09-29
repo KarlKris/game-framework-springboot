@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class ChannelSkillThinkStageProcessor extends AbstractSkillStageProcessor<ChannelSkillConfig> {
 
     @Override
-    public SkillStage getSkillSatge() {
+    public SkillStage getSkillStage() {
         return SkillStage.CHANNEL_THINK;
     }
 
@@ -23,6 +23,17 @@ public class ChannelSkillThinkStageProcessor extends AbstractSkillStageProcessor
         if (isExecutable(config.getThinkEffects())) {
             process0(skill, config.getThinkEffects());
         }
-        skill.updateSkillStage(SkillStage.CHANNEL_THINK);
+        long curRound = skill.getScene().getSceneRound();
+        int roundPeriod = skill.getScene().getRoundPeriod();
+        int channelRound = config.getChannelTime() / roundPeriod;
+        int addRound = config.getThinkInterval() / roundPeriod;
+        long endRound = skill.getChannelStartRound() + channelRound;
+        if (curRound + addRound < endRound) {
+            skill.addNextRound(addRound);
+            skill.updateSkillStage(SkillStage.CHANNEL_THINK);
+        } else {
+            skill.addNextRound(endRound - addRound);
+            skill.updateSkillStage(SkillStage.CHANNEL_FINISH);
+        }
     }
 }

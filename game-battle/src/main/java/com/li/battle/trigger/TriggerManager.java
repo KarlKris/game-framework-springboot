@@ -1,9 +1,10 @@
 package com.li.battle.trigger;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.effect.*;
 import com.li.battle.effect.domain.EffectParam;
-import com.li.battle.effect.source.TriggerReceiverEffectSource;
+import com.li.battle.effect.source.TriggerEffectSource;
 
 import java.util.*;
 
@@ -18,15 +19,18 @@ public class TriggerManager {
     private final BattleScene scene;
 
     /** 待处理的buff队列 **/
-    private final PriorityQueue<TriggerReceiver> queue = new PriorityQueue<>(Comparator.comparingLong(TriggerReceiver::getExpireRound));
+    private final PriorityQueue<Trigger> queue = new PriorityQueue<>(Comparator.comparingLong(Trigger::getExpireRound));
 
     public TriggerManager(BattleScene scene) {
         this.scene = scene;
     }
 
 
-    public void addTriggerReceiver(TriggerReceiver triggerReceiver) {
-        queue.offer(triggerReceiver);
+    public void addTriggerReceiver(Trigger trigger) {
+        if (trigger.getExpireRound() != 0) {
+            queue.offer(trigger);
+        }
+
     }
 
     public void removeTriggerReceiver(long ownerId) {
@@ -34,7 +38,7 @@ public class TriggerManager {
     }
 
     public void update() {
-        TriggerReceiver element = queue.peek();
+        Trigger element = queue.peek();
         long curRound = scene.getSceneRound();
         while (element != null && element.isInvalid(curRound)) {
             queue.poll();
@@ -43,13 +47,16 @@ public class TriggerManager {
         }
     }
 
-    private void handle(TriggerReceiver receiver) {
+    private void handle(Trigger receiver) {
         if (receiver.isManualInvalid()) {
             return;
         }
 
-        TriggerReceiverEffectSource source = new TriggerReceiverEffectSource(receiver, null);
+        TriggerEffectSource source = new TriggerEffectSource(receiver, null);
         EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
+        if (ArrayUtil.isEmpty(receiver.getConfig().getDestroyEffects())) {
+            return;
+        }
         for (EffectParam effectParam :  receiver.getConfig().getDestroyEffects()) {
             effectExecutor.execute(source, effectParam);
         }

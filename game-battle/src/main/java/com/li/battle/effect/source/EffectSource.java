@@ -68,7 +68,6 @@ public interface EffectSource {
      */
     void initAttributeValue(AttributeValueAlter attributeValue);
 
-
     /**
      * 获取存储的属性变更数据
      * @return 属性变更数据

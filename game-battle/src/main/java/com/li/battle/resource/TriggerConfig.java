@@ -1,7 +1,7 @@
 package com.li.battle.resource;
 
 import com.li.battle.effect.domain.EffectParam;
-import com.li.battle.trigger.core.Trigger;
+import com.li.battle.trigger.domain.TriggerParam;
 import com.li.common.resource.anno.*;
 import lombok.Getter;
 
@@ -18,7 +18,7 @@ public class TriggerConfig {
     @ResourceId
     private int id;
     /** 触发器构建参数 **/
-    private Trigger trigger;
+    private TriggerParam param;
     /** 触发器时长(毫秒 0表永久) **/
     private int duration;
     /** 触发器CD,即触发一次后等待x毫秒才能再次触发 **/
@@ -29,5 +29,7 @@ public class TriggerConfig {
     private EffectParam[] destroyEffects;
 
 
-
+    public <T extends TriggerParam> T getParam() {
+        return (T) param;
+    }
 }

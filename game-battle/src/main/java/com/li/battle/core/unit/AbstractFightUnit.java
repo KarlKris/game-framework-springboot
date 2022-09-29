@@ -1,22 +1,25 @@
 package com.li.battle.core.unit;
 
+import com.li.battle.buff.*;
+import com.li.battle.buff.core.Buff;
 import com.li.battle.collision.QuadTree;
 import com.li.battle.core.*;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.event.core.UnitMoveEvent;
 import com.li.battle.resource.SkillConfig;
 import com.li.battle.util.SteeringBehaviourUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 抽象战斗单元
  * @author li-yuanwen
  * @date 2022/5/6
  */
+@Slf4j
 public abstract class AbstractFightUnit implements FightUnit {
 
 
@@ -57,7 +60,8 @@ public abstract class AbstractFightUnit implements FightUnit {
 
     /** 技能信息 **/
     private final List<Skill> skills;
-
+    /** 单位身上的buff **/
+    private List<Buff> buffs;
 
     public AbstractFightUnit(long id, UnitType type, CampType campType, double radius, int maxSpeed
             , Vector2D position, Map<Attribute, Long> coreAttributes, List<Skill> skills) {
@@ -107,6 +111,85 @@ public abstract class AbstractFightUnit implements FightUnit {
     }
 
     @Override
+    public List<Buff> getBuffById(int buffId) {
+        if (buffs == null) {
+            return null;
+        }
+        return buffs.stream().filter(buff -> buff.getBuffId() == buffId).collect(Collectors.toList());
+    }
+
+    @Override
+    public Buff getBuffByIdAndCaster(final long caster, final int buffId) {
+        if (buffs == null) {
+            return null;
+        }
+        return buffs.stream().filter(buff -> buff.getBuffId() == buffId && buff.getCaster() == caster).findFirst().orElse(null);
+    }
+
+    @Override
+    public Collection<Buff> getAllBuffs() {
+        if (buffs == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableCollection(buffs);
+    }
+
+    @Override
+    public void addBuff(Buff buff) {
+        if (buffs == null) {
+            buffs = new ArrayList<>(4);
+        }
+        buffs.add(buff);
+    }
+
+    @Override
+    public void removeBuff(Buff buff) {
+        if (buffs == null) {
+            return;
+        }
+        buffs.remove(buff.getBuffId());
+    }
+
+    @Override
+    public final void onHurt(long dmg) {
+        if (buffs == null) {
+            modifyAttribute(Attribute.CUR_HP, -dmg);
+            return;
+        }
+
+        // 扣除护盾
+        long decShieldValue = 0;
+        for (Buff buff : buffs) {
+            if (dmg <= 0) {
+                break;
+            }
+            if (buff.getConfig().getType() != BuffType.SHIELD) {
+                continue;
+            }
+            BuffContext buffContext = buff.buffContext();
+            int shieldValue = buffContext.getShieldValue();
+            if (shieldValue >= dmg) {
+                buffContext.setShieldValue((int) (shieldValue - dmg));
+                decShieldValue += dmg;
+                dmg = 0;
+            } else {
+                buffContext.setShieldValue(0);
+                decShieldValue += shieldValue;
+                dmg -= shieldValue;
+            }
+        }
+
+        if (decShieldValue > 0) {
+            modifyAttribute(Attribute.SHIELD, -decShieldValue);
+        }
+
+        if (dmg > 0) {
+            modifyAttribute(Attribute.CUR_HP, -dmg);
+        }
+
+    }
+
+    @Override
     public int getMaxSpeed() {
         return maxSpeed;
     }
@@ -139,7 +222,7 @@ public abstract class AbstractFightUnit implements FightUnit {
     @Override
     public void moveTo(List<Vector2D> ways) {
         this.ways = ways;
-        this.wayIndex = 0;
+        this.wayIndex = 1;
         this.state = UnitState.MOVING;
     }
 
@@ -155,10 +238,10 @@ public abstract class AbstractFightUnit implements FightUnit {
         double distance = 0;
         int maxSpeed = getMaxSpeed();
         int size = ways.size();
-        while (distance < maxSpeed && wayIndex < size) {
+        while (isNotMatch(distance, maxSpeed) && wayIndex < size) {
             Vector2D oldPos = this.position;
             Vector2D target = ways.get(wayIndex);
-            this.velocity = SteeringBehaviourUtil.seek(this, target, maxSpeed - distance).add(velocity);
+            this.velocity = SteeringBehaviourUtil.arrive(this, target, maxSpeed - distance).add(velocity);
             this.position = this.velocity.add(this.position);
 
             distance += (Vector2D.distance(oldPos, position));
@@ -175,6 +258,10 @@ public abstract class AbstractFightUnit implements FightUnit {
 
         // 抛出移动事件
         scene.eventDispatcher().dispatch(new UnitMoveEvent(id), 0);
+    }
+
+    private boolean isNotMatch(double d1, double d2) {
+        return Math.abs(d1 - d2) >= 0.01;
     }
 
 

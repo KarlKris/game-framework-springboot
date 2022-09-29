@@ -2,6 +2,7 @@ package com.li.battle.ai;
 
 import com.li.battle.ai.behaviour.Behaviour;
 import com.li.battle.ai.composite.Composite;
+import com.li.battle.core.unit.FightUnit;
 
 import java.util.Stack;
 
@@ -16,12 +17,19 @@ public class BehaviourTreeBuilder {
     private Stack<Behaviour> stack;
     /** 行为树根节点 **/
     private Behaviour root;
+    /** 操控目标 **/
+    private FightUnit unit;
 
     public BehaviourTreeBuilder root(Behaviour root) {
         initOrReset();
         this.root = root;
         // 入栈
         stack.push(root);
+        return this;
+    }
+
+    public BehaviourTreeBuilder unit(FightUnit unit) {
+        this.unit = unit;
         return this;
     }
 
@@ -49,7 +57,7 @@ public class BehaviourTreeBuilder {
     }
 
     public BehaviourTree build() {
-        return new BehaviourTree(root);
+        return new BehaviourTree(root, unit);
     }
 
     private void initOrReset() {

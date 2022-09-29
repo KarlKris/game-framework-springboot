@@ -1,6 +1,6 @@
 package com.li.battle.core.scene;
 
-import com.li.battle.core.Skill;
+import com.li.battle.core.*;
 import com.li.battle.core.map.SceneMap;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.SkillConfig;
@@ -82,6 +82,11 @@ public class BattleSceneReferee {
 
         if (skill.isCoolDown(scene.getSceneRound())) {
             throw new RuntimeException("战斗单位技能：" + skillId + " 技能正在CD中");
+        }
+
+        long value = fightUnit.getAttributeValue(Attribute.CUR_MP);
+        if (value < config.getMpConsume()) {
+            throw new RuntimeException("战斗单位技能：" + skillId + " 蓝耗不够");
         }
 
 

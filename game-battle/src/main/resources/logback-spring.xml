@@ -94,6 +94,10 @@
             <appender-ref ref="RECORD_ROLLING_LOG"/>
         </AsyncLogger>
 
+        <AsyncLogger  name="com.li.battle" level="debug" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+        </AsyncLogger >
+
         <root level="${log.level}">
             <appender-ref ref="CONSOLE" />
             <appender-ref ref="ROLLING_LOG" />

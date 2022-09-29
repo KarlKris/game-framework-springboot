@@ -16,5 +16,5 @@ public abstract class AbstractDamageEffectParam implements EffectParam {
      * 伤害类型
      * @return HarmType
      */
-    public abstract HarmType harmType();
+    public abstract HarmType getHarmType();
 }

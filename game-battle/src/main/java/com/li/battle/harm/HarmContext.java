@@ -20,12 +20,16 @@ public class HarmContext {
         this.defender = defender;
     }
 
-    public long getAttackerAttr(Attribute attr) {
-        return attacker.getAttributeValue(attr);
+    public long getAttackerAttr(String attr) {
+        return attacker.getAttributeValue(Attribute.from(attr));
     }
 
-    public long getDefenderAttr(Attribute attr) {
-        return defender.getAttributeValue(attr);
+    public long getDefenderAttr(String attr) {
+        return defender.getAttributeValue(Attribute.from(attr));
+    }
+
+    public long getDmg() {
+        return dmg;
     }
 
 }

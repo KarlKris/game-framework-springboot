@@ -14,7 +14,7 @@ public interface EventReceiver extends IOwner {
      * 返回事件接收者的责任链
      * @return 事件接收者的责任链
      */
-    default EventPipeline eventPipeline() {
+    default EventPipeline newEventPipeline() {
         return new DefaultEventPipeline(this);
     }
 

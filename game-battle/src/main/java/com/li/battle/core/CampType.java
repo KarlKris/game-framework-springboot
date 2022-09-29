@@ -16,6 +16,19 @@ public enum CampType {
     DEFENDER,
 
     /** 中立方 **/
-    NEUTRAL
+    NEUTRAL,
+
+    ;
+
+
+    public CampType getEnemyType() {
+       if (this == CampType.ATTACKER) {
+           return CampType.DEFENDER;
+       } else if (this == CampType.DEFENDER) {
+           return CampType.ATTACKER;
+       } else {
+           return null;
+       }
+    }
 
 }

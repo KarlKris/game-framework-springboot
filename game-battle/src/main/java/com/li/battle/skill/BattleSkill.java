@@ -26,6 +26,8 @@ public class BattleSkill implements IOwner {
     private final SelectorResult target;
     /** 创建技能回合数 **/
     private final long createRound;
+    /** 引导技能开始回合数 **/
+    private long channelStartRound;
     /** 下一次执行技能效果的回合 **/
     private long nextRound;
     /** 技能失效的回合 **/
@@ -51,6 +53,13 @@ public class BattleSkill implements IOwner {
         this.nextStage = nextStage;
     }
 
+    public void addNextRound(long addRound) {
+        this.nextRound += addRound;
+    }
+
+    public void initChannelStartRound() {
+        this.channelStartRound = scene.getSceneRound();
+    }
 
     public boolean isExpire(long curRound) {
         return expireRound != 0 && curRound > expireRound;

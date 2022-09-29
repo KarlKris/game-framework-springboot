@@ -1,8 +1,9 @@
 package com.li.battle.skill.processor;
 
+import com.li.battle.core.UnitState;
+import com.li.battle.event.core.SkillExecutedEvent;
 import com.li.battle.resource.GeneralSkillConfig;
-import com.li.battle.skill.BattleSkill;
-import com.li.battle.skill.SkillStage;
+import com.li.battle.skill.*;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,14 +15,19 @@ import org.springframework.stereotype.Component;
 public class GeneralSkillSpellStageProcessor extends AbstractSkillStageProcessor<GeneralSkillConfig> {
 
     @Override
-    public SkillStage getSkillSatge() {
+    public SkillStage getSkillStage() {
         return SkillStage.SPELL;
     }
 
     @Override
     public void process(BattleSkill skill, GeneralSkillConfig config) {
+        skill.getScene().getFightUnit(skill.getCaster()).modifyState(UnitState.BACK);
+        skill.addNextRound(config.getBackRockingTime() / skill.getScene().getRoundPeriod());
         if (isExecutable(config.getSpellEffects())) {
             process0(skill, config.getSpellEffects());
         }
+        skill.updateSkillStage(SkillStage.FINISH);
+
+        skill.getScene().eventDispatcher().dispatch(new SkillExecutedEvent(skill));
     }
 }

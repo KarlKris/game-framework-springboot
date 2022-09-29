@@ -73,6 +73,9 @@ public abstract class AbstractProjectile implements Projectile {
         Vector2D end = getTargetPosition();
         Vector2D subtract = end.subtract(position);
         double distance = subtract.getNorm();
+        if (distance == 0) {
+            return new Pair<>(position, rectangle);
+        }
         double minSpeed = Math.min(config.getSpeed(), distance);
         Vector2D velocity = subtract.scalarMultiply(minSpeed / distance);
         Vector2D nextPosition = this.position.add(velocity);

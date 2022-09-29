@@ -1,9 +1,9 @@
 package com.li.battle.trigger.core;
 
-import com.li.battle.event.core.SkillExecutedEvent;
-import com.li.battle.trigger.TriggerType;
+import com.li.battle.core.scene.BattleScene;
+import com.li.battle.resource.TriggerConfig;
+import com.li.battle.trigger.Trigger;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * 固定施法引爆型Trigger
@@ -11,29 +11,20 @@ import lombok.NoArgsConstructor;
  * @date 2022/5/27
  */
 @Getter
-@NoArgsConstructor
-public class FixCasterDetonateTrigger extends AbstractDetonateTrigger {
+public class FixCasterDetonateTrigger extends Trigger {
 
-    public FixCasterDetonateTrigger(int[] skillIds, int num) {
-        super(skillIds, num);
+    /** 当前叠加次数 **/
+    private int curNum;
+
+    public FixCasterDetonateTrigger(long unitId, long parent, int skillId, int buffId, TriggerConfig config, BattleScene scene) {
+        super(unitId, parent, skillId, buffId, config, scene);
     }
 
-    @Override
-    protected void try0(long casterId, SkillExecutedEvent event, TriggerSuccessCallback callback) {
-        // 引爆成功
-        if (++curNum >= num) {
-            // 自身的引爆目标
-            callback.callback(casterId);
-        }
+    public int increment() {
+        return ++curNum;
     }
 
-    @Override
-    public TriggerType getType() {
-        return TriggerType.FIX_CASTER_DETONATE;
-    }
-
-    @Override
-    public Trigger copy() {
-        return new FixCasterDetonateTrigger(skillIds, num);
+    public void reset() {
+        this.curNum = 0;
     }
 }

@@ -20,9 +20,9 @@ public class BuffConfig {
     /** buff类型 **/
     private BuffType type;
     /** buff种类 **/
-    private byte tag;
+    private int tag;
     /** 免疫buff种类 **/
-    private byte immuneTag;
+    private int immuneTag;
     /** buff时长(毫秒) 0表永久 **/
     private int duration;
     /** buff刷新合并规则（更新Buff层数，等级，持续时间等数据） **/
@@ -68,7 +68,7 @@ public class BuffConfig {
     private EffectParam[] afterDeadEffects;
 
     /** 我方击杀目标后触发 **/
-    private EffectParam[] afterKillEffects;
+    private EffectParam[] killEffects;
 
     /** 子弹命中效果(子弹只能由buff来创建) **/
     private EffectParam[] hitEffects;

@@ -100,12 +100,10 @@ public class BattleSkillExecutor {
             if (!SkillType.belongTo(config.getType(), skillHandler.getSkillType())) {
                 continue;
             }
-
             time =  skillHandler.calculateDurationTime(config);
             skillDurationCache.put(config.getId(), time);
-
         }
-        return 0;
+        return time;
     }
 
 

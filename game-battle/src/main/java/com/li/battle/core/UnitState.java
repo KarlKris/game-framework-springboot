@@ -13,6 +13,12 @@ public enum UnitState {
     /** 寻路中 **/
     MOVING(true, true, true),
 
+    /** 前摇 **/
+    FRONT(false, false, true),
+
+    /** 后摇 **/
+    BACK(false, false, true),
+
     // -------- 异常类状态 -------------------
 
     /** 眩晕-目标不再响应任何操控 **/
@@ -36,11 +42,11 @@ public enum UnitState {
     ;
 
     /** 能否响应移动请求 **/
-    private boolean move;
+    private final boolean move;
     /** 能否释放技能 **/
-    private boolean freed;
+    private final boolean freed;
     /** 能否被他人看见 **/
-    private boolean see;
+    private final boolean see;
 
     UnitState(boolean move, boolean freed, boolean see) {
         this.move = move;

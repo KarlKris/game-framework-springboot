@@ -39,7 +39,7 @@ public class EffectExecutor {
      * @param effectParam 效果
      */
     public void execute(EffectSource effectSource, EffectParam effectParam) {
-        EffectHandler handler = handlers.get(effectParam.type());
+        EffectHandler handler = handlers.get(effectParam.getType());
         handler.execute(effectSource, effectParam);
     }
 

@@ -30,7 +30,7 @@ public class TargetSelector implements Selector {
             throw new RuntimeException("目标不存在");
         }
 
-        double distance = Vector2D.distance(unit.getPosition(), fightUnit.getPosition());
+        double distance = Vector2D.distance(unit.getPosition(), fightUnit.getPosition()) - unit.getRadius() - fightUnit.getRadius();
         if (distance > range) {
             // todo 后续决定是否转BadRequestException
             throw new RuntimeException("超出选择范围");

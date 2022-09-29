@@ -1,14 +1,13 @@
 package com.li.battle.buff.handler;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.li.battle.buff.core.Buff;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.effect.EffectExecutor;
 import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.BuffEventEffectSource;
 import com.li.battle.event.EventHandlerContext;
-import com.li.battle.event.EventReceiver;
-import com.li.battle.event.core.BattleEvent;
-import com.li.battle.event.core.BattleEventType;
-import com.li.battle.event.core.BeforeDamageEvent;
+import com.li.battle.event.core.*;
 import com.li.battle.resource.BuffConfig;
 import org.springframework.stereotype.Component;
 
@@ -21,25 +20,34 @@ import org.springframework.stereotype.Component;
 public class BeforeDamageEventBuffHandler extends AbstractBuffHandler<Buff, BeforeDamageEvent> {
 
     @Override
-    protected void handle0(EventHandlerContext context, Buff receiver, BeforeDamageEvent event) {
+    protected void doHandle(EventHandlerContext context, Buff receiver, BeforeDamageEvent event) {
         BattleScene battleScene = receiver.battleScene();
         EffectExecutor effectExecutor = battleScene.battleSceneHelper().effectExecutor();
 
         long targetId = event.getTarget();
         long casterId = receiver.getCaster();
         if (targetId == casterId) {
-            // 己方受到伤害
+            // 己方受到伤害前
             BuffConfig buffConfig = receiver.getConfig();
+            if (ArrayUtil.isEmpty(buffConfig.getBeforeTakeDamageEffects())) {
+                return;
+            }
+            BuffEventEffectSource source = new BuffEventEffectSource(receiver, event.getEffectSource());
             for (EffectParam param : buffConfig.getBeforeTakeDamageEffects()) {
-                // todo 执行效果
+                // 执行效果
+                effectExecutor.execute(source, param);
             }
         } else if (event.getMaker() == casterId) {
-            // 敌方受到伤害
+            // 敌方受到伤害前
             BuffConfig buffConfig = receiver.getConfig();
-            for (EffectParam param : buffConfig.getBeforeDamageEffects()) {
-                // todo 执行效果
+            if (ArrayUtil.isEmpty(buffConfig.getBeforeDamageEffects())) {
+                return;
             }
-
+            BuffEventEffectSource source = new BuffEventEffectSource(receiver, event.getEffectSource());
+            for (EffectParam param : buffConfig.getBeforeDamageEffects()) {
+                // 执行效果
+                effectExecutor.execute(source, param);
+            }
         }
     }
 

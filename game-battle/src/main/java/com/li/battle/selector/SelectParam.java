@@ -1,6 +1,6 @@
 package com.li.battle.selector;
 
-import lombok.Getter;
+import lombok.*;
 
 /**
  * 选择目标相关参数
@@ -8,6 +8,7 @@ import lombok.Getter;
  * @date 2022/5/31
  */
 @Getter
+@Setter
 public class SelectParam {
     /** 空参数 **/
     public static final SelectParam EMPTY = new SelectParam();

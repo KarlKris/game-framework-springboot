@@ -1,5 +1,6 @@
 package com.li.battle.buff.core;
 
+import com.li.battle.buff.BuffContext;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.event.EventReceiver;
 import com.li.battle.resource.BuffConfig;
@@ -43,9 +44,8 @@ public interface Buff extends EventReceiver {
     /**
      * 当Buff添加时，存在相同类型且施加者相同的时候，Buff执行刷新流程(更新Buff层数，等级，持续时间等数据)
      * @param other 其他buff
-     * @return true 成功合并刷新
      **/
-    boolean onBuffRefresh(Buff other);
+    void onBuffRefresh(Buff other);
 
     /**
      * 获取buff层数
@@ -82,6 +82,12 @@ public interface Buff extends EventReceiver {
      * @return 持续时间
      */
     int getDuration();
+
+    /**
+     * 获取失效回合数
+     * @return 失效回合
+     */
+    long getExpireRound();
 
     /**
      * 手动使buff失效

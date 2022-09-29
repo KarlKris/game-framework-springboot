@@ -20,6 +20,8 @@ public class SkillConfig {
     private byte type;
     /** 技能CD(毫秒) **/
     private int coolDown;
+    /** 蓝耗 **/
+    private int mpConsume;
     /** 技能初始化效果(技能类型包含被动技能时会在角色进场景时执行效果) **/
     private EffectParam[] initEffects;
 

@@ -15,7 +15,7 @@ public class AddBuffEffectParam implements EffectParam {
     private int buffId;
 
     @Override
-    public EffectType type() {
+    public EffectType getType() {
         return EffectType.ADD_BUFF;
     }
 }

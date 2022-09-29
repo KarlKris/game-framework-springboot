@@ -1,5 +1,7 @@
 package com.li.battle.skill.processor;
 
+import com.li.battle.core.UnitState;
+import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.ChannelSkillConfig;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillStage;
@@ -14,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class ChannelSkillDestroyStageProcessor extends AbstractSkillStageProcessor<ChannelSkillConfig> {
 
     @Override
-    public SkillStage getSkillSatge() {
+    public SkillStage getSkillStage() {
         return SkillStage.CHANNEL_DESTROY;
     }
 
@@ -23,5 +25,7 @@ public class ChannelSkillDestroyStageProcessor extends AbstractSkillStageProcess
         if (isExecutable(config.getDestroyEffects())) {
             process0(skill, config.getDestroyEffects());
         }
+        FightUnit unit = skill.getScene().getFightUnit(skill.getCaster());
+        unit.modifyState(UnitState.NORMAL);
     }
 }

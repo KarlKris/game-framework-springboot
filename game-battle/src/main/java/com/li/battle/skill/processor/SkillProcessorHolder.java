@@ -28,9 +28,9 @@ public class SkillProcessorHolder {
     @PostConstruct
     private void initialize() {
         for (SkillStageProcessor<?> processor : applicationContext.getBeansOfType(SkillStageProcessor.class).values()) {
-            SkillStageProcessor<?> old = processorHolder.put(processor.getSkillSatge(), processor);
+            SkillStageProcessor<?> old = processorHolder.put(processor.getSkillStage(), processor);
             if (old != null) {
-                throw new BeanInitializationException("存在多个相同技能阶段效果执行器:" + processor.getSkillSatge().name());
+                throw new BeanInitializationException("存在多个相同技能阶段效果执行器:" + processor.getSkillStage().name());
             }
         }
     }

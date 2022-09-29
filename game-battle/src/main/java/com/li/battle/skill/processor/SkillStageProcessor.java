@@ -15,7 +15,7 @@ public interface SkillStageProcessor<T> {
      * 负责的技能阶段
      * @return 技能阶段
      */
-    SkillStage getSkillSatge();
+    SkillStage getSkillStage();
 
 
     /**

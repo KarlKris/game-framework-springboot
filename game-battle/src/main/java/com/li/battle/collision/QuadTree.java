@@ -176,7 +176,7 @@ public class QuadTree<T extends Shape> {
         }
 
         int index = getIndex(t);
-        if (index == -1) {
+        if (index == -1 || nodes[index] == null) {
             return;
         }
 

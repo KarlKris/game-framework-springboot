@@ -16,5 +16,11 @@ public enum BuffType {
     /** 伤害Buff **/
     DAMAGE,
 
+    /** 护盾buff **/
+    SHIELD,
+
+    /** 创建子弹 **/
+    PROJECTILE,
+
     ;
 }

@@ -15,6 +15,15 @@ public enum Attribute {
     /** 血量上限值 **/
     HP_MAX,
 
+    /** 蓝量 **/
+    MP,
+
+    /** 当前蓝量 **/
+    CUR_MP,
+
+    /** 蓝量上限 **/
+    MP_MAX,
+
     /** 物理攻击 **/
     PHYSICAL_ATTACK,
 
@@ -23,6 +32,9 @@ public enum Attribute {
 
     /** 移速 **/
     SPEED,
+
+    /** 当前移速 **/
+    CUR_SPEED,
 
     /** 护甲 **/
     ARMOR,
@@ -45,6 +57,9 @@ public enum Attribute {
     /** 减伤万分比 **/
     DAMAGE_DEC,
 
+    /** 护盾 **/
+    SHIELD,
+
     ;
 
 
@@ -61,5 +76,14 @@ public enum Attribute {
 
     public long getDefaultValue() {
         return defaultValue;
+    }
+
+    public static Attribute from(String content) {
+        for (Attribute attr : Attribute.values()) {
+            if (attr.name().equals(content)) {
+                return attr;
+            }
+        }
+        return null;
     }
 }

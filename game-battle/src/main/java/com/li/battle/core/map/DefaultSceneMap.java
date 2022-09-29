@@ -136,6 +136,7 @@ public class DefaultSceneMap implements SceneMap {
             node = node.parent;
         }
 
+        Collections.reverse(ways);
         return ways;
     }
 
@@ -201,4 +202,6 @@ public class DefaultSceneMap implements SceneMap {
 
 
     }
+    
+
 }

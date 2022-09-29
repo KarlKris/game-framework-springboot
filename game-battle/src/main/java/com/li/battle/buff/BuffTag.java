@@ -10,26 +10,26 @@ import lombok.Getter;
 public enum BuffTag {
 
     /** 金系 **/
-    METAL((short) (1)),
+    METAL(1),
 
     /** 木系 **/
-    WOOD((short) (1 << 1)),
+    WOOD(1 << 1),
 
     /** 水系 **/
-    WATER((short) (1 << 2)),
+    WATER(1 << 2),
 
     /** 火系 **/
-    FIRE((short) (1 << 3)),
+    FIRE(1 << 3),
 
     /** 土系 **/
-    EARTH((short) (1 << 4)),
+    EARTH(1 << 4),
 
     ;
 
     /** 标记 **/
-    private final short tag;
+    private final int tag;
 
-    BuffTag(short tag) {
+    BuffTag(int tag) {
         this.tag = tag;
     }
 

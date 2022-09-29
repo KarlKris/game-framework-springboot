@@ -10,8 +10,8 @@ import com.li.battle.resource.BuffConfig;
  */
 public class NormalBuff extends AbstractBuff {
 
-    public NormalBuff(BuffConfig config, long caster, long parent, int skillId, BattleScene scene) {
-        super(config, caster, parent, skillId, scene);
+    public NormalBuff(long id, BuffConfig config, long caster, long parent, int skillId, BattleScene scene) {
+        super(id, config, caster, parent, skillId, scene);
     }
 
 }

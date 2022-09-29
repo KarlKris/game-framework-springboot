@@ -41,7 +41,7 @@ public class HarmExecutor {
      * @return 伤害值
      */
     public long calculate(FightUnit attacker, FightUnit defender, AbstractDamageEffectParam effectParam) {
-        HarmCalculator<AbstractDamageEffectParam> harmCalculator = calculators.get(effectParam.harmType());
+        HarmCalculator<AbstractDamageEffectParam> harmCalculator = calculators.get(effectParam.getHarmType());
         return harmCalculator.calculate(attacker, defender, effectParam);
     }
 

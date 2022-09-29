@@ -11,20 +11,21 @@ import lombok.Getter;
 public enum EffectType {
 
     /** 添加Buff效果 **/
-    ADD_BUFF(1),
+    ADD_BUFF,
     /** 创建子弹效果 **/
-    PROJECTILE(2),
+    PROJECTILE,
     /** 创建触发器 **/
-    TRIGGER(3),
+    TRIGGER,
     /** 普通伤害类效果 **/
-    NORMAL_DAMAGE(4),
+    NORMAL_DAMAGE,
+    /** 添加护盾 **/
+    ADD_SHIELD,
+    /** 移除剩余护盾 **/
+    REMOVE_REMAIN_SHIELD,
+    /** 修改属性 **/
+    MODIFY_ATTRIBUTE,
 
     ;
 
-    private final int code;
-
-    EffectType(int code) {
-        this.code = code;
-    }
 
 }

@@ -1,8 +1,12 @@
 package com.li.battle.buff.core;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.battle.buff.handler.SkillExecutedBuffEventHandler;
+import com.li.battle.buff.BuffContext;
+import com.li.battle.buff.handler.*;
 import com.li.battle.core.scene.BattleScene;
+import com.li.battle.effect.EffectExecutor;
+import com.li.battle.effect.domain.EffectParam;
+import com.li.battle.effect.source.BuffEffectSource;
 import com.li.battle.event.*;
 import com.li.battle.event.handler.EventHandler;
 import com.li.battle.resource.BuffConfig;
@@ -17,6 +21,8 @@ import java.util.*;
 @Getter
 public abstract class AbstractBuff implements Buff {
 
+    /** 唯一id **/
+    protected final long id;
     /** buff配置 **/
     protected final BuffConfig config;
     /** buff施加者 **/
@@ -40,7 +46,8 @@ public abstract class AbstractBuff implements Buff {
     protected BuffContext buffContext;
 
 
-    public AbstractBuff(BuffConfig config, long caster, long parent, int skillId, BattleScene scene) {
+    public AbstractBuff(long id, BuffConfig config, long caster, long parent, int skillId, BattleScene scene) {
+        this.id = id;
         this.config = config;
         this.caster = caster;
         this.parent = parent;
@@ -58,8 +65,8 @@ public abstract class AbstractBuff implements Buff {
     }
 
     @Override
-    public boolean onBuffRefresh(Buff other) {
-        return config.getMergeRule().merge(this, other);
+    public void onBuffRefresh(Buff other) {
+        config.getMergeRule().merge(this, other);
     }
 
     @Override
@@ -87,6 +94,7 @@ public abstract class AbstractBuff implements Buff {
         }
     }
 
+
     @Override
     public int getDuration() {
         return config.getDuration();
@@ -105,6 +113,14 @@ public abstract class AbstractBuff implements Buff {
     @Override
     public void makeExpire() {
         expireRound = -1;
+        EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
+        if (ArrayUtil.isNotEmpty(config.getRemoveEffects())) {
+            // 执行移除效果
+            BuffEffectSource source = new BuffEffectSource(this);
+            for (EffectParam effectParam : config.getRemoveEffects()) {
+                effectExecutor.execute(source, effectParam);
+            }
+        }
     }
 
     @Override
@@ -130,7 +146,11 @@ public abstract class AbstractBuff implements Buff {
 
     @Override
     public void updateNextRound(long nextRound) {
-        this.nextRound = Math.min(nextRound, expireRound);
+        if (expireRound == 0) {
+            this.nextRound = nextRound;
+        } else {
+            this.nextRound = Math.min(nextRound, expireRound);
+        }
     }
 
     private boolean isExpire0(long curRound) {
@@ -157,33 +177,47 @@ public abstract class AbstractBuff implements Buff {
             handlers.add(eventHandlerHolder.getEventHandler(SkillExecutedBuffEventHandler.class));
         }
 
-        if (ArrayUtil.isNotEmpty(config.getBeforeDamageEffects())) {
-            // todo 注册伤害前事件处理器
+        if (ArrayUtil.isNotEmpty(config.getBeforeDamageEffects()) || ArrayUtil.isNotEmpty(config.getBeforeTakeDamageEffects())) {
+            // 注册伤害前事件处理器
+            handlers.add(eventHandlerHolder.getEventHandler(BeforeDamageEventBuffHandler.class));
         }
 
-        if (ArrayUtil.isNotEmpty(config.getAfterDamageEffects())) {
-            // todo 注册伤害后事件处理器
+        if (ArrayUtil.isNotEmpty(config.getAfterDamageEffects()) || ArrayUtil.isNotEmpty(config.getAfterTakeDamageEffects())) {
+            // 注册伤害后事件处理器
+            handlers.add(eventHandlerHolder.getEventHandler(AfterDamageEventBuffHandler.class));
         }
 
         if (ArrayUtil.isNotEmpty(config.getBeforeDeadEffects())) {
-            // todo 注册死亡前事件处理器
+            //  注册死亡前事件处理器
+            handlers.add(eventHandlerHolder.getEventHandler(BeforeDeadEventBuffHandler.class));
         }
 
-        if (ArrayUtil.isNotEmpty(config.getAfterDeadEffects())) {
-            // todo 注册死亡后事件处理器
+        if (ArrayUtil.isNotEmpty(config.getAfterDeadEffects()) || (ArrayUtil.isNotEmpty(config.getKillEffects()))) {
+            // 注册死亡后事件处理器
+            handlers.add(eventHandlerHolder.getEventHandler(KillEventBuffHandler.class));
         }
 
-        if (ArrayUtil.isNotEmpty(config.getAfterKillEffects())) {
-            // todo 注册死亡事件处理器
-        }
 
         if (!handlers.isEmpty()) {
-            EventPipeline pipeline = eventPipeline();
+            EventPipeline pipeline = newEventPipeline();
             handlers.forEach(pipeline::addHandler);
 
             //  注册自身
-            scene.eventDispatcher().register(this);
+            scene.eventDispatcher().register(pipeline);
         }
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractBuff that = (AbstractBuff) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -31,19 +31,19 @@ public class TriggerEffectHandler extends AbstractEffectParamHandler<TriggerEffe
         BattleSceneHelper battleSceneHelper = scene.battleSceneHelper();
         TriggerConfig triggerConfig = battleSceneHelper.configHelper().getTriggerConfigById(effectParam.getTriggerId());
 
+        TriggerFactory triggerFactory = battleSceneHelper.triggerFactory();
 
         FightUnit caster = source.getCaster();
         List<FightUnit> results = source.getTargetUnits();
         if (results.isEmpty()) {
-            TriggerReceiver triggerReceiver = TriggerReceiverFactory.newInstanceAndRegister(caster.getId(), 0, source.getSkillId()
+            Trigger trigger = triggerFactory.newInstanceAndRegister(caster.getId(), 0, source.getSkillId()
                     , source.getBuffId(), triggerConfig, scene);
-            scene.triggerManager().addTriggerReceiver(triggerReceiver);
+            scene.triggerManager().addTriggerReceiver(trigger);
         } else {
             for (FightUnit unit : results) {
-                TriggerReceiver triggerReceiver = TriggerReceiverFactory.newInstanceAndRegister(caster.getId(), unit.getId()
-                        , source.getSkillId()
-                        , source.getBuffId(), triggerConfig, scene);
-                scene.triggerManager().addTriggerReceiver(triggerReceiver);
+                Trigger trigger = triggerFactory.newInstanceAndRegister(caster.getId(), unit.getId()
+                        , source.getSkillId(), source.getBuffId(), triggerConfig, scene);
+                scene.triggerManager().addTriggerReceiver(trigger);
             }
         }
 

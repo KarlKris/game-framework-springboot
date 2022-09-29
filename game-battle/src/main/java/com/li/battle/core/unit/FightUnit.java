@@ -1,9 +1,10 @@
 package com.li.battle.core.unit;
 
+import com.li.battle.buff.core.Buff;
 import com.li.battle.core.*;
 import com.li.battle.core.scene.BattleScene;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * 战斗单元对外接口
@@ -60,5 +61,44 @@ public interface FightUnit extends MoveUnit {
      * @return true hp<=0
      */
     boolean isDead();
+
+    /**
+     * 获取玩家身上的buff
+     * @param buffId buff标识
+     * @return buff集
+     */
+    List<Buff> getBuffById(int buffId);
+
+    /**
+     * 获取玩家身上的buff(指定施法者的)
+     * @param caster 施法者标识
+     * @param buffId buff标识
+     * @return buff or null
+     */
+    Buff getBuffByIdAndCaster(long caster, int buffId);
+
+    /**
+     * 添加buff
+     * @param buff buff
+     */
+    void addBuff(Buff buff);
+
+    /**
+     * 移除buff
+     * @param buff buff
+     */
+    void removeBuff(Buff buff);
+
+    /**
+     * 获取玩家身上的所有buff
+     * @return buff集
+     */
+    Collection<Buff> getAllBuffs();
+
+    /**
+     * 受到伤害
+     * @param dmg 伤害值
+     */
+    void onHurt(long dmg);
 
 }

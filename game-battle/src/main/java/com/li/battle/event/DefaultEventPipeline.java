@@ -23,6 +23,7 @@ public class DefaultEventPipeline implements EventPipeline {
 
     public DefaultEventPipeline(EventReceiver receiver) {
         this.receiver = receiver;
+        this.head = new HeadEventHandlerContext(this);
     }
 
     @Override
@@ -38,8 +39,11 @@ public class DefaultEventPipeline implements EventPipeline {
         List<BattleEventType> types = new LinkedList<>();
         AbstractEventHandlerContext next = head;
         while (next != null) {
-            types.add(next.eventHandler().getEventType());
-            next = head.next;
+            BattleEventType type = next.eventHandler().getEventType();
+            if (type != null) {
+                types.add(type);
+            }
+            next = next.next;
         }
         return types;
     }
@@ -68,5 +72,30 @@ public class DefaultEventPipeline implements EventPipeline {
 
     private AbstractEventHandlerContext newContext(EventHandler eventHandler) {
         return new DefaultEventHandlerContext(this, eventHandler);
+    }
+
+    /**
+     * 事件处理链头部
+     */
+    private static final class HeadEventHandlerContext extends AbstractEventHandlerContext implements EventHandler {
+
+        public HeadEventHandlerContext(EventPipeline pipeline) {
+            super(pipeline);
+        }
+
+        @Override
+        public BattleEventType getEventType() {
+            return null;
+        }
+
+        @Override
+        public void handle(EventHandlerContext context, Object receiver, Object event) {
+            context.fireHandleEvent(event);
+        }
+
+        @Override
+        public EventHandler eventHandler() {
+            return this;
+        }
     }
 }

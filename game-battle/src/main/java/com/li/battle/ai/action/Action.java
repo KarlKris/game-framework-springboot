@@ -10,14 +10,5 @@ import com.li.battle.ai.behaviour.Behaviour;
  */
 public interface Action extends Behaviour {
 
-    /**
-     * 初始化
-     */
-    void init();
-
-    /**
-     * 关闭
-     */
-    void close();
 
 }

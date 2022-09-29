@@ -35,6 +35,8 @@ public class ConversionConfig {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         // 允许出现单引号
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        objectMapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+        objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 
         return objectMapper;
     }

@@ -6,6 +6,7 @@ import com.li.battle.core.unit.FightUnit;
 
 import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Collectors;
 
 /**
  * 多人对战PVP场景
@@ -34,6 +35,6 @@ public class MultipleFightBattleScene extends AbstractBattleScene {
 
     @Override
     public Collection<FightUnit> getUnits() {
-        return null;
+        return fightUnits.values().stream().filter(unit -> !unit.isDead()).collect(Collectors.toList());
     }
 }

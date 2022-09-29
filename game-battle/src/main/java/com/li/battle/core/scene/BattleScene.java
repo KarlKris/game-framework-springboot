@@ -155,4 +155,10 @@ public interface BattleScene {
     QuadTree<FightUnit> distributed();
 
 
+    /**
+     * 获取唯一ID
+     * @return 场景内唯一id
+     */
+    long getNextId();
+
 }

@@ -1,8 +1,8 @@
 package com.li.battle.skill.processor;
 
+import com.li.battle.core.UnitState;
 import com.li.battle.resource.ChannelSkillConfig;
-import com.li.battle.skill.BattleSkill;
-import com.li.battle.skill.SkillStage;
+import com.li.battle.skill.*;
 
 /**
  * 持续型技能引导结束阶段技能效果执行器
@@ -12,7 +12,7 @@ import com.li.battle.skill.SkillStage;
 public class ChannelSkillFinishStageProcessor extends AbstractSkillStageProcessor<ChannelSkillConfig> {
 
     @Override
-    public SkillStage getSkillSatge() {
+    public SkillStage getSkillStage() {
         return SkillStage.CHANNEL_FINISH;
     }
 
@@ -21,5 +21,8 @@ public class ChannelSkillFinishStageProcessor extends AbstractSkillStageProcesso
         if (isExecutable(config.getFinishEffects())) {
             process0(skill, config.getFinishEffects());
         }
+        skill.updateSkillStage(SkillStage.CHANNEL_DESTROY);
+        skill.addNextRound(config.getBackRockingTime() / skill.getScene().getRoundPeriod());
+        skill.getScene().getFightUnit(skill.getCaster()).modifyState(UnitState.BACK);
     }
 }

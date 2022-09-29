@@ -1,5 +1,6 @@
 package com.li.battle.skill.processor;
 
+import com.li.battle.core.UnitState;
 import com.li.battle.resource.GeneralSkillConfig;
 import com.li.battle.skill.BattleSkill;
 import com.li.battle.skill.SkillStage;
@@ -14,14 +15,16 @@ import org.springframework.stereotype.Component;
 public class GeneralSkillFinishStageProcessor extends AbstractSkillStageProcessor<GeneralSkillConfig> {
 
     @Override
-    public SkillStage getSkillSatge() {
+    public SkillStage getSkillStage() {
         return SkillStage.FINISH;
     }
 
     @Override
     public void process(BattleSkill skill, GeneralSkillConfig config) {
+        skill.getScene().getFightUnit(skill.getCaster()).modifyState(UnitState.NORMAL);
         if (isExecutable(config.getFinishEffects())) {
             process0(skill, config.getFinishEffects());
         }
+        skill.addNextRound(skill.getExpireRound() + 1);
     }
 }

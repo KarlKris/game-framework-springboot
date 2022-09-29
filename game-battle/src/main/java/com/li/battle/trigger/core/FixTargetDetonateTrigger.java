@@ -1,12 +1,9 @@
 package com.li.battle.trigger.core;
 
-import com.li.battle.core.unit.FightUnit;
-import com.li.battle.core.unit.IPosition;
-import com.li.battle.event.core.SkillExecutedEvent;
-import com.li.battle.selector.SelectorResult;
-import com.li.battle.trigger.TriggerType;
+import com.li.battle.core.scene.BattleScene;
+import com.li.battle.resource.TriggerConfig;
+import com.li.battle.trigger.Trigger;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * 固定目标引爆型Trigger
@@ -14,43 +11,22 @@ import lombok.NoArgsConstructor;
  * @date 2022/5/27
  */
 @Getter
-@NoArgsConstructor
-public class FixTargetDetonateTrigger extends AbstractDetonateTrigger {
+public class FixTargetDetonateTrigger extends Trigger {
 
-    /** 当前挂载的目标 **/
-    private long targetUnitId;
+    /** 当前叠加的次数 **/
+    private int curNum;
 
-    public FixTargetDetonateTrigger(int[] skillIds, int num) {
-        super(skillIds, num);
+    public FixTargetDetonateTrigger(long unitId, long parent, int skillId, int buffId, TriggerConfig config, BattleScene scene) {
+        super(unitId, parent, skillId, buffId, config, scene);
     }
 
-    @Override
-    public TriggerType getType() {
-        return TriggerType.FIX_TARGET_DETONATE;
+
+    public int increment() {
+        return ++curNum;
     }
 
-    @Override
-    protected void try0(long casterId, SkillExecutedEvent event, TriggerSuccessCallback callback) {
-        // 查看挂载目标
-        SelectorResult selectorResult = event.getSkill().getTarget();
-        for (IPosition position : selectorResult.getResults()) {
-            if (!(position instanceof FightUnit)) {
-                continue;
-            }
-            FightUnit unit = (FightUnit) position;
-            if (unit.getId() != targetUnitId) {
-                curNum = 1;
-                continue;
-            }
-            // 引爆成功
-            if (++curNum >= num) {
-                callback.callback(unit.getId());
-            }
-        }
+    public void reset() {
+        curNum = 0;
     }
 
-    @Override
-    public Trigger copy() {
-        return new FixTargetDetonateTrigger(skillIds, num);
-    }
 }

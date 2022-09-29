@@ -56,7 +56,7 @@ public class TrackingProjectile extends AbstractProjectile {
     @Override
     public boolean checkFinish() {
         // 子弹已销毁或目标已死亡
-        return destroy || scene.getFightUnit(target).getAttributeValue(Attribute.HP) <= 0;
+        return destroy || scene.getFightUnit(target).getAttributeValue(Attribute.CUR_HP) <= 0;
     }
 
 }

@@ -2,6 +2,7 @@ package com.li.battle.ai.composite;
 
 import com.li.battle.ai.Status;
 import com.li.battle.ai.behaviour.Behaviour;
+import com.li.battle.ai.blackboard.BlackBoard;
 
 import java.util.Iterator;
 
@@ -10,20 +11,20 @@ import java.util.Iterator;
  * @author li-yuanwen
  * @date 2022/1/25
  */
-public class ParallelComposite extends AbstractComposite {
+public class ParallelBehaviour extends AbstractComposite {
 
     /** 成功并行策略 **/
     private final ParallelPolicy successPolicy;
     /**失败并行策略  **/
     private final ParallelPolicy failurePolicy;
 
-    public ParallelComposite(ParallelPolicy successPolicy, ParallelPolicy failurePolicy) {
+    public ParallelBehaviour(ParallelPolicy successPolicy, ParallelPolicy failurePolicy) {
         this.successPolicy = successPolicy;
         this.failurePolicy = failurePolicy;
     }
 
     @Override
-    public final Status update() {
+    public final Status update(BlackBoard board) {
         int successCount = 0;
         int failureCount = 0;
 
@@ -38,7 +39,7 @@ public class ParallelComposite extends AbstractComposite {
 
         while (iterator.hasNext()) {
             Behaviour behaviour = iterator.next();
-            Status status = behaviour.tick();
+            Status status = behaviour.tick(board);
 
             if (status == Status.SUCCESS) {
                 successCount++;

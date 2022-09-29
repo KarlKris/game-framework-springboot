@@ -12,14 +12,14 @@ import lombok.Getter;
 public class AfterDamageEvent implements BattleEvent {
 
     /** 伤害来源 **/
-    private final EffectSource source;
+    private final EffectSource effectSource;
     /** 伤害制造者唯一标识 **/
     private final long maker;
     /** 伤害目标唯一标识 **/
     private final long target;
 
     public AfterDamageEvent(EffectSource source, long maker, long target) {
-        this.source = source;
+        this.effectSource = source;
         this.maker = maker;
         this.target = target;
     }
@@ -32,5 +32,9 @@ public class AfterDamageEvent implements BattleEvent {
     @Override
     public long getSource() {
         return maker;
+    }
+
+    public EffectSource getEffectSource() {
+        return effectSource;
     }
 }

@@ -1,6 +1,7 @@
 package com.li.battle.collision;
 
 import com.li.battle.util.BattleMathUtil;
+import lombok.ToString;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.util.FastMath;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * @author li-yuanwen
  * @date 2022/6/1
  */
+@ToString
 public class Rectangle implements Shape {
 
     /** 矩形中点起点 **/

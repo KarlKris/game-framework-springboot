@@ -34,6 +34,12 @@ public abstract class AbstractDamageEffectHandler<EP extends AbstractDamageEffec
      * @param effectParam 伤害效果参数
      */
     protected void processDamage(EffectSource source, FightUnit attacker, FightUnit defender, EP effectParam) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("计算单位[{}]对单位[{}]的伤害, 伤害源[{}],伤害参数[{}]"
+                    , attacker.getId(), defender.getId(), source.getClass().getSimpleName(), effectParam);
+        }
+
         // 计算伤害
         long damage = calculateDamage(attacker, defender, effectParam);
         // 存储数据
@@ -45,9 +51,8 @@ public abstract class AbstractDamageEffectHandler<EP extends AbstractDamageEffec
         BeforeDamageEvent beforeDamageEvent = new BeforeDamageEvent(source, attacker.getId(), defender.getId());
         eventDispatcher.dispatch(beforeDamageEvent);
 
-        // 计算最终伤害值
-        long dmg = calculateFinalDamage(attacker, defender, source.getDamageValue());
-        defender.modifyAttribute(Attribute.CUR_HP, -dmg);
+        // 扣除血量
+        execDamage(attacker, defender, source);
 
         // 伤害后事件
         AfterDamageEvent afterDamageEvent = new AfterDamageEvent(source, attacker.getId(), defender.getId());
@@ -60,12 +65,11 @@ public abstract class AbstractDamageEffectHandler<EP extends AbstractDamageEffec
         }
 
         if (defender.isDead()) {
-            // 死亡后事件
-            AfterDeadEvent afterDeadEvent = new AfterDeadEvent(source, attacker.getId(), defender.getId());
-            eventDispatcher.dispatch(afterDeadEvent);
             // 击杀事件
             KillEvent killEvent = new KillEvent(source, attacker.getId(), defender.getId());
             eventDispatcher.dispatch(killEvent);
+            // 死亡移除
+            source.battleScene().distributed().remove(defender);
         }
 
     }
@@ -76,6 +80,22 @@ public abstract class AbstractDamageEffectHandler<EP extends AbstractDamageEffec
      * @return
      */
     protected abstract ValueAlter newValueAlter(long dmg);
+
+    /**
+     * 执行伤害扣除血量
+     * @param attacker 攻击方
+     * @param defender 防守方
+     * @param source 效果源
+     */
+    protected void execDamage(FightUnit attacker, FightUnit defender, EffectSource source) {
+        long dmg = calculateFinalDamage(attacker, defender, source.getDamageValue());
+        // 扣除伤害
+        defender.onHurt(dmg);
+        if (log.isDebugEnabled()) {
+            log.debug("单位[{}]受到单位[{}]的伤害[{}],剩余血量[{}]"
+                    , defender.getId(), attacker.getId(), dmg, defender.getAttributeValue(Attribute.CUR_HP));
+        }
+    }
 
     /**
      * 计算最终伤害值 默认受增伤和减伤影响
@@ -90,8 +110,16 @@ public abstract class AbstractDamageEffectHandler<EP extends AbstractDamageEffec
         long inc = dmg * attacker.getAttributeValue(Attribute.DAMAGE_INC) / Const.TEN_THOUSAND;
         long dec = dmg * defender.getAttributeValue(Attribute.DAMAGE_DEC) / Const.TEN_THOUSAND;
         dmg += (inc - dec);
+
+        // 敌方护盾抵扣
+        long shieldValue = defender.getAttributeValue(Attribute.SHIELD);
+        if (shieldValue > dmg) {
+            defender.modifyAttribute(Attribute.SHIELD, -dmg);
+        }
+
         return dmg;
     }
+
 
     /**
      * 根据伤害效果参数去计算伤害值

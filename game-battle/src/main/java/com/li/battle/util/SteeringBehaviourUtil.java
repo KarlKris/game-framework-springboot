@@ -5,6 +5,7 @@ import com.li.battle.core.scene.BattleScene;
 import com.li.battle.core.unit.MoveUnit;
 import com.li.battle.core.unit.Unit;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 
 /**
  * 操控行为封装---游戏人工智能编程案例精粹---3.4操控行为
@@ -12,6 +13,24 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
  * @date 2022/4/24
  */
 public class SteeringBehaviourUtil {
+
+    /**
+     * 靠近操控行为返回一个操控目标到达目标位置的力向量
+     * @param unit 操控单位
+     * @param targetPos 目标位置向量
+     * @return 到达目标位置的力向量
+     */
+    public static Vector2D arrive(MoveUnit unit, Vector2D targetPos, double maxSpeed) {
+        // 首先计算预期速度,这个速度在理想化情况下达到目标位置所需的速度.
+        Vector2D desiredSpeed = targetPos.subtract(unit.getPosition());
+        double distance = desiredSpeed.getNorm();
+        if (distance > maxSpeed) {
+            // 是从起始位置到目标的向量,大小为最大速度
+            desiredSpeed = desiredSpeed.normalize().scalarMultiply(maxSpeed);
+        }
+        // 该方法返回的操控力,当把它加到目标当前速度向量上就得到预期的速度,所以简单的从预期速度中减去目标的当前速度
+        return desiredSpeed.subtract(unit.getVelocity());
+    }
 
 
     /**
@@ -261,8 +280,21 @@ public class SteeringBehaviourUtil {
      * @return 全局位置向量
      */
     public static Vector2D pointToWorldSpace(Vector2D local, MoveUnit unit) {
-        // todo
-        return local;
+        Vector2D position = unit.getPosition();
+        Vector2D heading = unit.getHeading();
+        Vector2D side = BattleMathUtil.normalVector(heading);
+
+        double[][] matrix = BattleMathUtil.rotate(heading, side);
+
+        double[][] translateMatrix = new double[][] {
+                {1, 0, 0},
+                {0, 1, 0},
+                {position.getX(), position.getY(), 1}
+        };
+
+        // 矩阵相乘
+        Array2DRowRealMatrix realMatrix = new Array2DRowRealMatrix(matrix).multiply(new Array2DRowRealMatrix(translateMatrix));
+        return BattleMathUtil.matrixTransformVector2D(realMatrix.getData(), local);
     }
 
     /**
@@ -272,8 +304,20 @@ public class SteeringBehaviourUtil {
      * @return 局部位置向量
      */
     public static Vector2D pointToLocalSpace(Vector2D point, MoveUnit unit) {
-        // todo
-        return point;
+        Vector2D source = unit.getPosition();
+        Vector2D heading = unit.getHeading();
+        Vector2D side = BattleMathUtil.normalVector(heading);
+
+        double tx = -(source.dotProduct(heading));
+        double ty = -(source.dotProduct(side));
+
+        double[][] matrix = new double[][] {
+                {heading.getX(), side.getX()},
+                {heading.getY(), side.getY()},
+                {tx, ty}
+        };
+
+        return BattleMathUtil.matrixTransformVector2D(matrix, point);
     }
 
 
@@ -284,8 +328,10 @@ public class SteeringBehaviourUtil {
      * @return 全局变量
      */
     public static Vector2D vectorToWorldSpace(Vector2D vector, MoveUnit unit) {
-        // todo
-        return vector;
+        Vector2D heading = unit.getHeading();
+        Vector2D side = BattleMathUtil.normalVector(heading);
+        double[][] matrix = BattleMathUtil.rotate(heading, side);
+        return BattleMathUtil.matrixTransformVector2D(matrix, vector);
     }
 
 

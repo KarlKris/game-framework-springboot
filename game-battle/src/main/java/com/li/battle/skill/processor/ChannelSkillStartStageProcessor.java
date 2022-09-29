@@ -1,8 +1,7 @@
 package com.li.battle.skill.processor;
 
 import com.li.battle.resource.ChannelSkillConfig;
-import com.li.battle.skill.BattleSkill;
-import com.li.battle.skill.SkillStage;
+import com.li.battle.skill.*;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ChannelSkillStartStageProcessor extends AbstractSkillStageProcessor<ChannelSkillConfig> {
 
     @Override
-    public SkillStage getSkillSatge() {
+    public SkillStage getSkillStage() {
         return SkillStage.CHANNEL_START;
     }
 
@@ -24,5 +23,7 @@ public class ChannelSkillStartStageProcessor extends AbstractSkillStageProcessor
             process0(skill, config.getStartEffects());
         }
         skill.updateSkillStage(SkillStage.CHANNEL_THINK);
+        skill.initChannelStartRound();
+        skill.addNextRound(config.getFrontRockingTime() / skill.getScene().getRoundPeriod());
     }
 }
