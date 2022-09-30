@@ -44,9 +44,6 @@ public class SkillManager {
     }
 
     private void handle(BattleSkill skill, long curRound) {
-        if (skill.isExpire(curRound)) {
-            return;
-        }
         scene.battleSceneHelper().battleSkillExecutor().execute(skill);
         if (!skill.isExpire(curRound)) {
             queue.offer(skill);

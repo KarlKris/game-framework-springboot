@@ -25,6 +25,6 @@ public class GeneralSkillFinishStageProcessor extends AbstractSkillStageProcesso
         if (isExecutable(config.getFinishEffects())) {
             process0(skill, config.getFinishEffects());
         }
-        skill.addNextRound(skill.getExpireRound() + 1);
+        skill.addNextRound(skill.getExpireRound() - skill.getScene().getSceneRound());
     }
 }

@@ -126,9 +126,9 @@ public class DefaultSceneMap implements SceneMap {
         List<Vector2D> ways = new LinkedList<>();
         while (node != null) {
             if (node.grid.equals(toGrid)) {
-                ways.add(new Vector2D(toX, toY));
+                ways.add(new Vector2D(toGrid.getX(), toGrid.getY()));
             } else if (node.grid.equals(fromGrid)){
-                ways.add(new Vector2D(fromX, fromY));
+                ways.add(new Vector2D(fromGrid.getX(), fromGrid.getY()));
             } else {
                 // todo 优化 移除拐点
                 ways.add(new Vector2D(node.grid.getX(), node.grid.getY()));

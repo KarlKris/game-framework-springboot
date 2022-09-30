@@ -1,7 +1,6 @@
 package com.li.battle.core.scene;
 
 import com.li.battle.core.*;
-import com.li.battle.core.map.SceneMap;
 import com.li.battle.core.unit.FightUnit;
 import com.li.battle.resource.SkillConfig;
 import com.li.battle.selector.*;
@@ -9,7 +8,6 @@ import com.li.battle.skill.*;
 import com.li.battle.skill.executor.BattleSkillExecutor;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -26,9 +24,36 @@ public class BattleSceneReferee {
         this.scene = scene;
     }
 
-    public CompletableFuture<Void> move(long unitId, double x, double y) {
+    public CompletableFuture<Void> updatePosition(final long unitId, final Vector2D position, final Vector2D velocity, final boolean finish) {
         if (scene.checkDestroy()) {
-            throw new RuntimeException("场景已销毁");
+            return CompletableFuture.completedFuture(null);
+        }
+
+        final FightUnit fightUnit = scene.getFightUnit(unitId);
+        if (fightUnit == null) {
+            throw new RuntimeException("战斗单位未在场景中");
+        }
+
+        if (fightUnit.getState() != UnitState.MOVING) {
+            throw new RuntimeException("战斗单位无法响应移动请求");
+        }
+
+        return scene.addTask(() -> {
+            FightUnit unit = scene.getFightUnit(unitId);
+            unit.updatePosition(position);
+            unit.updateVelocity(velocity);
+
+            if (finish) {
+                unit.modifyState(UnitState.NORMAL);
+            }
+
+            return null;
+        });
+    }
+
+    public CompletableFuture<Void> moveTargetPosition(final long unitId, final Vector2D position) {
+        if (scene.checkDestroy()) {
+            return CompletableFuture.completedFuture(null);
         }
 
         final FightUnit fightUnit = scene.getFightUnit(unitId);
@@ -40,19 +65,14 @@ public class BattleSceneReferee {
             throw new RuntimeException("战斗单位无法响应移动请求");
         }
 
-        SceneMap sceneMap = scene.sceneMap();
-        Vector2D position = fightUnit.getPosition();
-        final List<Vector2D> way = sceneMap.findWayByAStar(position.getX(), position.getY(), x, y);
-        if (way.isEmpty()) {
-            throw new RuntimeException("寻路失败");
-        }
-
         return scene.addTask(() -> {
-            fightUnit.moveTo(way);
+            FightUnit unit = scene.getFightUnit(unitId);
+            unit.setMoveTargetPosition(position);
+
             return null;
         });
-
     }
+
 
     public CompletableFuture<Void> useSkill(long unitId, int skillId, SelectParam param) {
         if (scene.checkDestroy()) {

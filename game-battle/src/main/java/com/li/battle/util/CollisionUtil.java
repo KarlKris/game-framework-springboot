@@ -13,6 +13,8 @@ import java.util.List;
  */
 public class CollisionUtil {
 
+    /** 误差 **/
+    static final double NUMERICAL_FAULT = 0.001;
 
     /**
      * 判断2个检测体是否发生碰撞
@@ -105,6 +107,20 @@ public class CollisionUtil {
     public static boolean isCollisionBetweenCircle(ICircle c1, ICircle c2) {
         // 单元都是圆,只需要比较圆心距
         return Vector2D.distance(c1.getCentre(), c2.getCentre()) < (c1.getRadius() + c2.getRadius());
+    }
+
+
+    public static boolean isNotEqualWithDouble(double x, double y) {
+        // 2个值超过0.001则视为不相等
+        return Math.abs(x - y) > NUMERICAL_FAULT;
+    }
+
+    public static boolean isSimilarBetween(Vector2D v1, Vector2D v2) {
+        if (v1.equals(v2)) {
+            return true;
+        }
+
+        return v1.distance(v2) < NUMERICAL_FAULT;
     }
 
 

@@ -3,6 +3,9 @@ package com.li.battle.ai.blackboard;
 import com.li.battle.core.unit.FightUnit;
 import lombok.Getter;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 /**
  * 黑板,用于共享数据
@@ -16,10 +19,15 @@ public class BlackBoard {
     private final FightUnit unit;
     /** 选择的技能下标 **/
     private int skillIndex;
+
     /** 选择的敌人 **/
     private FightUnit enemy;
-    /** 移动坐标 **/
-    private Vector2D point;
+
+
+    /** 路径 **/
+    private List<Vector2D> ways;
+    /** 路径下标 **/
+    private int wayIndex;
 
 
     public BlackBoard(FightUnit unit) {
@@ -35,9 +43,16 @@ public class BlackBoard {
         this.enemy = enemy;
     }
 
-    public void setPoint(Vector2D point) {
-        this.point = point;
+    public void setWays(List<Vector2D> ways) {
+        this.ways = ways;
+        this.wayIndex = 1;
     }
 
+    public int incrementWayIndex() {
+        return ++this.wayIndex;
+    }
 
+    public boolean isWayEmpty() {
+        return CollectionUtils.isEmpty(ways);
+    }
 }

@@ -13,6 +13,9 @@ public enum UnitState {
     /** 寻路中 **/
     MOVING(true, true, true),
 
+    /** 寻路等待状态 **/
+    MOVING_WAIT(false, false, true),
+
     /** 前摇 **/
     FRONT(false, false, true),
 

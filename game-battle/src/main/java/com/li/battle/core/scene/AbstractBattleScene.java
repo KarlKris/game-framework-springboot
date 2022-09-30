@@ -180,19 +180,16 @@ public abstract class AbstractBattleScene implements BattleScene {
             executeAi();
             // 执行玩家操作
             executePlayerOperates();
-            // 战斗单位移动
-            getUnits().forEach(MoveUnit::moving);
             // 执行子弹逻辑
             projectileManager.update();
             // 开始执行buff逻辑
             buffManager.update();
-            // 执行事件逻辑
-            eventDispatcher.update();
             // 执行技能逻辑
             skillManager.update();
             // 执行触发器销毁逻辑
             triggerManager.update();
-
+            // 执行事件逻辑
+            eventDispatcher.update();
             if (checkDestroy()) {
                 destroy();
             }

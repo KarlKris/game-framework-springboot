@@ -39,10 +39,10 @@ public class SelectEnemyAction extends AbstractAction {
         FightUnit enemy = null;
 
         Circle circle = new Circle(unit.getPosition(), unit.getRadius() + range);
-        long unitId = unit.getId();
-        List<FightUnit> units = scene.distributed().retrieve(circle).stream().filter(u -> u.getId() != unitId).collect(Collectors.toList());
+        CampType enemyType = unit.getCampType().getEnemyType();
+        List<FightUnit> units = scene.distributed().retrieve(circle).stream().filter(u -> u.getCampType() == enemyType).collect(Collectors.toList());
         if (units.isEmpty()) {
-            units = scene.getUnits().stream().filter(u -> u.getId() != unitId).collect(Collectors.toList());
+            units = scene.getUnits().stream().filter(u -> u.getCampType() == enemyType).collect(Collectors.toList());
 
             if (units.isEmpty()) {
                 return Status.FAILURE;

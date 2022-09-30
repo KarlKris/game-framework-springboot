@@ -25,7 +25,6 @@ public class UseSkillAction extends AbstractAction  {
         selectParam.setTarget(board.getEnemy().getId());
         battleScene.battleSceneReferee().useSkill(unit.getId(), skill.getSkillId(), selectParam);
 
-        board.setPoint(null);
         board.setEnemy(null);
 
         return Status.SUCCESS;

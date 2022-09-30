@@ -55,6 +55,9 @@ public class BattleSkill implements IOwner {
 
     public void addNextRound(long addRound) {
         this.nextRound += addRound;
+        if (this.expireRound > 0) {
+            this.nextRound = Math.min(this.nextRound, this.expireRound);
+        }
     }
 
     public void initChannelStartRound() {
@@ -62,7 +65,7 @@ public class BattleSkill implements IOwner {
     }
 
     public boolean isExpire(long curRound) {
-        return expireRound != 0 && curRound > expireRound;
+        return expireRound != 0 && curRound >= expireRound;
     }
 
 

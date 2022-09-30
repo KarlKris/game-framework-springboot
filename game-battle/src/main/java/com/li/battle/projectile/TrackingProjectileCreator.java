@@ -40,7 +40,10 @@ public class TrackingProjectileCreator implements ProjectileCreator {
             return null;
         }
 
-        // todo 玩家已死亡则放弃创建子弹
+        // 玩家已死亡则放弃创建子弹
+        if (targetUnit.isDead()) {
+            return null;
+        }
 
         // 实际终点
         Vector2D end = targetUnit.getPosition().subtract(position).normalize()

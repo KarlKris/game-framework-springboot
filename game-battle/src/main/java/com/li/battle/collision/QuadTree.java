@@ -76,7 +76,7 @@ public class QuadTree<T extends Shape> {
     }
 
     private List<T> getSubNodes0() {
-        List<T> list = new LinkedList<>();
+        List<T> list = new LinkedList<>(objects);
         for (int i = 0; i < nodes.length; i++) {
             if (nodes[i] != null) {
                 list.addAll(nodes[i].getSubNodes0());

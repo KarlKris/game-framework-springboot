@@ -36,7 +36,8 @@ public class ConditionIsEnemyMatchDistance extends AbstractCondition {
         double distance = enemy.getPosition().distance(unit.getPosition());
         if (distance > range + unit.getRadius() + enemy.getRadius()) {
             Vector2D point = enemy.getPosition().subtract(unit.getPosition()).scalarMultiply(0.3D).add(unit.getPosition());
-            board.setPoint(point);
+//            board.setPoint(point);
+            scene.battleSceneReferee().moveTargetPosition(unit.getId(), point);
             return false;
         }
 

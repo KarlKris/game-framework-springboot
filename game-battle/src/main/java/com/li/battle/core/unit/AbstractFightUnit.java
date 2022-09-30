@@ -7,7 +7,6 @@ import com.li.battle.core.*;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.event.core.UnitMoveEvent;
 import com.li.battle.resource.SkillConfig;
-import com.li.battle.util.SteeringBehaviourUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
@@ -35,6 +34,8 @@ public abstract class AbstractFightUnit implements FightUnit {
     private UnitState state;
     /** 当前位置 **/
     private Vector2D position;
+    /** 目标位置 **/
+    private Vector2D moveTargetPosition;
 
     /** 最高移速(一回合内的移动距离) **/
     private final int maxSpeed;
@@ -220,50 +221,33 @@ public abstract class AbstractFightUnit implements FightUnit {
     }
 
     @Override
-    public void moveTo(List<Vector2D> ways) {
-        this.ways = ways;
-        this.wayIndex = 1;
-        this.state = UnitState.MOVING;
+    public void updateVelocity(Vector2D velocity) {
+        this.velocity = velocity;
     }
 
     @Override
-    public void moving() {
-        if (getState() != UnitState.MOVING) {
-            return;
-        }
-
-        QuadTree<FightUnit> distributed = scene.distributed();
+    public void updatePosition(Vector2D position) {
+        QuadTree<FightUnit> distributed = getScene().distributed();
         distributed.remove(this);
 
-        double distance = 0;
-        int maxSpeed = getMaxSpeed();
-        int size = ways.size();
-        while (isNotMatch(distance, maxSpeed) && wayIndex < size) {
-            Vector2D oldPos = this.position;
-            Vector2D target = ways.get(wayIndex);
-            this.velocity = SteeringBehaviourUtil.arrive(this, target, maxSpeed - distance).add(velocity);
-            this.position = this.velocity.add(this.position);
-
-            distance += (Vector2D.distance(oldPos, position));
-            if (target.equals(this.position)) {
-                wayIndex++;
-            }
-        }
+        UnitMoveEvent event = new UnitMoveEvent(id, this.position, position);
+        this.position = position;
 
         distributed.insert(this);
 
-        if (wayIndex >= size) {
-            this.state = UnitState.NORMAL;
-        }
-
-        // 抛出移动事件
-        scene.eventDispatcher().dispatch(new UnitMoveEvent(id), 0);
+        getScene().eventDispatcher().dispatch(event);
     }
 
-    private boolean isNotMatch(double d1, double d2) {
-        return Math.abs(d1 - d2) >= 0.01;
+    @Override
+    public void setMoveTargetPosition(Vector2D position) {
+        this.moveTargetPosition = position;
+        modifyState(UnitState.MOVING);
     }
 
+    @Override
+    public Vector2D getMoveTargetPosition() {
+        return moveTargetPosition;
+    }
 
     @Override
     public long getId() {
@@ -325,5 +309,18 @@ public abstract class AbstractFightUnit implements FightUnit {
     public void leaveScene() {
         this.scene = null;
         this.externalAttributes.clear();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractFightUnit that = (AbstractFightUnit) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

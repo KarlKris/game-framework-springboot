@@ -2,6 +2,7 @@ package com.li.battle.ai.starter;
 
 import com.li.battle.ai.*;
 import com.li.battle.ai.action.impl.*;
+import com.li.battle.ai.action.move.MovingAction;
 import com.li.battle.ai.composite.*;
 import com.li.battle.ai.condition.impl.*;
 import com.li.battle.core.unit.FightUnit;
@@ -21,7 +22,7 @@ public class FightUnitAiStarter {
         builder.addBehaviour(new SequenceBehaviour())
                     .addBehaviour(new ConditionIsMoveState())
                         .back()
-                    .addBehaviour(new SuccessAction())
+                    .addBehaviour(new MovingAction())
                         .back()
                     .back()
                 .addBehaviour(new SequenceBehaviour())
@@ -30,12 +31,12 @@ public class FightUnitAiStarter {
                     .addBehaviour(new SuccessAction())
                         .back()
                     .back()
-                .addBehaviour(new SequenceBehaviour())
-                    .addBehaviour(new ConditionIsHasMoveTarget())
-                        .back()
-                    .addBehaviour(new MoveToTargetAction())
-                        .back()
-                    .back()
+//                .addBehaviour(new SequenceBehaviour())
+//                    .addBehaviour(new ConditionIsHasMoveTarget())
+//                        .back()
+//                    .addBehaviour(new MoveToTargetAction())
+//                        .back()
+//                    .back()
                 .addBehaviour(new SequenceBehaviour())
                     .addBehaviour(new ConditionIsFreedSkill())
                         .back()

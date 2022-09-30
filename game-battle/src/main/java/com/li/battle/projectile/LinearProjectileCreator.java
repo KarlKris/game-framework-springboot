@@ -28,8 +28,6 @@ public class LinearProjectileCreator implements ProjectileCreator {
         BattleScene scene = source.battleScene();
 
         FightUnit caster = source.getCaster();
-        // todo 玩家已死亡则放弃创建子弹
-
         List<IPosition> results = source.getTargets();
         if (results.isEmpty()) {
             return null;
