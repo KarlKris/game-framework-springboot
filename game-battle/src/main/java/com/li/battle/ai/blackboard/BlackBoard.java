@@ -29,6 +29,8 @@ public class BlackBoard {
     /** 路径下标 **/
     private int wayIndex;
 
+    /** 移动等待回合数 **/
+    private int waitRound;
 
     public BlackBoard(FightUnit unit) {
         this.unit = unit;
@@ -54,5 +56,18 @@ public class BlackBoard {
 
     public boolean isWayEmpty() {
         return CollectionUtils.isEmpty(ways);
+    }
+
+    public void clearWays() {
+        this.ways = null;
+        this.wayIndex = 0;
+    }
+
+    public int incrementWaitRound() {
+        return ++waitRound;
+    }
+
+    public void resetWaitRound() {
+        this.waitRound = 0;
     }
 }
