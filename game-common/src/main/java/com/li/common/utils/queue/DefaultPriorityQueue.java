@@ -12,7 +12,8 @@ import java.util.*;
 public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQueue<T> implements PriorityQueue<T>  {
 
     private static final PriorityQueueNode[] EMPTY_ARRAY = new PriorityQueueNode[0];
-    private static final int DEFAULT_SIZE = 16;
+    /** java.util.PriorityQueue 默认大小 **/
+    private static final int DEFAULT_SIZE = 11;
 
     /** 元素排序器 **/
     private final Comparator<T> comparator;
@@ -35,7 +36,7 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
 
     @Override
     public void priorityChanged(T node) {
-        int i = node.priorityQueueIndex();
+        int i = node.priorityQueueIndex(this);
         if (!contains(node, i)) {
             return;
         }
@@ -65,7 +66,7 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
 
     @Override
     public boolean offer(T t) {
-        int index = t.priorityQueueIndex();
+        int index = t.priorityQueueIndex(this);
         if (index != PriorityQueueNode.INDEX_NOT_IN_QUEUE) {;
             throw new IllegalArgumentException("e.priorityQueueIndex(): " + index + " (expected: "
                     + PriorityQueueNode.INDEX_NOT_IN_QUEUE + ") + e: " + t);
@@ -88,7 +89,7 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
             return null;
         }
         T result = queue[0];
-        result.priorityQueueIndex(PriorityQueueNode.INDEX_NOT_IN_QUEUE);
+        result.priorityQueueIndex(this, PriorityQueueNode.INDEX_NOT_IN_QUEUE);
 
         T last = queue[--size];
         queue[size] = null;
@@ -143,7 +144,7 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
         for (int i = 0; i < size; ++i) {
             T node = queue[i];
             if (node != null) {
-                node.priorityQueueIndex(PriorityQueueNode.INDEX_NOT_IN_QUEUE);
+                node.priorityQueueIndex(this, PriorityQueueNode.INDEX_NOT_IN_QUEUE);
                 queue[i] = null;
             }
         }
@@ -169,7 +170,7 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
 
             // 否则让上层元素下沉
             queue[k] = parent;
-            parent.priorityQueueIndex(k);
+            parent.priorityQueueIndex(this, k);
 
             // 开始下一次循环
             k = iParent;
@@ -177,7 +178,7 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
 
         // 找到元素的位置,并能维持住最小堆的性质
         queue[k] = node;
-        node.priorityQueueIndex(k);
+        node.priorityQueueIndex(this, k);
     }
 
     /**
@@ -204,7 +205,7 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
             }
             // 下沉元素
             queue[k] = child;
-            child.priorityQueueIndex(k);
+            child.priorityQueueIndex(this, k);
 
             // 开始下次循环
             k = iChild;
@@ -212,16 +213,16 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
 
         // 得到元素的位置
         queue[k] = node;
-        node.priorityQueueIndex(k);
+        node.priorityQueueIndex(this, k);
     }
 
     private boolean remove0(T node) {
-        int i = node.priorityQueueIndex();
+        int i = node.priorityQueueIndex(this);
         if (!contains(node, i)) {
             return false;
         }
 
-        node.priorityQueueIndex(PriorityQueueNode.INDEX_NOT_IN_QUEUE);
+        node.priorityQueueIndex(this, PriorityQueueNode.INDEX_NOT_IN_QUEUE);
         if (--size == 0 || size == i) {
             queue[i] = null;
             return true;
@@ -259,6 +260,18 @@ public class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQ
                 throw new NoSuchElementException();
             }
             return queue[index++];
+        }
+
+        @Override
+        public void remove() {
+            int lastIndex = index - 1;
+            if (lastIndex < 0 || lastIndex >= size) {
+                throw new NoSuchElementException();
+            }
+
+            T removed = queue[lastIndex];
+            remove0(removed);
+            index = lastIndex;
         }
     }
 

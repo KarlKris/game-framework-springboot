@@ -39,8 +39,7 @@ public class TriggerManager {
 
     public void update() {
         Trigger element = queue.peek();
-        long curRound = scene.getSceneRound();
-        while (element != null && element.isInvalid(curRound)) {
+        while (element != null && element.isExpire()) {
             queue.poll();
             handle(element);
             element = queue.peek();

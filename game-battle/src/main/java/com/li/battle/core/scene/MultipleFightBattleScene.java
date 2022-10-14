@@ -3,9 +3,9 @@ package com.li.battle.core.scene;
 import com.li.battle.core.*;
 import com.li.battle.core.map.SceneMap;
 import com.li.battle.core.unit.FightUnit;
+import com.li.common.concurrent.RunnableLoop;
 
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -17,9 +17,9 @@ public class MultipleFightBattleScene extends AbstractBattleScene {
 
 
     public MultipleFightBattleScene(long sceneId, SceneMap sceneMap
-            , ScheduledExecutorService executorService
+            , RunnableLoop runnableLoop
             , BattleSceneHelper helper) {
-        super(sceneId, sceneMap, executorService, helper);
+        super(sceneId, sceneMap, runnableLoop, helper);
     }
 
     @Override
@@ -41,15 +41,14 @@ public class MultipleFightBattleScene extends AbstractBattleScene {
         }
 
         CampType type = null;
-        boolean sameCamp = true;
         for (FightUnit unit : units) {
             if (type == null) {
                 type = unit.getCampType();
             } else if (type != unit.getCampType()) {
-                sameCamp = false;
+                return false;
             }
         }
-        return sameCamp;
+        return true;
     }
 
     @Override

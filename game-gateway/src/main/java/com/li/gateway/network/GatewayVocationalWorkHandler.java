@@ -1,6 +1,6 @@
 package com.li.gateway.network;
 
-import com.li.common.concurrency.RunnableLoopGroup;
+import com.li.common.concurrent.RunnableLoopGroup;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.rpc.IRpcService;
@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -59,10 +60,13 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
         if (playerSession != null ) {
             if (playerSession.isIdentity()) {
                 long id = playerSession.getIdentity();
-                if (!playerSession.isRegisterRunnableLoop()) {
-                    group.register(playerSession);
+                Executor executor = null;
+                if (playerSession.isRegisterRunnableLoop()) {
+                    executor = playerSession.runnableLoop();
+                } else {
+                    executor = group.next();
                 }
-                playerSession.runnableLoop().submit(() -> {
+                executor.execute(() -> {
                     ThreadLocalContentHolder.setIdentity(id);
                     try {
                         // 网关服需要考虑通知游戏服更新玩家断开链接

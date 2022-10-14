@@ -1,12 +1,9 @@
-package com.li.common.concurrency;
+package com.li.common.concurrent;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 import com.li.common.utils.ObjectUtils;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
@@ -104,6 +101,27 @@ public class MultiThreadRunnableLoopGroup extends AbstractRunnableLoopGroup {
     public void execute(Runnable command) {
         next().execute(command);
     }
+
+    @Override
+    public ScheduledFuture<?> schedule(Runnable task, long delay, TimeUnit unit) {
+        return next().schedule(task, delay, unit);
+    }
+
+    @Override
+    public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
+        return next().schedule(task, delay, unit);
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit unit) {
+        return next().scheduleAtFixedRate(task, initialDelay, period, unit);
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long initialDelay, long delay, TimeUnit unit) {
+        return next().scheduleWithFixedDelay(task, initialDelay, delay, unit);
+    }
+
 
     // -----------------------------------------------------------------------------------------------------------------
 

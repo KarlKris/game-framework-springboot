@@ -1,7 +1,7 @@
 package com.li.battle.buff.core;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.li.battle.buff.BuffContext;
+import com.li.battle.buff.*;
 import com.li.battle.buff.handler.*;
 import com.li.battle.core.scene.BattleScene;
 import com.li.battle.effect.EffectExecutor;
@@ -44,7 +44,6 @@ public abstract class AbstractBuff implements Buff {
     protected long expireRound;
     /** 上下文数据 **/
     protected BuffContext buffContext;
-
 
     public AbstractBuff(long id, BuffConfig config, long caster, long parent, int skillId, BattleScene scene) {
         this.id = id;
@@ -106,13 +105,18 @@ public abstract class AbstractBuff implements Buff {
     }
 
     @Override
-    public void expire() {
-        makeExpire();
+    public void markExpire() {
+        expireRound = -1;
     }
 
     @Override
-    public void makeExpire() {
-        expireRound = -1;
+    public void expire() {
+        markExpire();
+
+        // 移除buff
+        BuffManager buffManager = scene.buffManager();
+        buffManager.removeBuff(this);
+
         EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
         if (ArrayUtil.isNotEmpty(config.getRemoveEffects())) {
             // 执行移除效果
@@ -121,22 +125,12 @@ public abstract class AbstractBuff implements Buff {
                 effectExecutor.execute(source, effectParam);
             }
         }
+
     }
 
     @Override
-    public boolean isManualExpire() {
-        return expireRound < 0;
-    }
-
-    /** buff是否失效 **/
-    @Override
-    public boolean isExpire(long curRound) {
-        return isExpire0(curRound);
-    }
-
-    @Override
-    public boolean isInvalid(long curRound) {
-        return isExpire0(curRound);
+    public boolean isExpire() {
+        return isExpire0(scene.getSceneRound());
     }
 
     @Override
@@ -169,12 +163,19 @@ public abstract class AbstractBuff implements Buff {
 
     @Override
     public void registerEventReceiverIfNecessary() {
-        EventHandlerHolder eventHandlerHolder = scene.battleSceneHelper().eventHandlerHolder();
-        List<EventHandler> handlers = new LinkedList<>();
         // 根据BuffConfig添加Handler
+        List<EventHandler> handlers = new LinkedList<>();
+
+        EventHandlerHolder eventHandlerHolder = scene.battleSceneHelper().eventHandlerHolder();
+
         if (ArrayUtil.isNotEmpty(config.getExecutedEffects())) {
             //  注册技能执行事件处理器
             handlers.add(eventHandlerHolder.getEventHandler(SkillExecutedBuffEventHandler.class));
+        }
+
+        if (ArrayUtil.isNotEmpty(config.getAwakeEffects())) {
+            // 注册buff生效前事件处理器
+            handlers.add(eventHandlerHolder.getEventHandler(BeforeBuffAwakeEventBuffHandler.class));
         }
 
         if (ArrayUtil.isNotEmpty(config.getBeforeDamageEffects()) || ArrayUtil.isNotEmpty(config.getBeforeTakeDamageEffects())) {
@@ -196,7 +197,6 @@ public abstract class AbstractBuff implements Buff {
             // 注册死亡后事件处理器
             handlers.add(eventHandlerHolder.getEventHandler(KillEventBuffHandler.class));
         }
-
 
         if (!handlers.isEmpty()) {
             EventPipeline pipeline = newEventPipeline();

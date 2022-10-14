@@ -1,4 +1,4 @@
-package com.li.common.concurrency;
+package com.li.common.concurrent;
 
 /**
  * 任务来源标识接口

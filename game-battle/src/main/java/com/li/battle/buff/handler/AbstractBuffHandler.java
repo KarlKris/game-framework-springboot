@@ -14,7 +14,7 @@ public abstract class AbstractBuffHandler<B extends Buff, E extends BattleEvent>
 
     @Override
     protected void handle0(EventHandlerContext context, B receiver, E event) {
-        if (receiver.isManualExpire()) {
+        if (receiver.isExpire()) {
             return;
         }
 

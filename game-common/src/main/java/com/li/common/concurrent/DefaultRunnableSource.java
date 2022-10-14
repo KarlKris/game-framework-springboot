@@ -1,4 +1,4 @@
-package com.li.common.concurrency;
+package com.li.common.concurrent;
 
 /**
  * RunnableSource的默认实现

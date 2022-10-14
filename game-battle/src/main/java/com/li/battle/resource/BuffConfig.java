@@ -28,7 +28,8 @@ public class BuffConfig {
     /** buff刷新合并规则（更新Buff层数，等级，持续时间等数据） **/
     private BuffMerge mergeRule;
     /** buff生效效果 **/
-    private EffectParam[] awakeEffects;
+    private EffectParam[] startEffects;
+
 
     /** buff触发间隔(毫秒) **/
     private int thinkInterval;
@@ -69,6 +70,9 @@ public class BuffConfig {
 
     /** 我方击杀目标后触发 **/
     private EffectParam[] killEffects;
+
+    /** 监听buff生效效果 **/
+    private EffectParam[] awakeEffects;
 
     /** 子弹命中效果(子弹只能由buff来创建) **/
     private EffectParam[] hitEffects;

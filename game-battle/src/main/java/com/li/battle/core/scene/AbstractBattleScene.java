@@ -16,6 +16,7 @@ import com.li.battle.projectile.ProjectileManager;
 import com.li.battle.resource.SkillConfig;
 import com.li.battle.skill.*;
 import com.li.battle.trigger.TriggerManager;
+import com.li.common.concurrent.RunnableLoop;
 import com.li.common.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,8 +44,6 @@ public abstract class AbstractBattleScene implements BattleScene {
     private final BattleSceneReferee referee;
     /** 战斗组件容器 **/
     private final BattleSceneHelper helper;
-    /** 单线程池(定时执行战斗逻辑) **/
-    protected final ScheduledExecutorService executorService;
     /** 事件分发器 **/
     protected final EventDispatcher eventDispatcher;
     /** Buff容器 **/
@@ -72,12 +71,11 @@ public abstract class AbstractBattleScene implements BattleScene {
     private final Map<Long, BehaviourTree> ai = new LinkedHashMap<>();
 
     public AbstractBattleScene(long sceneId, SceneMap sceneMap
-            , ScheduledExecutorService executorService
+            , RunnableLoop runnableLoop
             , BattleSceneHelper helper) {
         this.sceneId = sceneId;
         this.sceneMap = sceneMap;
         this.fightUnits = new HashMap<>();
-        this.executorService = executorService;
         this.helper = helper;
         this.referee = new BattleSceneReferee(this);
         this.eventDispatcher = new EventDispatcher(this);
@@ -88,7 +86,7 @@ public abstract class AbstractBattleScene implements BattleScene {
         this.attributes = new HashMap<>();
         this.distributed = new QuadTree<>(0, new Rectangle2D(0, 0, sceneMap.getHorizontalLength(), sceneMap.getVerticalLength()));
 
-        this.future = this.executorService.scheduleAtFixedRate(this::start, getRoundPeriod(), getRoundPeriod(), TimeUnit.MILLISECONDS);
+        this.future = runnableLoop.scheduleAtFixedRate(this::start, getRoundPeriod(), getRoundPeriod(), TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -145,7 +143,7 @@ public abstract class AbstractBattleScene implements BattleScene {
             FightUnit unit = fightUnits.remove(unitId);
             if (unit != null) {
                 unit.leaveScene();
-                buffManager.removeBuff(unitId);
+                buffManager.removeUnitAllBuff(unitId);
                 skillManager.removeBattleSkill(unitId);
                 triggerManager.removeTriggerReceiver(unitId);
                 eventDispatcher.unregister(unitId);
@@ -164,6 +162,10 @@ public abstract class AbstractBattleScene implements BattleScene {
             return;
         }
         future.cancel(false);
+
+        if (log.isDebugEnabled()) {
+            log.debug("销毁战斗场景: {}--{}", this.getClass().getSimpleName(), sceneId);
+        }
     }
 
     @Override

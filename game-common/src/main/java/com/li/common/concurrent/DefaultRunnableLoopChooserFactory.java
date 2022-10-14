@@ -1,4 +1,4 @@
-package com.li.common.concurrency;
+package com.li.common.concurrent;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,7 +36,7 @@ public class DefaultRunnableLoopChooserFactory implements RunnableLoopChooserFac
 
         @Override
         public RunnableLoop next() {
-            return loops[(idx.getAndIncrement() & loops.length) - 1];
+            return loops[idx.getAndIncrement() & loops.length];
         }
     }
 

@@ -1,4 +1,4 @@
-package com.li.common.concurrency;
+package com.li.common.concurrent;
 
 import com.li.common.utils.ObjectUtils;
 
@@ -14,6 +14,11 @@ public abstract class AbstractRunnableLoopGroup implements RunnableLoopGroup {
     static final long DEFAULT_SHUTDOWN_QUIET_PERIOD = 2;
     static final long DEFAULT_SHUTDOWN_TIMEOUT = 30;
 
+    private static final long START_TIME = System.nanoTime();
+
+    static long nanoTime() {
+        return System.nanoTime() - START_TIME;
+    }
 
     @Override
     public Future<?> shutdownGracefully() {
@@ -45,5 +50,6 @@ public abstract class AbstractRunnableLoopGroup implements RunnableLoopGroup {
         ObjectUtils.checkNotNull(task, "task");
         return new FutureTask<V>(task);
     }
+
 
 }

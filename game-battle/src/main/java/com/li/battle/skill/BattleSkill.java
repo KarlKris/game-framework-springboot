@@ -45,7 +45,7 @@ public class BattleSkill implements IOwner {
         this.param = param;
         this.createRound = scene.getSceneRound();
         this.nextRound = createRound;
-        this.expireRound = createRound + durationRound;
+        this.expireRound = createRound + durationRound + 1;
 
     }
 

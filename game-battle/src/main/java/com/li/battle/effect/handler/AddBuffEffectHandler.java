@@ -53,7 +53,7 @@ public class AddBuffEffectHandler extends AbstractEffectParamHandler<AddBuffEffe
             eventDispatcher.dispatch(event, 0);
 
             //  Buff容器内添加,同时判断是否往EventDispatcher注册
-            if (!buff.isManualExpire() && buffManager.addBuff(buff)) {
+            if (!buff.isExpire() && buffManager.addBuff(buff)) {
                 buff.registerEventReceiverIfNecessary();
             }
         }

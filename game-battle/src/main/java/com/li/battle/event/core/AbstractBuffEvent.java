@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 public abstract class AbstractBuffEvent implements BattleEvent {
 
-    private final Buff buff;
+    protected final Buff buff;
 
     public AbstractBuffEvent(Buff buff) {
         this.buff = buff;

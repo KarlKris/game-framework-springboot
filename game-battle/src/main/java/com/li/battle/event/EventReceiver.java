@@ -21,14 +21,13 @@ public interface EventReceiver extends IOwner {
     /**
      * 手动无效
      */
-    void makeExpire();
+    void expire();
 
     /**
      * 事件接收者是否有效
-     * @param curRound 当前回合数
      * @return true 事件接收者已无效
      */
-    boolean isInvalid(long curRound);
+    boolean isExpire();
 
 
     /**

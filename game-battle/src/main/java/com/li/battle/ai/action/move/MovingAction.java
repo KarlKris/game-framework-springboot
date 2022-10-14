@@ -30,7 +30,7 @@ public class MovingAction extends AbstractAction {
             Vector2D vector2D = targetPosition.subtract(position);
             double distance = vector2D.getNorm();
             if (distance > MAX_DISTANCE) {
-                targetPosition = vector2D.scalarMultiply(MAX_DISTANCE);
+                targetPosition = vector2D.scalarMultiply(MAX_DISTANCE / distance).add(position);
             }
 
             List<Vector2D> ways = unit.getScene().sceneMap().findWayByAStar(position.getX(), position.getY()
@@ -58,8 +58,13 @@ public class MovingAction extends AbstractAction {
             }
         }
 
+        boolean finishMoving = wayIndex >= size;
+        if (finishMoving) {
+            board.clearWays();
+        }
+
         BattleSceneReferee battleSceneReferee = unit.getScene().battleSceneReferee();
-        battleSceneReferee.updatePosition(unit.getId(), finalPosition, velocity, wayIndex >= size);
+        battleSceneReferee.updatePosition(unit.getId(), finalPosition, velocity, finishMoving);
 
         return Status.SUCCESS;
     }

@@ -1,6 +1,6 @@
 package com.li.game.network;
 
-import com.li.common.concurrency.RunnableLoopGroup;
+import com.li.common.concurrent.RunnableLoopGroup;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;

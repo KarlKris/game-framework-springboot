@@ -1,4 +1,4 @@
-package com.li.common.concurrency;
+package com.li.common.concurrent;
 
 
 import com.li.common.utils.ObjectUtils;
@@ -14,13 +14,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * @date 2022/7/15
  */
 @Slf4j
-public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implements RunnableLoop {
-
-    private static final long START_TIME = System.nanoTime();
-
-    static long nanoTime() {
-        return System.nanoTime() - START_TIME;
-    }
+public class SingleThreadRunnableLoop extends AbstractScheduledRunnableLoop {
 
     /** 线程未启动 **/
     private static final int ST_NOT_STARTED = 1;
@@ -77,6 +71,7 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
             return terminationFuture;
         }
 
+        boolean wakeup;
         boolean inRunnableLoop = inRunnableLoop();
         int oldState;
         for (;;) {
@@ -84,6 +79,7 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
                 return terminationFuture;
             }
             int newState;
+            wakeup = true;
             oldState = state;
             if (inRunnableLoop) {
                 newState = ST_SHUTTING_DOWN;
@@ -95,6 +91,7 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
                         break;
                     default:
                         newState = oldState;
+                        wakeup = false;
                 }
             }
             if (STATE_UPDATER.compareAndSet(this, oldState, newState)) {
@@ -105,7 +102,14 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
         gracefulShutdownQuietPeriod = unit.toNanos(quietPeriod);
         gracefulShutdownTimeout = unit.toNanos(timeout);
 
-        ensureThreadStarted(oldState);
+        if (ensureThreadStarted(oldState)) {
+            return terminationFuture;
+        }
+
+        if (wakeup) {
+            // 唤醒线程
+            taskQueue.offer(WAKEUP_TASK);
+        }
 
         return terminationFuture;
     }
@@ -194,15 +198,18 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
      * 确保线程已正常启动
      * @param oldState 线程状态
      */
-    private void ensureThreadStarted(int oldState) {
+    private boolean ensureThreadStarted(int oldState) {
         if (oldState == ST_NOT_STARTED) {
             try {
                 doStartThread();
             } catch (Throwable cause) {
                 STATE_UPDATER.set(this, ST_TERMINATED);
                 terminationFuture.completeExceptionally(cause);
+
+                return true;
             }
         }
+        return false;
     }
 
     private void startThread() {
@@ -292,21 +299,74 @@ public class SingleThreadRunnableLoop extends AbstractRunnableLoopGroup implemen
         boolean running = true;
         while (running) {
             try {
-                Runnable task = taskQueue.poll(1000, TimeUnit.MILLISECONDS);
+                Runnable task = takeTask();
                 if (task != null) {
                     safeExecute(task);
                     lastExecutionTime = nanoTime();
                 }
-            } catch (InterruptedException e) {
-                // ignore
             } finally {
-                try {
-                    if (isShuttingDown() && confirmShutdown()) {
-                        running = false;
-                    }
-                } catch (Throwable t) {
-                    log.error("SingleThreadRunnableLoop.run()出现未知异常", t);
+                if (isShuttingDown() && confirmShutdown()) {
+                    running = false;
                 }
+            }
+        }
+    }
+
+    private Runnable takeTask() {
+        assert inRunnableLoop();
+
+        for (;;) {
+            AbstractScheduledRunnableLoop.ScheduledFutureTask<?> scheduledTask = peekScheduledTask();
+            if (scheduledTask == null) {
+                Runnable task = null;
+                try {
+                    task = taskQueue.take();
+                    if (task == WAKEUP_TASK) {
+                        task = null;
+                    }
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+                return task;
+            } else {
+                Runnable task = null;
+                long delayNanos = scheduledTask.delayNanos();
+                if (delayNanos > 0) {
+                    try {
+                        task = taskQueue.poll(delayNanos, TimeUnit.NANOSECONDS);
+                    } catch (InterruptedException e) {
+                        // Waken Up
+                        return null;
+                    }
+                }
+                if (task == null) {
+                    // 防止taskQueue一直有任务导致scheduledTaskQueue里的任务饿死
+                    fetchFromScheduledTaskQueue();
+                    task = taskQueue.poll();
+                }
+
+                if (task != null) {
+                    return task;
+                }
+            }
+        }
+    }
+
+    private boolean fetchFromScheduledTaskQueue() {
+        if (scheduledTaskQueue == null || scheduledTaskQueue.isEmpty()) {
+            return true;
+        }
+        long nanoTime = nanoTime();
+        for (;;) {
+            Runnable scheduledTask = pollScheduledTask(nanoTime);
+            if (scheduledTask == null) {
+                return true;
+            }
+
+            if (!taskQueue.offer(scheduledTask)) {
+                // 入队失败则回到延时队列
+                scheduledTaskQueue.add((ScheduledFutureTask<?>) scheduledTask);
+                return false;
             }
         }
     }

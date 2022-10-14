@@ -1,6 +1,6 @@
 package com.li.gateway.network;
 
-import com.li.common.concurrency.RunnableLoopGroup;
+import com.li.common.concurrent.RunnableLoopGroup;
 import com.li.common.rpc.RemoteServerSeekService;
 import com.li.common.rpc.model.Address;
 import com.li.engine.client.NettyClient;

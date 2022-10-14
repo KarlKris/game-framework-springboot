@@ -1,8 +1,6 @@
-package concurrency;
+package com.li.common.concurrent;
 
 import cn.hutool.core.util.RandomUtil;
-import com.li.common.concurrency.AbstractRunnableSource;
-import com.li.common.concurrency.MultiThreadRunnableLoopGroup;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +29,7 @@ public class MultiThreadRunnableLoopGroupTest {
             source.runnableLoop().submit(runnable);
         }
 
-        Thread.sleep(30000);
+        Thread.sleep(3000);
 
         group.shutdownGracefully();
 

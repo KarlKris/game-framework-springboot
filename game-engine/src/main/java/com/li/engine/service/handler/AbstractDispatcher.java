@@ -68,7 +68,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         return true;
     }
 
-    protected void handleMessage(S session, M message) {
+    private void handleMessage(S session, M message) {
         if (!beforeDispatch(session, message)) {
             return;
         }

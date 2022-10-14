@@ -52,7 +52,7 @@ public class EventDispatcher {
     public void unregister(long owner) {
         List<EventReceiver> eventReceivers = receivers.remove(owner);
         if (!CollectionUtils.isEmpty(eventReceivers)) {
-            eventReceivers.forEach(EventReceiver::makeExpire);
+            eventReceivers.forEach(EventReceiver::expire);
         }
     }
 
@@ -72,7 +72,7 @@ public class EventDispatcher {
      */
     public void dispatch(BattleEvent event, int delay) {
         if (delay <= 0) {
-            handle(event, scene.getSceneRound());
+            handle(event);
         } else {
             queue.offer(new EventElement(scene.getSceneRound() + delay, event));
         }
@@ -86,13 +86,13 @@ public class EventDispatcher {
         EventElement eventElement = queue.peek();
         while (eventElement != null && eventElement.round <= scene.getSceneRound()) {
             queue.poll();
-            handle(eventElement.event, scene.getSceneRound());
+            handle(eventElement.event);
             eventElement = queue.peek();
         }
     }
 
 
-    private void handle(BattleEvent event, long curRound) {
+    private void handle(BattleEvent event) {
         List<EventHandlerContext> contexts = contextHolder.get(event.getType());
         if (contexts == null) {
             return;
@@ -102,7 +102,7 @@ public class EventDispatcher {
         Iterator<EventHandlerContext> iterator = contexts.iterator();
         while (iterator.hasNext()) {
             EventHandlerContext context = iterator.next();
-            if (context.eventReceiver().isInvalid(curRound)) {
+            if (context.eventReceiver().isExpire()) {
                 // 失效移除
                 iterator.remove();
                 continue;

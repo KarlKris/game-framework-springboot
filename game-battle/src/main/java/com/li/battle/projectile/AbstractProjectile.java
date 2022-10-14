@@ -157,7 +157,7 @@ public abstract class AbstractProjectile implements Projectile {
     }
 
     @Override
-    public boolean isInvalid(long curRound) {
+    public boolean isExpire() {
         return checkFinish();
     }
 
@@ -174,7 +174,7 @@ public abstract class AbstractProjectile implements Projectile {
     }
 
     @Override
-    public void makeExpire() {
+    public void expire() {
         destroy();
     }
 

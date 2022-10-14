@@ -53,13 +53,13 @@ public class Trigger implements EventReceiver {
     }
 
     @Override
-    public void makeExpire() {
+    public void expire() {
         expireRound = -1;
     }
 
     @Override
-    public boolean isInvalid(long curRound) {
-        return expireRound != 0 && curRound >= expireRound;
+    public boolean isExpire() {
+        return expireRound != 0 && scene.getSceneRound() >= expireRound;
     }
 
     @Override

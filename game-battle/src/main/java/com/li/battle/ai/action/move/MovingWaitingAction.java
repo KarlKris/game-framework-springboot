@@ -31,7 +31,7 @@ public class MovingWaitingAction extends AbstractAction {
         } else {
             // 判断路上有没有障碍
             Vector2D force = SteeringBehaviourUtil.obstacleAvoidance(unit, unit.getScene());
-            if (force == Vector2D.ZERO) {
+            if (Vector2D.ZERO.equals(force)) {
                 unit.modifyState(UnitState.MOVING);
             }
         }

@@ -12,6 +12,12 @@ import com.li.battle.resource.BuffConfig;
 public interface Buff extends EventReceiver {
 
     /**
+     * buff唯一标识
+     * @return 唯一标识
+     */
+    long getId();
+
+    /**
      * 获取buff标识
      * @return buff标识
      */
@@ -46,6 +52,11 @@ public interface Buff extends EventReceiver {
      * @param other 其他buff
      **/
     void onBuffRefresh(Buff other);
+
+    /**
+     * 标识buff失效,用于在buff加入容器前,被其他buff驱散
+     */
+    void markExpire();
 
     /**
      * 获取buff层数
@@ -90,17 +101,6 @@ public interface Buff extends EventReceiver {
     long getExpireRound();
 
     /**
-     * 手动使buff失效
-     **/
-    void expire();
-
-    /**
-     * 判断buff是否已被手动失效
-     * @return true buff已被手动失效
-     */
-    boolean isManualExpire();
-
-    /**
      * 获取下一次触发间隔效果的回合数
      * @return 下一次触发间隔效果的回合数
      */
@@ -111,13 +111,6 @@ public interface Buff extends EventReceiver {
      * @param nextRound 下一次触发间隔效果的回合数
      */
     void updateNextRound(long nextRound);
-
-    /**
-     * 判断buff是否失效
-     * @param curRound 当前场景回合数
-     * @return true buff已失效
-     */
-    boolean isExpire(long curRound);
 
     /**
      * 关联的战斗场景

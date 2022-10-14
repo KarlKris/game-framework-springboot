@@ -20,6 +20,7 @@ public class SteeringBehaviourUtil {
      * @param targetPos 目标位置向量
      * @return 到达目标位置的力向量
      */
+    @Deprecated
     public static Vector2D arrive(MoveUnit unit, Vector2D targetPos, double maxSpeed) {
         // 首先计算预期速度,这个速度在理想化情况下达到目标位置所需的速度.
         Vector2D desiredSpeed = targetPos.subtract(unit.getPosition());
@@ -56,6 +57,7 @@ public class SteeringBehaviourUtil {
      * @param targetPos 目标位置向量
      * @return 到达目标位置的力向量
      */
+    @Deprecated
     public static Vector2D seek(MoveUnit unit, Vector2D targetPos) {
         return seek(unit, targetPos, unit.getMaxSpeed());
     }
@@ -66,12 +68,25 @@ public class SteeringBehaviourUtil {
      * @param targetPos 目标位置向量
      * @return 到达目标位置的力向量
      */
+    @Deprecated
     public static Vector2D seek(MoveUnit unit, Vector2D targetPos, double maxSpeed) {
+        return seek(unit.getPosition(), unit.getVelocity(), targetPos, maxSpeed);
+    }
+
+    /**
+     * 靠近操控行为返回一个操控目标到达目标位置的力向量
+     * @param position 操控单位位置
+     * @param velocity 操控单位速度
+     * @param targetPos 目标位置向量
+     * @param maxSpeed 操控单位最大速度
+     * @return 到达目标位置的力向量
+     */
+    public static Vector2D seek(Vector2D position, Vector2D velocity, Vector2D targetPos, double maxSpeed) {
         // 首先计算预期速度,这个速度在理想化情况下达到目标位置所需的速度.
         // 是从起始位置到目标的向量,大小为最大速度
-        Vector2D desiredSpeed = targetPos.subtract(unit.getPosition()).normalize().scalarMultiply(maxSpeed);
+        Vector2D desiredSpeed = targetPos.subtract(position).normalize().scalarMultiply(maxSpeed);
         // 该方法返回的操控力,当把它加到目标当前速度向量上就得到预期的速度,所以简单的从预期速度中减去目标的当前速度
-        return desiredSpeed.subtract(unit.getVelocity());
+        return desiredSpeed.subtract(velocity);
     }
 
 
@@ -216,7 +231,7 @@ public class SteeringBehaviourUtil {
      * @return 一个操控力,使目标在环境中避开障碍
      */
     public static Vector2D obstacleAvoidance(MoveUnit unit, BattleScene scene) {
-        int minLength = 10;
+        double minLength = unit.getRadius();
         // 检测盒长度正比与移动单位速度,检测盒宽度等于单位直径
         double detectionBoxLength = minLength + (unit.getSpeed() / unit.getMaxSpeed()) * minLength;
 

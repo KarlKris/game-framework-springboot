@@ -2,22 +2,17 @@ package com.li.battle.service;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 import com.li.battle.core.BattleSceneHelper;
-import com.li.battle.core.scene.BattleScene;
-import com.li.battle.core.scene.MultipleFightBattleScene;
-import com.li.battle.core.map.DefaultSceneMap;
-import com.li.battle.core.map.SceneMap;
+import com.li.battle.core.map.*;
+import com.li.battle.core.scene.*;
 import com.li.battle.resource.MapConfig;
+import com.li.common.concurrent.*;
 import com.li.common.resource.anno.ResourceInject;
 import com.li.common.resource.storage.ResourceStorage;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -29,7 +24,7 @@ public class BattleServiceImpl implements BattleService, InitializingBean, Dispo
 
     private final AtomicLong idGenerator = new AtomicLong(0);
 
-    private ScheduledExecutorService executorService;
+    private RunnableLoopGroup group;
 
     @Resource
     private BattleSceneHelper battleSceneHelper;
@@ -40,12 +35,12 @@ public class BattleServiceImpl implements BattleService, InitializingBean, Dispo
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        executorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("战斗线程-", false));
+        group = new MultiThreadRunnableLoopGroup(1, new NamedThreadFactory("战斗线程-", false));
     }
 
     @Override
     public void destroy() throws Exception {
-        executorService.shutdown();
+        group.shutdownGracefully();
     }
 
     @Override
@@ -54,6 +49,6 @@ public class BattleServiceImpl implements BattleService, InitializingBean, Dispo
             MapConfig config = mapStorage.getResource(mapId);
             return new DefaultSceneMap(config);
         });
-       return new MultipleFightBattleScene(idGenerator.incrementAndGet(), sceneMap, executorService, battleSceneHelper);
+       return new MultipleFightBattleScene(idGenerator.incrementAndGet(), sceneMap, group.next(), battleSceneHelper);
     }
 }

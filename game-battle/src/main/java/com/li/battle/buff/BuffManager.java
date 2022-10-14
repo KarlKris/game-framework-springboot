@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
+
 /**
  * Buff管理
  * @author li-yuanwen
@@ -24,6 +25,9 @@ public class BuffManager {
 
     /** 待处理的buff队列 **/
     private final PriorityQueue<Buff> queue = new PriorityQueue<>(Comparator.comparingLong(Buff::getNextRound));
+
+    /** buff字典 **/
+    private final Map<Long, Buff> buffs = new HashMap<>();
 
     public BuffManager(BattleScene scene) {
         this.scene = scene;
@@ -39,28 +43,49 @@ public class BuffManager {
                 final long caster = buff.getCaster();
                 Optional<Buff> optional = buffs.stream().filter(b -> b.getCaster() == caster).findFirst();
                 if (optional.isPresent()) {
-                    optional.get().onBuffRefresh(buff);
+                    Buff oldBuff = optional.get();
+                    long oldNextRound = oldBuff.getNextRound();
+                    oldBuff.onBuffRefresh(buff);
+                    if (oldBuff.getNextRound() != oldNextRound) {
+                        long oldBuffId = oldBuff.getId();
+                        queue.removeIf(b -> b.getId() == oldBuffId);
+                        queue.offer(oldBuff);
+                    }
                     return true;
                 }
             }
         }
 
         BuffConfig config = buff.getConfig();
-        if (ArrayUtil.isNotEmpty(config.getAwakeEffects())) {
+        if (ArrayUtil.isNotEmpty(config.getStartEffects())) {
             EffectExecutor effectExecutor = buff.battleScene().battleSceneHelper().effectExecutor();
             BuffEffectSource source = new BuffEffectSource(buff);
-            for (EffectParam effectParam : config.getAwakeEffects()) {
+            for (EffectParam effectParam : config.getStartEffects()) {
                 effectExecutor.execute(source, effectParam);
             }
         }
 
         queue.offer(buff);
+        buffs.put(buff.getId(), buff);
         return true;
     }
 
-    public void removeBuff(long ownerId) {
-        queue.removeIf(buff -> buff.getOwner() == ownerId);
+    public void removeUnitAllBuff(long ownerId) {
+        Iterator<Buff> iterator = queue.iterator();
+        while (iterator.hasNext()) {
+            Buff buff = iterator.next();
+            if (buff.getOwner() != ownerId) {
+                continue;
+            }
+            iterator.remove();
+            buffs.remove(buff.getId());
+        }
     }
+
+    public void removeBuff(Buff buff) {
+        buffs.remove(buff.getId());
+    }
+
 
 
     /**
@@ -76,7 +101,7 @@ public class BuffManager {
         }
         // 遍历目标身上的所有buff
         for (Buff buff : target.getAllBuffs()) {
-            if (buff.isManualExpire()) {
+            if (buff.isExpire()) {
                 continue;
             }
             int b = buff.getConfig().getImmuneTag() & buffTag;
@@ -92,14 +117,16 @@ public class BuffManager {
         long curRound = scene.getSceneRound();
         while (element != null && element.getNextRound() <= curRound) {
             queue.poll();
-            handle(element, curRound);
+            if (buffs.containsKey(element.getId())) {
+                handle(element, curRound);
+            }
             element = queue.peek();
         }
     }
 
     private void handle(Buff buff, long curRound) {
         BuffConfig config = scene.battleSceneHelper().configHelper().getBuffConfigById(buff.getBuffId());
-        if (!buff.isExpire(curRound)) {
+        if (!buff.isExpire()) {
             if (ArrayUtil.isNotEmpty(config.getThinkEffects())) {
                 EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
                 BuffEffectSource source = new BuffEffectSource(buff);
@@ -119,6 +146,7 @@ public class BuffManager {
             queue.offer(buff);
 
         } else {
+            buffs.remove(buff.getId());
             // 执行销毁效果
             if (ArrayUtil.isNotEmpty(config.getDestroyEffects())) {
                 EffectExecutor effectExecutor = scene.battleSceneHelper().effectExecutor();
@@ -129,6 +157,7 @@ public class BuffManager {
             }
             // 移除单位身上的buff
             scene.getFightUnit(buff.getParent()).removeBuff(buff);
+
         }
 
     }

@@ -12,16 +12,16 @@ public interface PriorityQueueNode {
     int INDEX_NOT_IN_QUEUE = -1;
 
     /**
-     * 获取上次被#priorityQueueIndex(int)设定的值
+     * 获取上次被#priorityQueueIndex(DefaultPriorityQueue, int)设定的值
      * @return 索引值
      */
-    int priorityQueueIndex();
+    int priorityQueueIndex(DefaultPriorityQueue<?> queue);
 
 
     /**
      * 设定元素顺序值
      * @param index 索引值
      */
-    void priorityQueueIndex(int index);
+    void priorityQueueIndex(DefaultPriorityQueue<?> queue, int index);
 
 }

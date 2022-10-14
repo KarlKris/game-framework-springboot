@@ -1,8 +1,8 @@
 package com.li.network.session;
 
-import com.li.common.concurrency.DefaultRunnableSource;
-import com.li.common.concurrency.RunnableLoop;
-import com.li.common.concurrency.RunnableSource;
+import com.li.common.concurrent.DefaultRunnableSource;
+import com.li.common.concurrent.RunnableLoop;
+import com.li.common.concurrent.RunnableSource;
 import com.li.common.utils.IpUtils;
 import com.li.network.message.IMessage;
 import com.li.network.protocol.ChannelAttributeKeys;

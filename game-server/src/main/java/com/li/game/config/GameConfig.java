@@ -1,8 +1,8 @@
 package com.li.game.config;
 
 import cn.hutool.core.thread.NamedThreadFactory;
-import com.li.common.concurrency.MultiThreadRunnableLoopGroup;
-import com.li.common.concurrency.RunnableLoopGroup;
+import com.li.common.concurrent.MultiThreadRunnableLoopGroup;
+import com.li.common.concurrent.RunnableLoopGroup;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
