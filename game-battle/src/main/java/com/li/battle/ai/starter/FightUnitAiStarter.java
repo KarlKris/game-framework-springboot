@@ -5,6 +5,7 @@ import com.li.battle.ai.action.impl.*;
 import com.li.battle.ai.action.move.MovingAction;
 import com.li.battle.ai.composite.*;
 import com.li.battle.ai.condition.impl.*;
+import com.li.battle.ai.condition.move.ConditionIsMovingState;
 import com.li.battle.core.unit.FightUnit;
 
 /**
@@ -20,7 +21,7 @@ public class FightUnitAiStarter {
         builder.root(new SelectorBehaviour());
 
         builder.addBehaviour(new SequenceBehaviour())
-                    .addBehaviour(new ConditionIsMoveState())
+                    .addBehaviour(new ConditionIsMovingState())
                         .back()
                     .addBehaviour(new MovingAction())
                         .back()
