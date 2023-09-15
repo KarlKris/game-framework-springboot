@@ -76,7 +76,7 @@ public class ResourceAutoReload implements ApplicationContextAware, Runnable {
 
         for (File f : files) {
             if (f.isDirectory()) {
-                Paths.get(file.getPath()).register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+                Paths.get(f.getPath()).register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
                 registerFile(f);
             }
         }
@@ -88,6 +88,9 @@ public class ResourceAutoReload implements ApplicationContextAware, Runnable {
     }
 
     private String getClassSimpleName(String filename) {
+        if (!filename.endsWith(".xlsx") && !filename.endsWith(".xls")) {
+            return null;
+        }
         int last = filename.lastIndexOf('.');
         return filename.substring(0, last);
     }
@@ -107,7 +110,7 @@ public class ResourceAutoReload implements ApplicationContextAware, Runnable {
                     String fileName = path.toFile().getName();
                     String classSimpleName = getClassSimpleName(fileName);
                     if (!StringUtils.hasLength(classSimpleName) || StringUtils.startsWithIgnoreCase(fileName, "~")) {
-                        return;
+                        continue;
                     }
 
                     log.error("更新的文件名是: {}", classSimpleName);
@@ -127,6 +130,7 @@ public class ResourceAutoReload implements ApplicationContextAware, Runnable {
                     } catch (Exception e) {
                         validate = false;
                         log.error(e.getMessage(), e);
+                        break;
                     }
                 }
                 if (!validate) {

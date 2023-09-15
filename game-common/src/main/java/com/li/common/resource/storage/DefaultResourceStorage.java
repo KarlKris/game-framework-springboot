@@ -36,10 +36,10 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
     private String path;
     /** 文件资源读取器 **/
     private ResourceReader resourceReader;
+    /** 上个版本数据容器 **/
+    private InnerValueHolder lastData;
     /** 数据容器 **/
     private InnerValueHolder data;
-    /** 临时数据 **/
-    private InnerValueHolder temp;
     /** 数据变更监听器 **/
     private final List<StorageChangeListener> listeners = new LinkedList<>();
     /** 索引解析器 **/
@@ -87,21 +87,7 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
 
     @Override
     public Collection<V> getAll() {
-        if (data == null) {
-            return Collections.unmodifiableCollection(temp.values.values());
-        }
         return Collections.unmodifiableCollection(data.values.values());
-    }
-
-    @Override
-    public Collection<V> getTempAll() {
-        if (temp == null) {
-            if (data == null) {
-                return Collections.emptyList();
-            }
-            return Collections.unmodifiableCollection(data.values.values());
-        }
-        return Collections.unmodifiableCollection(temp.values.values());
     }
 
     @Override
@@ -120,20 +106,17 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
 
     @Override
     public void validateSuccessfully() {
-        if (this.temp == null) {
-            throw new IllegalArgumentException("资源:" + resourceDefinition.getClz().getSimpleName() + "没有load数据");
-        }
-
-        this.data = this.temp;
-        this.temp = null;
-
+        // 清空上个版本数据
+        this.lastData = null;
         // 通知监听器
         notifyChange();
     }
 
     @Override
     public void validateFailure() {
-        this.temp = null;
+        // 还原到上个版本
+        this.data = this.lastData;
+        this.lastData = null;
     }
 
     @Override
@@ -168,7 +151,8 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
                     throw new RuntimeException(message);
                 }
             }
-            this.temp = data;
+            this.lastData = this.data;
+            this.data = data;
 
         } catch (IOException e) {
             String message = MessageFormatter.format("资源类Class:[{}]所对应的资源文件[{}]不存在"
@@ -231,13 +215,13 @@ public class DefaultResourceStorage<K, V> implements ResourceStorage<K, V>, Appl
         }
         Resolver foreignKeyResolver = ResolverFactory.createFieldResolver(foreignKeyField);
         ResourceStorage<?, ?> foreignKeyStorage = storageManager.getResourceStorage(annotation.foreignKeyClz());
-        Collection<?> list = foreignKeyStorage.getTempAll();
+        Collection<?> list = foreignKeyStorage.getAll();
         Set<Object> foreignKeyValueSet = new HashSet<>(list.size());
         for (Object obj : list) {
             foreignKeyValueSet.add(foreignKeyResolver.resolve(obj));
         }
         ResourceStorage<?, ?> storage = storageManager.getResourceStorage(clz);
-        for (Object obj : storage.getTempAll()) {
+        for (Object obj : storage.getAll()) {
             Object value = resolver.resolve(obj);
             if (!foreignKeyValueSet.contains(value)) {
                 String message = MessageFormatter.arrayFormat("资源类Class:{} 属性名:{} 值:{} 所对应的外键类Class:{} 属性名:{} 中不存在"

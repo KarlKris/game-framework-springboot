@@ -48,12 +48,6 @@ public interface ResourceStorage<K, V> {
     Collection<V> getAll();
 
     /**
-     * 获取所有临时资源(临时资源不存在时,用正式资源)
-     * @return 所有资源
-     */
-    Collection<V> getTempAll();
-
-    /**
      * 加载资源(此时并不会覆盖原数据,需要调用#validate()来检验，通过后覆盖原数据)
      */
     void load();
