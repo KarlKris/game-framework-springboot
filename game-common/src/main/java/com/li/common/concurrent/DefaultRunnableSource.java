@@ -7,4 +7,13 @@ package com.li.common.concurrent;
  */
 public class DefaultRunnableSource extends AbstractRunnableSource {
 
+    private final Object identity;
+
+    public DefaultRunnableSource(Object identity) {
+        this.identity = identity;
+    }
+
+    public Object getIdentity() {
+        return identity;
+    }
 }

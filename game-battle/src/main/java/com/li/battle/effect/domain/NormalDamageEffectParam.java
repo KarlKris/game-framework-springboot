@@ -3,6 +3,7 @@ package com.li.battle.effect.domain;
 import com.li.battle.effect.EffectType;
 import com.li.battle.harm.HarmType;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * 普通伤害效果
@@ -10,6 +11,7 @@ import lombok.Getter;
  * @date 2022/9/23
  */
 @Getter
+@ToString
 public class NormalDamageEffectParam extends AbstractDamageEffectParam {
 
     /** 基础伤害 **/

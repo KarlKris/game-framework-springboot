@@ -5,6 +5,7 @@ import com.li.common.ApplicationContextHolder;
 import com.li.common.exception.SocketException;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.SocketProtocol;
+import com.li.network.modules.ErrorCode;
 import com.li.network.modules.ErrorCodeModule;
 import com.li.network.protocol.ProtocolMethodCtx;
 import com.li.network.protocol.SocketProtocolManager;
@@ -39,8 +40,8 @@ public class RpcInvocation extends Invocation {
         // 如果是返回错误码
         if (protocol.getModule() == ErrorCodeModule.MODULE) {
             // 解析错误码消息
-            Integer errorCode = serializer.deserialize(message.getBody(), Integer.class);
-            future.completeExceptionally(new SocketException(errorCode, "请求远程服务异常"));
+            ErrorCode errorCode = serializer.deserialize(message.getBody(), ErrorCode.class);
+            future.completeExceptionally(new SocketException(errorCode.getCode(), "请求远程服务异常"));
             return;
         }
         ProtocolMethodCtx protocolMethodCtx = socketProtocolManager.getMethodCtxBySocketProtocol(protocol);

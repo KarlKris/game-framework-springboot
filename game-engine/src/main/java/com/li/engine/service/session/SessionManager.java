@@ -25,7 +25,7 @@ public class SessionManager {
     /** session id generator **/
     private final AtomicLong sessionIdGenerator = new AtomicLong(0);
 
-    /** Identity2Session 字典 **/
+    /** Identity2Session  **/
     private final ConcurrentHashMap<Long, PlayerSession> identities = new ConcurrentHashMap<>();
 
     /** 为Channel注册PlayerSession **/
@@ -76,8 +76,11 @@ public class SessionManager {
     }
 
     /** 是否在线 **/
-    public boolean online(Long identity) {
-        return this.identities.containsKey(identity);
+    public boolean isOnline(Long identity) {
+        PlayerSession playerSession = this.identities.get(identity);
+        return playerSession != null
+                && playerSession.getChannel() != null
+                && playerSession.getChannel().isActive();
     }
 
     /**
@@ -135,7 +138,6 @@ public class SessionManager {
             }
             return;
         }
-
 
         session.writeAndFlush(message);
     }

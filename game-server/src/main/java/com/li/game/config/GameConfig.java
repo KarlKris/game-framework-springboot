@@ -1,8 +1,6 @@
 package com.li.game.config;
 
-import cn.hutool.core.thread.NamedThreadFactory;
-import com.li.common.concurrent.MultiThreadRunnableLoopGroup;
-import com.li.common.concurrent.RunnableLoopGroup;
+import com.li.common.concurrent.IdentityThreadFactoryExecutor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,9 +12,8 @@ import org.springframework.context.annotation.Configuration;
 public class GameConfig {
 
     @Bean
-    public RunnableLoopGroup runnableLoopGroup() {
-        return new MultiThreadRunnableLoopGroup(Runtime.getRuntime().availableProcessors() << 1
-                , new NamedThreadFactory("游戏服业务线程-", false));
+    public IdentityThreadFactoryExecutor runnableLoopGroup() {
+        return new IdentityThreadFactoryExecutor();
     }
 
 }

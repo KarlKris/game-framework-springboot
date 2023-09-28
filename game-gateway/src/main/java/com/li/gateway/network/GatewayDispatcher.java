@@ -1,11 +1,11 @@
 package com.li.gateway.network;
 
-import com.li.common.concurrent.RunnableLoopGroup;
 import com.li.common.rpc.RemoteServerSeekService;
 import com.li.common.rpc.model.Address;
 import com.li.engine.client.NettyClient;
 import com.li.engine.client.NioNettyClientFactory;
 import com.li.engine.protocol.MessageFactory;
+import com.li.common.concurrent.IdentityThreadFactoryExecutor;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.push.ResponseMessagePushProcessor;
 import com.li.engine.service.rpc.InvocationManager;
@@ -43,23 +43,20 @@ public class GatewayDispatcher extends AbstractDispatcher<OuterMessage, PlayerSe
     @Resource
     private MessageFactory messageFactory;
     @Resource
-    private RunnableLoopGroup group;
+    private IdentityThreadFactoryExecutor identityThreadFactoryExecutor;
 
     @Override
     protected Executor getExecutor(OuterMessage message, PlayerSession session) {
         if (session.isIdentity()) {
-            if (!session.isRegisterRunnableLoop()) {
-                group.register(session);
-            }
-            return session.runnableLoop();
+            return identityThreadFactoryExecutor.getExecutor(session.getIdentity());
         }
-        return group.next();
+        return identityThreadFactoryExecutor.next();
     }
 
     @Override
     protected void close() {
         try {
-            group.shutdownGracefully().get();
+            identityThreadFactoryExecutor.shutdownGracefully().get();
             log.warn("关闭业务线程池");
         } catch (Exception e) {
             e.printStackTrace();

@@ -175,7 +175,7 @@ public abstract class AbstractBattleScene implements BattleScene {
             increaseRound();
 
             if (log.isDebugEnabled()) {
-                log.debug("------------------战斗场景开始第[{}]帧逻辑-------------------------", round);
+                log.debug("---战斗场景开始第[{}]帧逻辑---", round);
             }
 
             // 执行ai逻辑

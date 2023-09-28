@@ -2,6 +2,7 @@ package com.li.battle.effect.domain;
 
 import com.li.battle.effect.EffectType;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * 添加护盾
@@ -9,6 +10,7 @@ import lombok.Getter;
  * @date 2022/9/26
  */
 @Getter
+@ToString
 public class AddShieldEffectParam implements EffectParam {
 
     /** 添加的护盾值 **/

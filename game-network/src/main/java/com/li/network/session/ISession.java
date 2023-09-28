@@ -1,15 +1,15 @@
 package com.li.network.session;
 
 
-import com.li.common.concurrent.RunnableSource;
 import com.li.network.message.IMessage;
+import io.netty.channel.Channel;
 
 /**
  * 网络层连接对象接口
  * @author li-yuanwen
  * @date 2021/12/8
  */
-public interface ISession extends RunnableSource {
+public interface ISession {
 
 
     /**
@@ -28,7 +28,13 @@ public interface ISession extends RunnableSource {
      * 传输消息
      * @param message 消息
      */
-    void writeAndFlush(IMessage message);
+    default void writeAndFlush(IMessage message) {
+        Channel channel = getChannel();
+        if (channel == null) {
+            return;
+        }
+        channel.writeAndFlush(message);
+    }
 
     /**
      * 关闭连接
@@ -54,5 +60,7 @@ public interface ISession extends RunnableSource {
      * @return PlayerSession
      */
     PlayerSession bindIdentity(long identity);
+
+    Channel getChannel();
 
 }

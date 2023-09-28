@@ -6,6 +6,7 @@ import com.li.common.shutdown.ShutdownProcessor;
 import com.li.engine.protocol.MessageFactory;
 import com.li.network.message.IMessage;
 import com.li.network.message.SocketProtocol;
+import com.li.network.modules.ErrorCode;
 import com.li.network.modules.ErrorCodeModule;
 import com.li.network.protocol.*;
 import com.li.network.serialize.Serializer;
@@ -101,7 +102,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
             if (!forwardMessage(session, message)) {
                 // RPC
                 response(session, message, errorSocketProtocol()
-                        , serializer.serialize(createErrorCodeBody(ServerErrorCode.INVALID_OP)));
+                        , serializer.serialize(createExceptionBody(message.getSn(), protocol, ServerErrorCode.INVALID_OP)));
             }
             return;
         }
@@ -110,7 +111,7 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
         // 检查身份标识
         if (protocolMethodInvokeCtx.isIdentity() && identity <= 0) {
             response(session, message, errorSocketProtocol()
-                    , serializer.serialize(createErrorCodeBody(ServerErrorCode.NO_IDENTITY)));
+                    , serializer.serialize(createExceptionBody(message.getSn(), protocol, ServerErrorCode.NO_IDENTITY)));
             return;
         }
 
@@ -138,11 +139,11 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
                 log.debug("发生异常请求异常,异常码[{}]", e.getErrorCode(), e);
             }
             protocol = errorSocketProtocol();
-            responseBody = serializer.serialize(createExceptionBody(e));
+            responseBody = serializer.serialize(createExceptionBody(message.getSn(), protocol, e));
         } catch (Exception e){
             log.error("发生未知异常", e);
             protocol = errorSocketProtocol();
-            responseBody = serializer.serialize(createErrorCodeBody(ServerErrorCode.UNKNOWN));
+            responseBody = serializer.serialize(createExceptionBody(message.getSn(), protocol, ServerErrorCode.UNKNOWN));
         } finally {
             // 同步协议或有响应体时返回
             if (protocolMethodInvokeCtx.isSyncMethod() || responseBody != null) {
@@ -248,18 +249,17 @@ public abstract class AbstractDispatcher<M extends IMessage, S extends ISession>
      * @param exception 异常
      * @return /
      */
-    private Object createExceptionBody(SocketException exception) {
-        return createErrorCodeBody(exception.getErrorCode());
+    private Object createExceptionBody(long reqSn, SocketProtocol protocol, SocketException exception) {
+        return createExceptionBody(reqSn, protocol, exception.getErrorCode());
     }
 
-
     /**
-     * 封装错误码成消息体
-     * @param errorCode 错误码
+     * 封装异常码成消息体
+     * @param code 异常码
      * @return /
      */
-    protected Object createErrorCodeBody(int errorCode) {
-        return errorCode;
+    private Object createExceptionBody(long reqSn, SocketProtocol protocol, int code) {
+        return new ErrorCode(reqSn, protocol, code);
     }
 
 }

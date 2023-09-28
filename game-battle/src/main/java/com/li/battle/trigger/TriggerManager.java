@@ -56,7 +56,7 @@ public class TriggerManager {
         if (ArrayUtil.isEmpty(receiver.getConfig().getDestroyEffects())) {
             return;
         }
-        for (EffectParam effectParam :  receiver.getConfig().getDestroyEffects()) {
+        for (EffectParam effectParam : receiver.getConfig().getDestroyEffects()) {
             effectExecutor.execute(source, effectParam);
         }
     }

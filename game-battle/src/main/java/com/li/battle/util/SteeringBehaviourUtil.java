@@ -57,7 +57,6 @@ public class SteeringBehaviourUtil {
      * @param targetPos 目标位置向量
      * @return 到达目标位置的力向量
      */
-    @Deprecated
     public static Vector2D seek(MoveUnit unit, Vector2D targetPos) {
         return seek(unit, targetPos, unit.getMaxSpeed());
     }
@@ -68,7 +67,6 @@ public class SteeringBehaviourUtil {
      * @param targetPos 目标位置向量
      * @return 到达目标位置的力向量
      */
-    @Deprecated
     public static Vector2D seek(MoveUnit unit, Vector2D targetPos, double maxSpeed) {
         return seek(unit.getPosition(), unit.getVelocity(), targetPos, maxSpeed);
     }

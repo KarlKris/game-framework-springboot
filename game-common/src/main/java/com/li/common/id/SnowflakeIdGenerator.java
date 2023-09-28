@@ -10,7 +10,7 @@ package com.li.common.id;
  * 10位作为毫秒内序号位  10位的计数顺序号支持每个节点每毫秒产生1024个ID序号
  * @author li-yuanwen
  **/
-public class SnowflakeIdGenerator {
+public class SnowflakeIdGenerator implements DistributedIdGenerator {
 
 
     //================================================Algorithm's Parameter=============================================
@@ -26,7 +26,7 @@ public class SnowflakeIdGenerator {
      *  -1L 左移 5位 (worker id 所占位数) 即 5位二进制所能获得的最大十进制数 - 31
      **/
     private final static int MAX_WORKER_ID = ~(-1 << WORKER_ID_BITS);
-    /** 序列在id中占的位数 - 31 **/
+    /** 序列在id中占的位数 **/
     private final static int SEQUENCE_BITS = 10;
     /** 机器ID 左移位数 - 10 (即末 sequence 所占用的位数) **/
     private final static int WORKER_ID_MOVE_BITS = SEQUENCE_BITS;
@@ -41,14 +41,6 @@ public class SnowflakeIdGenerator {
     /** 机器ID掩码 **/
     private final static int WORKER_ID_MARK = ~(-1 << WORKER_ID_BITS) << WORKER_ID_MOVE_BITS;
 
-    /** 根据id查询机器id **/
-    public static short toWorkerId(long id) {
-        if (id < 0) {
-            throw new IllegalArgumentException("Id can't be less than 0");
-        }
-
-        return (short) ((id & WORKER_ID_MARK ) >> WORKER_ID_MOVE_BITS);
-    }
 
     //=================================================Works's Parameter================================================
 
@@ -60,6 +52,15 @@ public class SnowflakeIdGenerator {
     private final long workerId;
     /** 毫秒内序列(0~4095) **/
     private long sequence = 0L;
+
+    /** 根据id查询机器id **/
+    public static int toWorkerId(long id) {
+        if (id < 0) {
+            throw new IllegalArgumentException("Id can't be less than 0");
+        }
+
+        return (short) ((id & WORKER_ID_MARK ) >> WORKER_ID_MOVE_BITS);
+    }
 
     //===============================================Constructors=======================================================
     /**
@@ -76,7 +77,14 @@ public class SnowflakeIdGenerator {
 
     // ==================================================Methods========================================================
 
+
+    @Override
+    public int getWorkerId(long id) {
+        return toWorkerId(id);
+    }
+
     /** 线程安全的获得下一个 ID 的方法 **/
+    @Override
     public synchronized long nextId() {
         long timestamp = currentTime();
         //如果当前时间小于上一次ID生成的时间戳: 说明系统时钟回退过 - 这个时候时间回拨位加1

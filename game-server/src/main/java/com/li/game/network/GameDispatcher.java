@@ -1,13 +1,12 @@
 package com.li.game.network;
 
-import com.li.common.concurrent.RunnableLoopGroup;
+import com.li.common.concurrent.IdentityThreadFactoryExecutor;
 import com.li.engine.service.handler.AbstractDispatcher;
 import com.li.engine.service.session.SessionManager;
 import com.li.network.message.InnerMessage;
 import com.li.network.message.ProtocolConstant;
 import com.li.network.message.SocketProtocol;
 import com.li.network.session.ISession;
-import com.li.network.session.PlayerSession;
 import com.li.network.session.ServerSession;
 import com.li.protocol.game.login.protocol.GameServerLoginModule;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,7 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
     @Resource
     private SessionManager sessionManager;
     @Resource
-    private RunnableLoopGroup group;
+    private IdentityThreadFactoryExecutor identityThreadFactoryExecutor;
 
     @Override
     protected long getProtocolIdentity(ServerSession session, InnerMessage message) {
@@ -40,21 +39,15 @@ public class GameDispatcher extends AbstractDispatcher<InnerMessage, ServerSessi
     protected Executor getExecutor(InnerMessage message, ServerSession session) {
         long identity = getProtocolIdentity(session, message);
         if (identity > 0) {
-            PlayerSession playerSession = session.getPlayerSession(identity);
-            if (playerSession != null) {
-                if (!playerSession.isRegisterRunnableLoop()) {
-                    group.register(playerSession);
-                }
-                return playerSession.runnableLoop();
-            }
+            return identityThreadFactoryExecutor.getExecutor(identity);
         }
-        return group.next();
+        return identityThreadFactoryExecutor.next();
     }
 
     @Override
     protected void close() {
         try {
-            group.shutdownGracefully().get();
+            identityThreadFactoryExecutor.shutdownGracefully().get();
             log.warn("关闭业务线程池");
         } catch (Exception e) {
             e.printStackTrace();

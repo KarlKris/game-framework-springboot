@@ -1,6 +1,5 @@
 package com.li.gateway.network;
 
-import com.li.common.concurrent.RunnableLoopGroup;
 import com.li.engine.channelhandler.server.AbstractServerVocationalWorkHandler;
 import com.li.engine.service.handler.ThreadLocalContentHolder;
 import com.li.engine.service.rpc.IRpcService;
@@ -29,8 +28,6 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
 
     @Resource
     private IRpcService rpcService;
-    @Resource
-    private RunnableLoopGroup group;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, OuterMessage outerMessage) throws Exception {
@@ -60,12 +57,7 @@ public class GatewayVocationalWorkHandler extends AbstractServerVocationalWorkHa
         if (playerSession != null ) {
             if (playerSession.isIdentity()) {
                 long id = playerSession.getIdentity();
-                Executor executor = null;
-                if (playerSession.isRegisterRunnableLoop()) {
-                    executor = playerSession.runnableLoop();
-                } else {
-                    executor = group.next();
-                }
+                Executor executor = ctx.channel().eventLoop();
                 executor.execute(() -> {
                     ThreadLocalContentHolder.setIdentity(id);
                     try {
